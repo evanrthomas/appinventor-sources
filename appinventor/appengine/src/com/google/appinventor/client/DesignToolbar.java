@@ -99,6 +99,7 @@ public class DesignToolbar extends Toolbar {
   private static final String WIDGET_NAME_SCREENS_DROPDOWN = "ScreensDropdown";
   private static final String WIDGET_NAME_SWITCH_TO_BLOCKS_EDITOR = "SwitchToBlocksEditor";
   private static final String WIDGET_NAME_SWITCH_TO_FORM_EDITOR = "SwitchToFormEditor";
+  private static final String WIDGET_NAME_OPEN_SHARED_PAGES_OVERLAY = "OpenSharedPagesOverlay";
 
   // Switch language
   private static final String WIDGET_NAME_SWITCH_LANGUAGE = "Language";
@@ -160,6 +161,8 @@ public class DesignToolbar extends Toolbar {
         MESSAGES.switchToFormEditorButton(), new SwitchToFormEditorAction()), true);
     addButton(new ToolbarItem(WIDGET_NAME_SWITCH_TO_BLOCKS_EDITOR,
         MESSAGES.switchToBlocksEditorButton(), new SwitchToBlocksEditorAction()), true);
+    addButton(new ToolbarItem(WIDGET_NAME_OPEN_SHARED_PAGES_OVERLAY,
+            MESSAGES.openSharedPagesOverlay(), new OpenSharedPagesOverlay()), true);
 
     // Gray out the Designer button and enable the blocks button
     toggleEditor(false);
@@ -297,6 +300,13 @@ public class DesignToolbar extends Toolbar {
         toggleEditor(true);       // Gray out the blocks button and enable the designer button
         Ode.getInstance().getTopToolbar().updateFileMenuButtons(1);
       }
+    }
+  }
+
+  private class OpenSharedPagesOverlay implements Command {
+    @Override
+    public void execute() {
+
     }
   }
 

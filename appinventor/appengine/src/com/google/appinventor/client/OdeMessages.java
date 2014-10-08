@@ -115,6 +115,10 @@ public interface OdeMessages extends Messages {
   @Description("Label of the button for switching to the blocks editor")
   String switchToBlocksEditorButton();
 
+  @DefaultMessage("Manage Shared Pages")
+  @Description("Label of the button for managing shared pages")
+  String openSharedPagesOverlay();
+
   @DefaultMessage("Designer")
   @Description("Label of the button for switching to the form editor")
   String switchToFormEditorButton();
