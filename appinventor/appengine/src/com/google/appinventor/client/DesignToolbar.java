@@ -306,8 +306,15 @@ public class DesignToolbar extends Toolbar {
   private class OpenSharedPagesOverlay implements Command {
     @Override
     public void execute() {
+      //display overlay here
+      alert("testing");
 
     }
+
+    public native void alert(String msg) /*-{
+     $wnd.alert(msg);
+    }-*/;
+
   }
 
   private class SwitchToFormEditorAction implements Command {
