@@ -23,8 +23,7 @@ import com.google.common.collect.Maps;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.*;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -304,10 +303,19 @@ public class DesignToolbar extends Toolbar {
   }
 
   private class OpenSharedPagesOverlay implements Command {
+    private VerticalPanel panel;
+    private VerticalPanel popUpPanelContents;
+    private PopupPanel popup;
+    private HTML message;
+    private Button button;
+    private ClickListener listener;
+    private SimplePanel holder;
     @Override
     public void execute() {
       //display overlay here
-      alert("testing");
+      //alert("testing");
+      //lookinto popup panel
+      popup();
 
     }
 
@@ -315,7 +323,17 @@ public class DesignToolbar extends Toolbar {
      $wnd.alert(msg);
     }-*/;
 
+    public void popup() {
+      //PopupPanel panel = new PopupPanel();
+      //panel.setVisible(true);
+      //panel.setModal(true);
+      //Canvas htmlCanvas = new Canvas();
+      //panel.setWidget(htmlCanvas);
+
+    }
+
   }
+
 
   private class SwitchToFormEditorAction implements Command {
     @Override

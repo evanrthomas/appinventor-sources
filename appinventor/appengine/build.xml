@@ -35,8 +35,8 @@
 
   <property name="gwt.sdk" location="${lib.dir}/gwt/2.5.1" />
   <property name="appengine.sdk" location="${lib.dir}/appengine/appengine-java-sdk-1.7.6" />
-
   <property name="build.war.dir" location="${local.build.dir}/war" />
+  <property name="custom.gwt.js.dir" location="customGWTjs" />
 
   <!-- =====================================================================
        Copy static files to <build>/war, from war and elsewhere
@@ -73,6 +73,15 @@
       <fileset file="${build.dir}/blocklyeditor/blockly-all.js"></fileset>
     </copy>
   </target>
+
+
+  <target name="CompileCustomGWTJs"
+          description="Create custom-all.js and add to war">
+    <concat destfile="${build.war.dir}/customGWTJs-all.js">
+      <fileset dir="${custom.gwt.js.dir}"></fileset>
+    </concat>
+  </target>
+
   <!-- =====================================================================
        Create the keystore that is used by AiServerLib to encrypt user and
        project IDs.
@@ -120,11 +129,11 @@
     <!-- external libs -->
     <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/commons-fileupload/commons-fileupload-1.2.2.jar" />
     <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/findbugs/jsr305.jar" />
-    <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/guava/guava-14.0.1.jar" /> 
+    <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/guava/guava-14.0.1.jar" />
     <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/json/json.jar" />
     <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/keyczar/keyczar-0.66-080111-java-1.6.jar" />
     <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/objectify-3.0/objectify-3.0.jar" />
-    <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/gson/gson-2.1.jar" />  <!-- for keyczar --> 
+    <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/gson/gson-2.1.jar" />  <!-- for keyczar -->
     <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/log4j/log4j-1.2.16.jar" />  <!-- for keyczar -->
     <!-- GCS Libs -->
     <copy todir="${build.war.dir}/WEB-INF/lib" file="${lib.dir}/gcs/appengine-gcs-client-0.3.jar" />
@@ -246,7 +255,7 @@
     <pathelement location="${local.build.dir}/AiSharedLib.jar" />
     <pathelement location="${local.build.dir}/AiServerLib.jar" />
     <pathelement location="${build.dir}/common/CommonUtils.jar" />
-    <pathelement location="${lib.dir}/guava/guava-14.0.1.jar" /> 
+    <pathelement location="${lib.dir}/guava/guava-14.0.1.jar" />
     <pathelement location="${lib.dir}/json/json.jar" />
     <pathelement location="${lib.dir}/junit/junit-4.8.2.jar" />
     <pathelement location="${lib.dir}/gcs/appengine-gcs-client-0.3.jar" />
@@ -314,7 +323,7 @@
         <pathelement location="${build.dir}/components/CommonConstants.jar" />
         <pathelement location="${build.dir}/components/CommonConstants-gwt.jar" />
         <!-- external libs -->
-        <pathelement location="${lib.dir}/guava/guava-14.0.1.jar" /> 
+        <pathelement location="${lib.dir}/guava/guava-14.0.1.jar" />
         <pathelement location="${lib.dir}/gwt_dragdrop/gwt-dnd-3.2.3.jar" />
         <pathelement location="${lib.dir}/gwt_incubator/gwt-incubator-20101117-r1766.jar" />
         <!-- gwt libs -->

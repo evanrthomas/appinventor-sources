@@ -19,6 +19,7 @@
     <ant inheritAll="false" useNativeBasedir="true" dir="buildserver"/>
     <ant inheritAll="false" useNativeBasedir="true" dir="components"/>
     <ant inheritAll="false" useNativeBasedir="true" dir="buildserver" target="PlayApp"/>
+    <ant inheritAll="false" useNativeBasedir="true" dir="appengine" target="CompileCustomGWTJs"/>
   </target>
 
   <target name="comps">
@@ -52,6 +53,10 @@
 
   <target name="Blockly">
     <ant inheritAll="false" useNativeBasedir="true" dir="appengine" target="CopyBlocklyToBuildWar"/>
+  </target>
+
+  <target name="CustomGWTJs">
+    <ant inheritAll="false" useNativeBasedir="true" dir="appengine" target="CompileCustomGWTJs"/>
   </target>
 
   <!-- Convenient target for just running the blockly related tests -->
