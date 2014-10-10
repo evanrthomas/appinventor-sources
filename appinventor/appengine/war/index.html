@@ -8,6 +8,7 @@
     <title> </title>
     <link type="text/css" rel="stylesheet" href="gwt.css">
     <link type="text/css" rel="stylesheet" href="Ya.css">
+    <link type="text/css" rel="stylesheet" href="mycss.css">
     <script src="customGWTJs-all.js"></script>
     <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
     <noscript>
@@ -29,6 +30,18 @@
         <li> Firefox 23+ </li>
       </ul>
     </div>
+
+    <!-- manage shared pages overlay -->
+
+    <div id="fade"></div>
+    <div id="overlay">
+      <canvas id="canvas"></canvas>
+      <div>
+        <button class="sharedPage-btn ode-TextButton" type="button">+New SharedPage</button>
+        <button class="sharedPage-btn ode-TextButton" type="button">Attach Existing SharedPage</button>
+      </div>
+    </div>
+
     <script language="javascript" src="ode/ode.nocache.js"></script>
     <script>
       if (window.navigator.userAgent.indexOf("MSIE") != -1){

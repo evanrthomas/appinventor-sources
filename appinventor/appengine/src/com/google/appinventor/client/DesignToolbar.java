@@ -312,26 +312,13 @@ public class DesignToolbar extends Toolbar {
     private SimplePanel holder;
     @Override
     public void execute() {
-      //display overlay here
-      //alert("testing");
-      //lookinto popup panel
-      popup();
+      openOverlay();
 
     }
 
-    public native void alert(String msg) /*-{
-     $wnd.alert(msg);
+    public native void openOverlay() /*-{
+     $wnd.exported.openSharedPagesOverlay();
     }-*/;
-
-    public void popup() {
-      //PopupPanel panel = new PopupPanel();
-      //panel.setVisible(true);
-      //panel.setModal(true);
-      //Canvas htmlCanvas = new Canvas();
-      //panel.setWidget(htmlCanvas);
-
-    }
-
   }
 
 
