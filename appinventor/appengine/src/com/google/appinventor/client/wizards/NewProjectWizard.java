@@ -6,11 +6,20 @@
 package com.google.appinventor.client.wizards;
 
 import com.google.appinventor.client.Ode;
-import static com.google.appinventor.client.Ode.MESSAGES;
 import com.google.appinventor.client.OdeAsyncCallback;
+import com.google.appinventor.client.explorer.commands.AddSharedPageCommand;
+import com.google.appinventor.client.explorer.commands.ChainableCommand;
 import com.google.appinventor.client.explorer.project.Project;
+import com.google.appinventor.client.explorer.project.ProjectChangeListener;
+import com.google.appinventor.client.output.OdeLog;
+import com.google.appinventor.client.tracking.Tracking;
 import com.google.appinventor.shared.rpc.project.NewProjectParameters;
+import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.UserProject;
+
+import static com.google.appinventor.client.Ode.MESSAGES;
+
+
 
 /**
  * Superclass for wizards creating new projects.
@@ -51,6 +60,7 @@ public abstract class NewProjectWizard extends Wizard {
   protected void createNewProject(String projectType, final String projectName,
       NewProjectParameters params, final NewProjectCommand onSuccessCommand) {
     // Callback for updating the project explorer after the project was created on the back-end
+    //TODO (evan): project type should be an enum for APP or LIBRARY_PAGE
     final Ode ode = Ode.getInstance();
     OdeAsyncCallback<UserProject> callback =
         new OdeAsyncCallback<UserProject>(
@@ -60,10 +70,32 @@ public abstract class NewProjectWizard extends Wizard {
           public void onSuccess(UserProject projectInfo) {
             // Update project explorer
             Project project = ode.getProjectManager().addProject(projectInfo);
+            //TODO (evan): what happens if project is loaded here before you register the project change listener?
+            project.addProjectChangeListener(new ProjectChangeListener() {
+              //TODO (evan): not sure if this should go here or in NewYoungAndroidProjectWizard in the callback it passes to this functoin
+              // I'm not sure why these two classes are different and what their responsibilities are
+              @Override
+              public void onProjectLoaded(Project project) {
+                ChainableCommand cmd = new AddSharedPageCommand();
+                OdeLog.log("project.getRootNode() " + project.getRootNode());
+                cmd.startExecuteChain(Tracking.PROJECT_ACTION_ADDFORM_YA, project.getRootNode());
+              }
+
+              @Override
+              public void onProjectNodeAdded(Project project, ProjectNode node) {
+
+              }
+
+              @Override
+              public void onProjectNodeRemoved(Project project, ProjectNode node) {
+
+              }
+            });
             if (onSuccessCommand != null) {
               onSuccessCommand.execute(project);
             }
           }
+
     };
 
     // TODO(user): input error checking
