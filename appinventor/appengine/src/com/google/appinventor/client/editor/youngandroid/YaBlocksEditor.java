@@ -26,6 +26,8 @@ import com.google.appinventor.shared.rpc.project.FileDescriptorWithContent;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
 import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
 import com.google.common.collect.Maps;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Command;
@@ -33,9 +35,8 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.TreeItem;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.appinventor.client.Ode.MESSAGES;
 
@@ -152,39 +153,108 @@ public final class YaBlocksEditor extends FileEditor
     }
   }
 
+  private List<YoungAndroidBlocksNode> sharedPageDependenciesFor(YoungAndroidBlocksNode parent) {
+    //TODO (evan): consider making a YoungAndroidSharedBlocksNode and using that instead
+    //TODO (evan): give YABlocksNode a List<SharedPagesNode> field. Then instead of grabbing
+    //    the blocksnode from the project, grab them from this.blocksNode
+    //TODO (evan): recursivley get shared pages
+    //TODO (evan): move this method to YaBlocksNode, should not be a function of YaBlocksEditor
+    ArrayList<YoungAndroidBlocksNode> list = new ArrayList<YoungAndroidBlocksNode>();
+    for (String s: formToBlocksEditor.keySet()) {
+      if (s.contains("SharedPage") && !parent.getName().contains("SharedPage")) {
+        list.add(formToBlocksEditor.get(s).blocksNode);
+      }
+    }
+    return list;
+  }
+
+  private void loadXmlAndMerge(final List<YoungAndroidBlocksNode> nodesToLoad, final Function<JavaScriptObject> onComplete) {
+    final AtomicInteger numLoaded = new AtomicInteger(0); //not sure if I need AtomicInteger, since it's being compiled to javascript which is single threaded
+    final AtomicInteger gotCheckSumedFileException = new AtomicInteger(-1); //use atomicInteger instead of atomicboolean because gwt can't find atomic boolean (I hate gwt so much)
+    final JavaScriptObject finalContents = blocklyXmlContainer();
+    for (final YoungAndroidBlocksNode node: nodesToLoad) {
+      //TODO (evan): loadFromCache instead of load2, find where load2 is being used and invalidate cache where necessary
+      Ode.getInstance().getProjectService().load2(node.getProjectId(), node.getFileId(),
+              new OdeAsyncCallback<ChecksumedLoadFile>(MESSAGES.loadError()) {
+                @Override
+                public void onSuccess(ChecksumedLoadFile result) {
+                  try {
+                    //TODO (evan): it shouldn't be the job of the loader to put the projectid/fileid on the blocks, it should be the saver
+                    JavaScriptObject fileContentsAsXml = textToDom(result.getContent());
+                    JsArray<JavaScriptObject> blocks = getBlockDescendants(fileContentsAsXml);
+                    labelBlocksWithId(blocks, node.getProjectId() +"", node.getFileId()); //convert long to string because you can't pass longs into jsni
+                    appendChildrenToParent(blocks, finalContents);
+                  } catch (ChecksumedFileException e) {
+                    //TODO (evan): test that this works as expected by throwing a checksumedException in the try{}
+                    gotCheckSumedFileException.set(1);
+                    Ode.getInstance().recordCorruptProject(node.getProjectId(), node.getFileId(), e.getMessage());
+                    onFailure(e);
+                  } finally {
+                    if (numLoaded.incrementAndGet() == nodesToLoad.size() && gotCheckSumedFileException.intValue() < 0) {
+                      onComplete.call(finalContents);
+                    }
+                  }
+                }
+              });
+    }
+  }
+
   // FileEditor methods
+
 
   @Override
   public void loadFile(final Command afterFileLoaded) {
-    final long projectId = getProjectId();
-    final String fileId = getFileId();
-    OdeAsyncCallback<ChecksumedLoadFile> callback = new OdeAsyncCallback<ChecksumedLoadFile>(MESSAGES.loadError()) {
+    List<YoungAndroidBlocksNode> backendNodes = new ArrayList<YoungAndroidBlocksNode>();
+    backendNodes.add(blocksNode);
+    backendNodes.addAll(sharedPageDependenciesFor(blocksNode));
+    loadXmlAndMerge(backendNodes, new Function<JavaScriptObject>() {
       @Override
-      public void onSuccess(ChecksumedLoadFile result) {
-        String blkFileContent;
-        try {
-          blkFileContent = result.getContent();
-        } catch (ChecksumedFileException e) {
-          this.onFailure(e);
-          return;
-        }
-        blocksArea.loadBlocksContent(blkFileContent);
+      public void call(JavaScriptObject mergedXml) {
+        blocksArea.loadBlocksContent(domToText(mergedXml));
         loadComplete = true;
         selectedDrawer = null;
         if (afterFileLoaded != null) {
           afterFileLoaded.execute();
         }
       }
-      @Override
-      public void onFailure(Throwable caught) {
-        if (caught instanceof ChecksumedFileException) {
-          Ode.getInstance().recordCorruptProject(projectId, fileId, caught.getMessage());
-        }
-        super.onFailure(caught);
-      }
-    };
-    Ode.getInstance().getProjectService().load2(projectId, fileId, callback);
+    }); 
   }
+
+  public native JsArray<JavaScriptObject> labelBlocksWithId(JsArray<JavaScriptObject> blocks, String projectId, String fileId) /*-{
+    return $wnd.exported.labelBlocksWithId(blocks, projectId, fileId);
+  }-*/;
+
+  public native JavaScriptObject textToDom(String s) /*-{
+    return $wnd.exported.textToDom(s);
+  }-*/;
+
+  public native String domToText(JavaScriptObject xml) /*-{
+    return $wnd.exported.domToText(xml);
+  }-*/;
+
+  public native JsArray<JavaScriptObject> getBlockDescendants(JavaScriptObject root) /*-{
+    return $wnd.exported.getBlockDescendants(root);
+  }-*/;
+
+  public native JavaScriptObject blocklyXmlContainer() /*-{
+    return $wnd.exported.blocklyXmlContainer();
+  }-*/;
+
+  public native void appendChildrenToParent(JsArray<JavaScriptObject> children, JavaScriptObject parent) /*-{
+    return $wnd.exported.appendChildrenToParent(children, parent);
+  }-*/;
+
+  public native String evalJS(String s) /*-{
+     return eval(s);
+    }-*/;
+
+  public void printJS(String s) {
+    OdeLog.log(s);
+  }
+
+  //public native void printJS(String s) /*-{
+  //   $wnd.console.log(s);
+  //}-*/;
 
   @Override
   public String getTabText() {
@@ -599,4 +669,7 @@ public final class YaBlocksEditor extends FileEditor
     blocksArea.switchLanguage(newLanguage);
   }
 
+  interface Function<E> {
+    public void call(E e);
+  }
 }

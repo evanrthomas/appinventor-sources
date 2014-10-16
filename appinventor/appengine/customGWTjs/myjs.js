@@ -110,8 +110,6 @@ window.exported.openSharedPagesOverlay =  function() {
       connect(0, 1, 'r', 'l');
     })();
 
-
-
  document.getElementById('fade').style.display = 'block';
  document.getElementById('overlay').style.display = 'block';
 

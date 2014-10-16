@@ -89,9 +89,11 @@ public final class AddSharedPageCommand extends ChainableCommand {
         // that with the current work done in YaProjectEditor.addFormEditor,
         // consider moving this deferred work to the explicit command for
         // after the form file is loaded.
+
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
           @Override
           public void execute() {
+            //TODO (evan): consider making a YoungAndroidSharedBlocksNode here, and adding that to the screen instead
             ProjectEditor projectEditor =
                     ode.getEditorManager().getOpenProjectEditor(project.getProjectId());
             FileEditor formEditor = projectEditor.getFileEditor(formFileId);
@@ -124,3 +126,4 @@ public final class AddSharedPageCommand extends ChainableCommand {
   }
 
 }
+
