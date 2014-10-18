@@ -30,6 +30,8 @@ import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -75,6 +77,8 @@ public final class YaBlocksEditor extends FileEditor
 
   // Panel that is used as the content of the palette box
   private final YoungAndroidPalettePanel palettePanel;
+
+  private final String IS_IMPORTED = "isImported";
 
   // Blocks area. Note that the blocks area is a part of the "document" in the
   // browser (via the deckPanel in the ProjectEditor). So if the document changes (which happens
@@ -179,11 +183,14 @@ public final class YaBlocksEditor extends FileEditor
                 @Override
                 public void onSuccess(ChecksumedLoadFile result) {
                   try {
-                    //TODO (evan): it shouldn't be the job of the loader to put the projectid/fileid on the blocks, it should be the saver
-                    JavaScriptObject fileContentsAsXml = textToDom(result.getContent());
-                    JsArray<JavaScriptObject> blocks = getBlockDescendants(fileContentsAsXml);
-                    labelBlocksWithId(blocks, node.getProjectId() +"", node.getFileId()); //convert long to string because you can't pass longs into jsni
-                    appendChildrenToParent(blocks, finalContents);
+                    if (!result.getContent().equals("")) {
+                      JavaScriptObject fileContentsAsXml = textToDom(result.getContent());
+                      JsArray<JavaScriptObject> blocks = getTopLevelBlocks(fileContentsAsXml);
+                      attachAttributes(blocks, makeJSON(
+                              new JSONPair(IS_IMPORTED, (blocksNode.getFileId() != node.getFileId()) + "")
+                      ));
+                      appendChildrenToParent(blocks, finalContents);
+                    }
                   } catch (ChecksumedFileException e) {
                     //TODO (evan): test that this works as expected by throwing a checksumedException in the try{}
                     gotCheckSumedFileException.set(1);
@@ -200,8 +207,6 @@ public final class YaBlocksEditor extends FileEditor
   }
 
   // FileEditor methods
-
-
   @Override
   public void loadFile(final Command afterFileLoaded) {
     List<YoungAndroidBlocksNode> backendNodes = new ArrayList<YoungAndroidBlocksNode>();
@@ -220,31 +225,44 @@ public final class YaBlocksEditor extends FileEditor
     }); 
   }
 
-  public native JsArray<JavaScriptObject> labelBlocksWithId(JsArray<JavaScriptObject> blocks, String projectId, String fileId) /*-{
-    return $wnd.exported.labelBlocksWithId(blocks, projectId, fileId);
+  private JavaScriptObject makeJSON(JSONPair ... pairs) {
+    JSONObject obj = new JSONObject();
+    for (JSONPair pair: pairs) {
+      obj.put(pair.key, new JSONString(pair.value));
+    }
+    return obj.getJavaScriptObject();
+  }
+
+
+  private native String filterOutImportedBlocks(String s) /*-{
+    return $wnd.exported.filterOutImportedBlocks(s);
   }-*/;
 
-  public native JavaScriptObject textToDom(String s) /*-{
+  private native JsArray<JavaScriptObject> attachAttributes(JsArray<JavaScriptObject> blocks, JavaScriptObject attributes) /*-{
+    return $wnd.exported.attachAttributes(blocks, attributes);
+  }-*/;
+
+  private native JavaScriptObject textToDom(String s) /*-{
     return $wnd.exported.textToDom(s);
   }-*/;
 
-  public native String domToText(JavaScriptObject xml) /*-{
+  private native String domToText(JavaScriptObject xml) /*-{
     return $wnd.exported.domToText(xml);
   }-*/;
 
-  public native JsArray<JavaScriptObject> getBlockDescendants(JavaScriptObject root) /*-{
-    return $wnd.exported.getBlockDescendants(root);
+  private native JsArray<JavaScriptObject> getTopLevelBlocks(JavaScriptObject root) /*-{
+    return $wnd.exported.getTopLevelBlocks(root);
   }-*/;
 
-  public native JavaScriptObject blocklyXmlContainer() /*-{
+  private native JavaScriptObject blocklyXmlContainer() /*-{
     return $wnd.exported.blocklyXmlContainer();
   }-*/;
 
-  public native void appendChildrenToParent(JsArray<JavaScriptObject> children, JavaScriptObject parent) /*-{
+  private native void appendChildrenToParent(JsArray<JavaScriptObject> children, JavaScriptObject parent) /*-{
     return $wnd.exported.appendChildrenToParent(children, parent);
   }-*/;
 
-  public native String evalJS(String s) /*-{
+  private native String evalJS(String s) /*-{
      return eval(s);
     }-*/;
 
@@ -252,9 +270,6 @@ public final class YaBlocksEditor extends FileEditor
     OdeLog.log(s);
   }
 
-  //public native void printJS(String s) /*-{
-  //   $wnd.console.log(s);
-  //}-*/;
 
   @Override
   public String getTabText() {
@@ -372,6 +387,7 @@ public final class YaBlocksEditor extends FileEditor
   }
 
   public static void onBlocksAreaChanged(String formName) {
+    //TODO (evan): if this is a SharedPage editor, recursivley update the parents
     YaBlocksEditor editor = formToBlocksEditor.get(formName);
     if (editor != null) {
       OdeLog.log("Got blocks area changed for " + formName);
@@ -407,8 +423,10 @@ public final class YaBlocksEditor extends FileEditor
 
   @Override
   public String getRawFileContent() {
-    return blocksArea.getBlocksContent();
+    String content = blocksArea.getBlocksContent();
+    return content.equals("") ? "" : filterOutImportedBlocks(content);
   }
+
 
   public FileDescriptorWithContent getYail() throws YailGenerationException {
     return new FileDescriptorWithContent(getProjectId(), yailFileName(),
@@ -672,4 +690,13 @@ public final class YaBlocksEditor extends FileEditor
   interface Function<E> {
     public void call(E e);
   }
+
+  private class JSONPair {
+    String key,value;
+    public JSONPair(String key, String value) {
+      this.key = key;
+      this.value = value;
+    }
+  }
 }
+

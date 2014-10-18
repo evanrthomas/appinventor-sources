@@ -136,6 +136,9 @@ Blockly.Xml.blockToDom_ = function(block) {
   if (!block.isEditable()) {
     element.setAttribute('editable', false);
   }
+  if (block.isImported()) {
+    element.setAttribute('isImported', true);
+  }
 
   var nextBlock = block.getNextBlock();
   if (nextBlock) {
@@ -143,7 +146,6 @@ Blockly.Xml.blockToDom_ = function(block) {
         Blockly.Xml.blockToDom_(nextBlock));
     element.appendChild(container);
   }
-
   return element;
 };
 
@@ -214,29 +216,21 @@ Blockly.Xml.textToDom = function(text) {
  * @param {!Element} xml XML DOM.
  */
 Blockly.Xml.domToWorkspace = function(workspace, xml) {
-  Blockly.Instrument.timer (
-      function () {
-        var width;  // Not used in LTR.
-        if (Blockly.RTL) {
-          width = workspace.getMetrics().viewWidth;
-        }
-        for (var x = 0, xmlChild; xmlChild = xml.childNodes[x]; x++) {
-          if (xmlChild.nodeName.toLowerCase() == 'block') {
-            var block = Blockly.Xml.domToBlock(workspace, xmlChild);
-            var blockX = parseInt(xmlChild.getAttribute('x'), 10);
-            var blockY = parseInt(xmlChild.getAttribute('y'), 10);
-            if (!isNaN(blockX) && !isNaN(blockY)) {
-              block.moveBy(Blockly.RTL ? width - blockX : blockX, blockY);
-            }
-          }
-        }
-      },
-      function (result, timeDiff) {
-        Blockly.Instrument.stats.domToWorkspaceCalls++;
-        Blockly.Instrument.stats.domToWorkspaceTime = timeDiff;
+  var width;  // Not used in LTR.
+  if (Blockly.RTL) {
+    width = workspace.getMetrics().viewWidth;
+  }
+  for (var x = 0, xmlChild; xmlChild = xml.childNodes[x]; x++) {
+    if (xmlChild.nodeName.toLowerCase() == 'block') {
+      var block = Blockly.Xml.domToBlock(workspace, xmlChild);
+      var blockX = parseInt(xmlChild.getAttribute('x'), 10);
+      var blockY = parseInt(xmlChild.getAttribute('y'), 10);
+      if (!isNaN(blockX) && !isNaN(blockY)) {
+        block.moveBy(Blockly.RTL ? width - blockX : blockX, blockY);
       }
-  );
-};
+    }
+  }
+}
 
 /**
  * Wrapper for domToBlockInner that renders blocks.
@@ -340,6 +334,10 @@ Blockly.Xml.domToBlockInner = function(workspace, xmlBlock, opt_reuseBlock) {
   var editable = xmlBlock.getAttribute('editable');
   if (editable) {
     block.setEditable(editable == 'true');
+  }
+  var isImported = xmlBlock.getAttribute("isImported");
+  if (isImported) {
+    block.setIsImported(isImported == 'true');
   }
 
   var blockChild = null;
