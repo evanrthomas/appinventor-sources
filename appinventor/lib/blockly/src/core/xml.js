@@ -250,21 +250,10 @@ Blockly.Xml.domToWorkspace = function(workspace, xml) {
  * @private
  */
 Blockly.Xml.domToBlock = function(workspace, xmlBlock, opt_reuseBlock) {
-  return Blockly.Instrument.timer (
-  function () {
   var block =  Blockly.Xml.domToBlockInner(workspace, xmlBlock, opt_reuseBlock);
-  Blockly.Instrument.timer (
-  function () {
-    if (Blockly.Instrument.useRenderDown) {
-      block.renderDown();
-    }
-  },
-  function (result, timeDiffInner) {
-    if (Blockly.Instrument.useRenderDown) {
-      Blockly.Instrument.stats.renderDownTime += timeDiffInner;
-    }
+  if (Blockly.Instrument.useRenderDown) {
+    block.renderDown();
   }
-  );
   // [lyn, 07/03/2014] Special case to handle renaming of event parameters in i8n
   if (block && block.type == "component_event") {
     // Create a dictionary mapping default event parameter names appearing in body
@@ -290,13 +279,6 @@ Blockly.Xml.domToBlock = function(workspace, xmlBlock, opt_reuseBlock) {
     }
   }
   return block;
-  },
-  function (block, timeDiffOuter) {
-    Blockly.Instrument.stats.domToBlockCalls++;
-    Blockly.Instrument.stats.domToBlockTime += timeDiffOuter;
-    return block;
-  }
-  );
 }
 
 /**
