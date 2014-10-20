@@ -16,9 +16,6 @@ goog.provide('Blockly.SaveFile');
 goog.require('Blockly.Instrument');
 
 Blockly.SaveFile.load = function(blocksContent) {
-  Blockly.Instrument.initializeStats("Blockly.SaveFile.load");
-  Blockly.Instrument.timer(
-  function () {
   // We leave it to our caller to catch JavaScriptException and deal with
   // errors loading the block space.
 
@@ -37,14 +34,6 @@ Blockly.SaveFile.load = function(blocksContent) {
       Blockly.Xml.domToWorkspace(Blockly.mainWorkspace, xml);
     }
   }
-  },
-  function (result, timeDiff) {
-    Blockly.Instrument.stats.totalTime = timeDiff;
-    Blockly.Instrument.stats.blockCount = Blockly.Instrument.stats.domToBlockInnerCalls;
-    Blockly.Instrument.stats.topBlockCount = Blockly.Instrument.stats.domToBlockCalls;
-    Blockly.Instrument.displayStats("Blockly.SaveFile.load");
-  }
-  );
 };
 
 /**
