@@ -22,7 +22,8 @@ var domToText = function(dom) {
 
 var blocklyXmlContainer = function() {
   //TODO (evan): allow changing the ya-version and language-version numbers
-  return textToDom('<xml xmlns="http://www.w3.org/1999/xhtml"> <yacodeblocks ya-version="104" language-version="17"></yacodeblocks> </xml>"');
+  return textToDom(
+      '<xml xmlns="http://www.w3.org/1999/xhtml"> <yacodeblocks ya-version="104" language-version="17"></yacodeblocks> </xml>');
 }
 
 var getTopLevelBlocks = function(root) {

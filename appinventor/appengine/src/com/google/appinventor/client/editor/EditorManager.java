@@ -5,11 +5,10 @@
 
 package com.google.appinventor.client.editor;
 
-import static com.google.appinventor.client.Ode.MESSAGES;
-
 import com.google.appinventor.client.ErrorReporter;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
+import com.google.appinventor.client.YACachedBlocksNode;
 import com.google.appinventor.client.editor.youngandroid.YaBlocksEditor;
 import com.google.appinventor.client.editor.youngandroid.YailGenerationException;
 import com.google.appinventor.client.explorer.project.Project;
@@ -22,12 +21,10 @@ import com.google.common.collect.Maps;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.google.appinventor.client.Ode.MESSAGES;
 
 /**
  * Manager class for opened project editors.
@@ -188,6 +185,7 @@ public final class EditorManager {
     // Add the file editor to the dirtyFileEditors list.
     if (!fileEditor.isDamaged()) { // Don't save damaged files
       dirtyFileEditors.add(fileEditor);
+      //if (YACachedBlocksNode.get(fileEditor.blo))
     } else {
       OdeLog.log("Not saving blocks for " + fileEditor.getFileId() + " because it is damaged.");
     }
@@ -336,7 +334,6 @@ public final class EditorManager {
     });
   }
 
-
   /**
    * This code used to send the contents of all changed files to the server
    * in the same RPC transaction. However we are now sending them separately
@@ -362,40 +359,46 @@ public final class EditorManager {
       if (afterSavingFiles != null) {
         afterSavingFiles.execute();
       }
-
     } else {
       for (FileDescriptorWithContent fileDescriptor : filesWithContent ) {
         final long projectId = fileDescriptor.getProjectId();
         final String fileId = fileDescriptor.getFileId();
         final String content = fileDescriptor.getContent();
-        Ode.getInstance().getProjectService().save2(Ode.getInstance().getSessionId(),
-          projectId, fileId, false, content, new OdeAsyncCallback<Long>(MESSAGES.saveErrorMultipleFiles()) {
-            @Override
-            public void onSuccess(Long date) {
-              if (dateHolder.date != 0) {
-                // This sets the project modification time to that of one of
-                // the successful file saves. It doesn't really matter which
-                // file date we use, they will all be close. However it is important
-                // to use some files date because that will be based on the server's
-                // time. If we used the local clients time, then we may be off if the
-                // client's computer's time isn't set correctly.
-                dateHolder.date = date;
-                dateHolder.projectId = projectId;
-              }
-              if (afterSavingFiles != null) {
-                afterSavingFiles.execute();
-              }
-            }
-            @Override
-            public void onFailure(Throwable caught) {
-              // Here is where we handle BlocksTruncatedException
-              if (caught instanceof BlocksTruncatedException) {
-                Ode.getInstance().blocksTruncatedDialog(projectId, fileId, content, this);
-              } else {
-                super.onFailure(caught);
-              }
-            }
-          });
+        final OdeAsyncCallback<Long> saveCallback = new OdeAsyncCallback<Long>(MESSAGES.saveErrorMultipleFiles()) {
+                  @Override
+                  public void onSuccess(Long date) {
+                    if (dateHolder.date != 0) {
+                      // This sets the project modification time to that of one of
+                      // the successful file saves. It doesn't really matter which
+                      // file date we use, they will all be close. However it is important
+                      // to use some files date because that will be based on the server's
+                      // time. If we used the local clients time, then we may be off if the
+                      // client's computer's time isn't set correctly.
+                      dateHolder.date = date;
+                      dateHolder.projectId = projectId;
+                    }
+                    if (afterSavingFiles != null) {
+                      afterSavingFiles.execute();
+                    }
+                  }
+
+                  @Override
+                  public void onFailure(Throwable caught) {
+                    // Here is where we handle BlocksTruncatedException
+                    if (caught instanceof BlocksTruncatedException) {
+                      Ode.getInstance().blocksTruncatedDialog(projectId, fileId, content, this);
+                    } else {
+                      super.onFailure(caught);
+                    }
+                  }
+                };
+
+        if (YACachedBlocksNode.getCachedNode(projectId, fileId) != null) {
+          YACachedBlocksNode.getCachedNode(projectId, fileId).save(content, false, saveCallback);
+        } else {
+          Ode.getInstance().getProjectService().save2(Ode.getInstance().getSessionId(),
+                  projectId, fileId, false, content, saveCallback);
+        }
       }
     }
   }

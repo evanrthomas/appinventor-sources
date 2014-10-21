@@ -479,7 +479,7 @@ public class BlocklyPanel extends HTMLPanel {
    *
    * @param blocksContent XML description of a blocks workspace in format expected by Blockly
    */
-  public void loadBlocksContent(String blocksContent) {
+  private void addBlocksContent(String blocksContent) {
     LoadStatus loadStat = new LoadStatus();
     loadStatusMap.put(formName, loadStat);
     if (blocksInited(formName)) {
@@ -490,6 +490,11 @@ public class BlocklyPanel extends HTMLPanel {
       OdeLog.log("Caching blocks content for " + formName + " for loading when blocks area inited");
       pendingBlocksContentMap.put(formName, blocksContent);
     }
+  }
+
+  public void setBlocksContent(String blocksContent) {
+    doClearWorkspace(formName);
+    addBlocksContent(blocksContent);
   }
 
   public static void loadBlocksContentNow(String formName, String blocksContent) {
@@ -573,6 +578,9 @@ public class BlocklyPanel extends HTMLPanel {
     doHardReset(formName);
   }
 
+  public void clearWorkspace() {
+    doClearWorkspace(formName);
+  }
   public static boolean checkIsAdmin() {
     return Ode.getInstance().getUser().getIsAdmin();
   }
@@ -887,6 +895,12 @@ public class BlocklyPanel extends HTMLPanel {
     } catch (e) {
       $wnd.console.log("doPollYail() Failed");
       $wnd.console.log(e);
+    }
+  }-*/;
+
+  private static native void doClearWorkspace(String formName) /*-{
+    if ($wnd.Blocklies && $wnd.Blocklies[formName]) { //check that the workspace exists
+      $wnd.Blocklies[formName].mainWorkspace.clear();
     }
   }-*/;
 

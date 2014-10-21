@@ -4,8 +4,10 @@
 // Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
 package com.google.appinventor.client.editor.youngandroid;
 
+import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
+import com.google.appinventor.client.YACachedBlocksNode;
 import com.google.appinventor.client.boxes.AssetListBox;
 import com.google.appinventor.client.boxes.BlockSelectorBox;
 import com.google.appinventor.client.boxes.PaletteBox;
@@ -70,7 +72,7 @@ public final class YaBlocksEditor extends FileEditor
   // projectid_formname for this blocks editor. Our index into the static formToBlocksEditor map.
   private String fullFormName;
 
-  private final YoungAndroidBlocksNode blocksNode;
+  private final YACachedBlocksNode blocksNode;
 
   // References to other panels that we need to control.
   private final SourceStructureExplorer sourceStructureExplorer;
@@ -78,6 +80,7 @@ public final class YaBlocksEditor extends FileEditor
   // Panel that is used as the content of the palette box
   private final YoungAndroidPalettePanel palettePanel;
 
+  //blocks will contain this property if they were imported form another shared page
   private final String IS_IMPORTED = "isImported";
 
   // Blocks area. Note that the blocks area is a part of the "document" in the
@@ -113,7 +116,7 @@ public final class YaBlocksEditor extends FileEditor
   YaBlocksEditor(YaProjectEditor projectEditor, YoungAndroidBlocksNode blocksNode) {
     super(projectEditor, blocksNode);
 
-    this.blocksNode = blocksNode;
+    this.blocksNode = YACachedBlocksNode.getOrCreateCachedNode(blocksNode);
 
     fullFormName = blocksNode.getProjectId() + "_" + blocksNode.getFormName();
     formToBlocksEditor.put(fullFormName, this);
@@ -157,29 +160,29 @@ public final class YaBlocksEditor extends FileEditor
     }
   }
 
-  private List<YoungAndroidBlocksNode> sharedPageDependenciesFor(YoungAndroidBlocksNode parent) {
+  private List<YACachedBlocksNode> sharedPageDependenciesFor(YACachedBlocksNode parent) {
     //TODO (evan): consider making a YoungAndroidSharedBlocksNode and using that instead
     //TODO (evan): give YABlocksNode a List<SharedPagesNode> field. Then instead of grabbing
     //    the blocksnode from the project, grab them from this.blocksNode
     //TODO (evan): recursivley get shared pages
     //TODO (evan): move this method to YaBlocksNode, should not be a function of YaBlocksEditor
-    ArrayList<YoungAndroidBlocksNode> list = new ArrayList<YoungAndroidBlocksNode>();
+    ArrayList<YACachedBlocksNode> list = new ArrayList<YACachedBlocksNode>();
     for (String s: formToBlocksEditor.keySet()) {
-      if (s.contains("SharedPage") && !parent.getName().contains("SharedPage")) {
+      if (s.contains("SharedPage") && !parent.getName().contains("SharedPage")
+              &&formToBlocksEditor.get(s).getProjectId() == blocksNode.getProjectId()) {
         list.add(formToBlocksEditor.get(s).blocksNode);
       }
     }
     return list;
   }
 
-  private void loadXmlAndMerge(final List<YoungAndroidBlocksNode> nodesToLoad, final Function<JavaScriptObject> onComplete) {
+  private void loadXmlAndMerge(final List<YACachedBlocksNode> nodesToLoad, final Function<JavaScriptObject> onComplete) {
     final AtomicInteger numLoaded = new AtomicInteger(0); //not sure if I need AtomicInteger, since it's being compiled to javascript which is single threaded
     final AtomicInteger gotCheckSumedFileException = new AtomicInteger(-1); //use atomicInteger instead of atomicboolean because gwt can't find atomic boolean (I hate gwt so much)
     final JavaScriptObject finalContents = blocklyXmlContainer();
-    for (final YoungAndroidBlocksNode node: nodesToLoad) {
+    for (final YACachedBlocksNode node: nodesToLoad) {
       //TODO (evan): loadFromCache instead of load2, find where load2 is being used and invalidate cache where necessary
-      Ode.getInstance().getProjectService().load2(node.getProjectId(), node.getFileId(),
-              new OdeAsyncCallback<ChecksumedLoadFile>(MESSAGES.loadError()) {
+      node.load(new OdeAsyncCallback<ChecksumedLoadFile>(MESSAGES.loadError()) {
                 @Override
                 public void onSuccess(ChecksumedLoadFile result) {
                   try {
@@ -192,15 +195,20 @@ public final class YaBlocksEditor extends FileEditor
                       appendChildrenToParent(blocks, finalContents);
                     }
                   } catch (ChecksumedFileException e) {
-                    //TODO (evan): test that this works as expected by throwing a checksumedException in the try{}
-                    gotCheckSumedFileException.set(1);
-                    Ode.getInstance().recordCorruptProject(node.getProjectId(), node.getFileId(), e.getMessage());
                     onFailure(e);
                   } finally {
                     if (numLoaded.incrementAndGet() == nodesToLoad.size() && gotCheckSumedFileException.intValue() < 0) {
                       onComplete.call(finalContents);
                     }
                   }
+                }
+
+                @Override
+                public void onFailure(Throwable e) {
+                  //TODO (evan): test that this works as expected by throwing a checksumedException in the try{}
+                  gotCheckSumedFileException.set(1);
+                  Ode.getInstance().recordCorruptProject(node.getProjectId(), node.getFileId(), e.getMessage());
+                  onFailure(e);
                 }
               });
     }
@@ -209,13 +217,13 @@ public final class YaBlocksEditor extends FileEditor
   // FileEditor methods
   @Override
   public void loadFile(final Command afterFileLoaded) {
-    List<YoungAndroidBlocksNode> backendNodes = new ArrayList<YoungAndroidBlocksNode>();
+    List<YACachedBlocksNode> backendNodes = new ArrayList<YACachedBlocksNode>();
     backendNodes.add(blocksNode);
     backendNodes.addAll(sharedPageDependenciesFor(blocksNode));
     loadXmlAndMerge(backendNodes, new Function<JavaScriptObject>() {
       @Override
       public void call(JavaScriptObject mergedXml) {
-        blocksArea.loadBlocksContent(domToText(mergedXml));
+        blocksArea.setBlocksContent(domToText(mergedXml));
         loadComplete = true;
         selectedDrawer = null;
         if (afterFileLoaded != null) {
@@ -266,9 +274,6 @@ public final class YaBlocksEditor extends FileEditor
      return eval(s);
     }-*/;
 
-  public void printJS(String s) {
-    OdeLog.log(s);
-  }
 
 
   @Override
@@ -308,6 +313,12 @@ public final class YaBlocksEditor extends FileEditor
    * properties panel.
    */
   private void loadBlocksEditor() {
+    Helper.printJS("loadBlocksEditor() " + fullFormName);
+    //before you switch to a new blocks editor,
+    //make sure all the pending changes from other shared pages that this editor might depend on are
+    //saved and loaded into this editor
+    Ode.getInstance().getEditorManager().saveDirtyEditors(null);
+    loadFile(null);
 
     // Set the palette box's content.
     if (palettePanel != null) {
@@ -386,8 +397,22 @@ public final class YaBlocksEditor extends FileEditor
     hideComponentBlocks();
   }
 
+  private static List<YaBlocksEditor> getParents(YaBlocksEditor editor) {
+    //printJS("getParents() " + editor.fullFormName);
+    ArrayList<YaBlocksEditor> parents = new  ArrayList<YaBlocksEditor>();
+    if (!editor.fullFormName.contains("SharedPage")) {
+      return parents;
+    } else {
+      for (String s: formToBlocksEditor.keySet()) {
+        if (!s.contains("SharedPage")) {
+          parents.add(formToBlocksEditor.get(s));
+        }
+      }
+      return parents;
+    }
+  }
+
   public static void onBlocksAreaChanged(String formName) {
-    //TODO (evan): if this is a SharedPage editor, recursivley update the parents
     YaBlocksEditor editor = formToBlocksEditor.get(formName);
     if (editor != null) {
       OdeLog.log("Got blocks area changed for " + formName);
