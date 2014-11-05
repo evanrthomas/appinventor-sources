@@ -5,8 +5,6 @@
 
 package com.google.appinventor.client.editor.youngandroid;
 
-import static com.google.appinventor.client.Ode.MESSAGES;
-
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.boxes.AssetListBox;
@@ -49,6 +47,8 @@ import com.google.gwt.user.client.ui.DockPanel;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static com.google.appinventor.client.Ode.MESSAGES;
 
 /**
  * Editor for Young Android Form (.scm) files.
@@ -111,6 +111,10 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
    */
   YaFormEditor(ProjectEditor projectEditor, YoungAndroidFormNode formNode) {
     super(projectEditor, formNode);
+
+    //Note(evan): In java, booleans default to false so this wouldn't be necessary. Some bug popped up in gwt however, where the
+    //this was showing up as null. So we fix it here. (This is an error in gwt)
+    loadComplete = false;
 
     this.formNode = formNode;
 
@@ -216,7 +220,7 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
           + "current file editor!");
     }
   }
-  
+
   @Override
   public void onClose() {
     form.removeFormChangeListener(this);
@@ -255,7 +259,7 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
 
   @Override
   public List<String> getComponentNames() {
-    return new ArrayList<String>(getComponents().keySet());
+    return new ArrayList<String>(this.getComponents().keySet());
   }
 
   @Override
@@ -457,9 +461,8 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
 
     // Add component type to the blocks editor
     YaProjectEditor yaProjectEditor = (YaProjectEditor) projectEditor;
-    YaBlocksEditor blockEditor = yaProjectEditor.getBlocksFileEditor(formNode.getFormName());
-    blockEditor.addComponent(mockComponent.getType(), mockComponent.getName(),
-        mockComponent.getUuid());
+    YaCodePageEditor blockEditor = yaProjectEditor.getBlocksFileEditor(formNode.getFormName());
+    blockEditor.addComponent(mockComponent);
 
     // Add nested components
     if (properties.containsKey("$Components")) {
@@ -482,6 +485,7 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
     // Set the palette box's content.
     PaletteBox paletteBox = PaletteBox.getPaletteBox();
     paletteBox.setContent(palettePanel);
+    PaletteBox.getPaletteBox().setVisible(true);
 
     // Update the source structure explorer with the tree of this form's components.
     sourceStructureExplorer.updateTree(form.buildComponentsTree(),
@@ -620,7 +624,7 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
    */
   private void updatePhone() {
     YaProjectEditor yaProjectEditor = (YaProjectEditor) projectEditor;
-    YaBlocksEditor blockEditor = yaProjectEditor.getBlocksFileEditor(formNode.getFormName());
+    YaCodePageEditor blockEditor = yaProjectEditor.getBlocksFileEditor(formNode.getFormName());
     blockEditor.onBlocksAreaChanged(getProjectId() + "_" + formNode.getFormName());
   }
 

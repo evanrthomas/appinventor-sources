@@ -5,15 +5,12 @@
 
 package com.google.appinventor.client.editor.simple.components;
 
-import static com.google.appinventor.client.Ode.MESSAGES;
-
-import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
-
 import com.google.appinventor.client.Images;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.TranslationDesignerPallete;
+import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
 import com.google.appinventor.client.editor.simple.SimpleEditor;
-import com.google.appinventor.client.editor.youngandroid.YaBlocksEditor;
+import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
 import com.google.appinventor.client.explorer.SourceStructureExplorerItem;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.output.OdeLog;
@@ -22,11 +19,7 @@ import com.google.appinventor.client.widgets.LabeledTextBox;
 import com.google.appinventor.client.widgets.dnd.DragSource;
 import com.google.appinventor.client.widgets.dnd.DragSourceSupport;
 import com.google.appinventor.client.widgets.dnd.DropTarget;
-import com.google.appinventor.client.widgets.properties.EditableProperties;
-import com.google.appinventor.client.widgets.properties.EditableProperty;
-import com.google.appinventor.client.widgets.properties.PropertyChangeListener;
-import com.google.appinventor.client.widgets.properties.PropertyEditor;
-import com.google.appinventor.client.widgets.properties.TextPropertyEditor;
+import com.google.appinventor.client.widgets.properties.*;
 import com.google.appinventor.client.youngandroid.TextValidators;
 import com.google.appinventor.shared.rpc.project.HasAssetsFolder;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
@@ -34,36 +27,15 @@ import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidAssets
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
 import com.google.appinventor.shared.settings.SettingsConstants;
 import com.google.appinventor.shared.storage.StorageUtil;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
-import com.google.gwt.user.client.Command;
-import com.google.gwt.user.client.DOM;
-import com.google.gwt.user.client.DeferredCommand;
-import com.google.gwt.user.client.Event;
+import com.google.gwt.event.dom.client.*;
+import com.google.gwt.user.client.*;
 import com.google.gwt.user.client.Random;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.MouseListener;
-import com.google.gwt.user.client.ui.MouseListenerCollection;
-import com.google.gwt.user.client.ui.SourcesMouseEvents;
-import com.google.gwt.user.client.ui.TreeItem;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import com.google.gwt.user.client.ui.impl.ClippedImagePrototype;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static com.google.appinventor.client.Ode.MESSAGES;
 
 /**
  * Abstract superclass for all components in the visual designer.
@@ -248,9 +220,9 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
       @Override
       public void onSelected() {
         // are we showing the blocks editor? if so, toggle the component drawer
-        if (Ode.getInstance().getCurrentFileEditor() instanceof YaBlocksEditor) {
-          YaBlocksEditor blocksEditor = 
-              (YaBlocksEditor) Ode.getInstance().getCurrentFileEditor();
+        if (Ode.getInstance().getCurrentFileEditor() instanceof YaCodePageEditor) {
+          YaCodePageEditor blocksEditor =
+              (YaCodePageEditor) Ode.getInstance().getCurrentFileEditor();
           OdeLog.log("Showing item " + getName());
           blocksEditor.showComponentBlocks(getName());
         } else {
@@ -656,7 +628,7 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
    *
    * @return  tree item for this component
    */
-  protected TreeItem buildTree() {
+  public TreeItem buildTree() {
     // Instantiate new tree item for this component
     // Note: We create a ClippedImagePrototype because we need something that can be
     // used to get HTML for the iconImage. AbstractImagePrototype requires

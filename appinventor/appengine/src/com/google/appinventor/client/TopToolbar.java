@@ -8,7 +8,7 @@ package com.google.appinventor.client;
 import com.google.appinventor.client.boxes.ProjectListBox;
 import com.google.appinventor.client.boxes.ViewerBox;
 import com.google.appinventor.client.editor.youngandroid.BlocklyPanel;
-import com.google.appinventor.client.editor.youngandroid.YaBlocksEditor;
+import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
 import com.google.appinventor.client.explorer.commands.BuildCommand;
 import com.google.appinventor.client.explorer.commands.ChainableCommand;
 import com.google.appinventor.client.explorer.commands.CopyYoungAndroidProjectCommand;
@@ -41,7 +41,6 @@ import com.google.gwt.http.client.UrlBuilder;
 import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.Window.Location;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.ClickListener;
@@ -846,7 +845,7 @@ public class TopToolbar extends Composite {
       return;
     }
     DesignToolbar.Screen screen = currentProject.screens.get(currentProject.currentScreen);
-    ((YaBlocksEditor)screen.blocksEditor).hardReset();
+    ((YaCodePageEditor)screen.blocksEditor).hardReset();
     updateConnectToDropDownButton(false, false, false);
   }
 

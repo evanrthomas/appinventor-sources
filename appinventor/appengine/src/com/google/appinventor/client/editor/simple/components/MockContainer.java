@@ -87,7 +87,7 @@ public abstract class MockContainer extends MockVisibleComponent implements Drop
   }
 
   @Override
-  protected TreeItem buildTree() {
+  public TreeItem buildTree() {
     TreeItem itemNode = super.buildTree();
 
     // Recursively build the tree for child components

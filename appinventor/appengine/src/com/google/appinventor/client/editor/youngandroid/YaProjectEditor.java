@@ -7,6 +7,7 @@ package com.google.appinventor.client.editor.youngandroid;
 
 import com.google.appinventor.client.DesignToolbar;
 import com.google.appinventor.client.ErrorReporter;
+import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.boxes.AssetListBox;
 import com.google.appinventor.client.editor.FileEditor;
@@ -47,7 +48,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
   // editor for the textual representation of the program logic.
   private class EditorSet {
     YaFormEditor formEditor = null;
-    YaBlocksEditor blocksEditor = null;
+    YaCodePageEditor blocksEditor = null;
   }
 
   // Maps form name -> editors for this form
@@ -85,11 +86,11 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
   private void loadBlocksEditor(String formNamePassedIn) {
 
     final String formName = formNamePassedIn;
-    final YaBlocksEditor newBlocksEditor = editorMap.get(formName).blocksEditor;
+    final YaCodePageEditor newBlocksEditor = editorMap.get(formName).blocksEditor;
     newBlocksEditor.loadFile(new Command() {
         @Override
         public void execute() {
-          YaBlocksEditor newBlocksEditor = editorMap.get(formName).blocksEditor;
+          YaCodePageEditor newBlocksEditor = editorMap.get(formName).blocksEditor;
           int pos = Collections.binarySearch(fileIds, newBlocksEditor.getFileId(),
               getFileIdComparator());
           if (pos < 0) {
@@ -165,10 +166,11 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
     if (selectedFileEditor != null) {
       if (selectedFileEditor instanceof YaFormEditor) {
         YaFormEditor formEditor = (YaFormEditor) selectedFileEditor;
+        Helper.println("YaProjectEditor.onShow() special conversion " + formEditor.isLoadComplete());
         designToolbar.switchToScreen(projectId, formEditor.getForm().getName(), 
             DesignToolbar.View.FORM);
-      } else if (selectedFileEditor instanceof YaBlocksEditor) {
-        YaBlocksEditor blocksEditor = (YaBlocksEditor) selectedFileEditor;
+      } else if (selectedFileEditor instanceof YaCodePageEditor) {
+        YaCodePageEditor blocksEditor = (YaCodePageEditor) selectedFileEditor;
         designToolbar.switchToScreen(projectId, blocksEditor.getForm().getName(), 
             DesignToolbar.View.BLOCKS);
       } else {
@@ -250,7 +252,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
   /*
    * Returns the YaBlocksEditor for the given form name in this project
    */
-  public YaBlocksEditor getBlocksFileEditor(String formName) {
+  public YaCodePageEditor getBlocksFileEditor(String formName) {
     if (editorMap.containsKey(formName)) {
       return editorMap.get(formName).blocksEditor;
     } else {
@@ -356,7 +358,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
   }
 
   private void addBlocksEditor(YoungAndroidBlocksNode blocksNode) {
-    final YaBlocksEditor newBlocksEditor = new YaBlocksEditor(this, blocksNode);
+    final YaCodePageEditor newBlocksEditor = new YaScreenPageEditor(this, blocksNode);
     final String formName = blocksNode.getFormName();
     OdeLog.log("Adding blocks editor for " + formName);
     if (editorMap.containsKey(formName)) {

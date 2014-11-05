@@ -5,32 +5,14 @@
 
 package com.google.appinventor.client.editor.youngandroid;
 
-import com.google.appinventor.client.DesignToolbar;
-import com.google.appinventor.client.ErrorReporter;
-import com.google.appinventor.client.Ode;
-import com.google.appinventor.client.TopToolbar;
-import com.google.appinventor.client.TranslationComponentEvents;
-import com.google.appinventor.client.TranslationComponentMethods;
-import com.google.appinventor.client.TranslationComponentParams;
-import com.google.appinventor.client.TranslationComponentProperty;
-import com.google.appinventor.client.TranslationDesignerPallete;
+import com.google.appinventor.client.*;
 import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.components.common.YaVersion;
-
 import com.google.common.collect.Maps;
-
 import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JavaScriptObject;
-
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.ClickListener;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.HTMLPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -205,10 +187,10 @@ public class BlocklyPanel extends HTMLPanel {
       return;
     }
     if (loadStat.error) {
-      YaBlocksEditor.setBlocksDamaged(formName);
+      YaCodePageEditor.setBlocksDamaged(formName);
       ErrorReporter.reportError(MESSAGES.blocksNotSaved(formName));
     } else {
-      YaBlocksEditor.onBlocksAreaChanged(formName);
+      YaCodePageEditor.onBlocksAreaChanged(formName);
     }
   }
 
@@ -438,7 +420,7 @@ public class BlocklyPanel extends HTMLPanel {
   }
 
   public static void callToggleWarning() {
-    YaBlocksEditor.toggleWarning();
+    YaCodePageEditor.toggleWarning();
   }
 
   /**
@@ -687,15 +669,15 @@ public class BlocklyPanel extends HTMLPanel {
   }
 
   public static String getComponentInfo(String typeName) {
-    return YaBlocksEditor.getComponentInfo(typeName);
+    return YaCodePageEditor.getComponentInfo(typeName);
   }
 
   public static String getComponentsJSONString() {
-    return YaBlocksEditor.getComponentsJSONString();
+    return YaCodePageEditor.getComponentsJSONString();
   }
 
   public static String getComponentInstanceTypeName(String formName, String instanceName) {
-    return YaBlocksEditor.getComponentInstanceTypeName(formName, instanceName);
+    return YaCodePageEditor.getComponentInstanceTypeName(formName, instanceName);
   }
 
   public static int getYaVersion() {

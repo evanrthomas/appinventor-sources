@@ -2,10 +2,8 @@
 
 package com.google.appinventor.client.boxes;
 
-import com.google.appinventor.client.Images;
-import com.google.appinventor.client.Ode;
-import com.google.appinventor.client.TranslationDesignerPallete;
-import com.google.appinventor.client.editor.simple.components.MockForm;
+import com.google.appinventor.client.*;
+import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.editor.youngandroid.BlockDrawerSelectionListener;
 import com.google.appinventor.client.explorer.SourceStructureExplorer;
 import com.google.appinventor.client.explorer.SourceStructureExplorerItem;
@@ -141,6 +139,7 @@ public final class BlockSelectorBox extends Box {
       SourceStructureExplorerItem sourceItem = new BlockSelectorItem() {
         @Override
         public void onSelected() {
+          Helper.println("BlockSelectorBox.getBuitInBlocksTree() ... onSelected()");
           fireBuiltinDrawerSelected(drawerName);
         }
       };
@@ -185,13 +184,15 @@ public final class BlockSelectorBox extends Box {
    * Constructs a tree item for generic ("Advanced") component blocks for
    * component types that appear in form.
    *
-   * @param form
+   * @param components
    *          only component types that appear in this Form will be included
    * @return tree item for this form
    */
-  public TreeItem getGenericComponentsTree(MockForm form) {
+  public TreeItem getGenericComponentsTree(ComponentSet components) {
     Map<String, String> typesAndIcons = Maps.newHashMap();
-    form.collectTypesAndIcons(typesAndIcons);
+    for (MockComponent comp : components.getComponents()) {
+      comp.collectTypesAndIcons(typesAndIcons);
+    }
     TreeItem advanced = new TreeItem(new HTML("<span>" + MESSAGES.anyComponentLabel() + "</span>"));
     List<String> typeList = new ArrayList<String>(typesAndIcons.keySet());
     Collections.sort(typeList);

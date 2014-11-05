@@ -5,12 +5,6 @@
 
 package com.google.appinventor.client.editor.simple.components;
 
-import static com.google.appinventor.client.Ode.MESSAGES;
-
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-
 import com.google.appinventor.client.editor.simple.SimpleEditor;
 import com.google.appinventor.client.editor.simple.components.utils.PropertiesUtil;
 import com.google.appinventor.client.editor.youngandroid.properties.YoungAndroidLengthPropertyEditor;
@@ -22,14 +16,13 @@ import com.google.gwt.dom.client.DivElement;
 import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.ui.AbsolutePanel;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.DockPanel;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.ScrollPanel;
-import com.google.gwt.user.client.ui.TreeItem;
+import com.google.gwt.user.client.ui.*;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+
+import static com.google.appinventor.client.Ode.MESSAGES;
 
 /**
  * Mock Form component.
@@ -188,6 +181,7 @@ public final class MockForm extends MockContainer {
     resizePanels();
 
     initComponent(formWidget);
+
     
     // Set up the initial state of the vertical alignment property editor and its
     // dropdowns
@@ -197,6 +191,7 @@ public final class MockForm extends MockContainer {
       OdeLog.log(MESSAGES.badAlignmentPropertyEditorForArrangement());
       return;
     };
+
     enableAndDisableDropdowns();
     initialized = true;
   }
