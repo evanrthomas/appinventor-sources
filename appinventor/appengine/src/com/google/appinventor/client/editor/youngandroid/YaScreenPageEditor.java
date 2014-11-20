@@ -3,10 +3,12 @@ package com.google.appinventor.client.editor.youngandroid;
 
 import com.google.appinventor.client.editor.simple.SimpleNonVisibleComponentsPanel;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
+import com.google.appinventor.client.editor.simple.components.MockForm;
 import com.google.appinventor.client.editor.simple.palette.SimplePalettePanel;
 import com.google.appinventor.shared.rpc.project.FileDescriptorWithContent;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
 import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
+import com.google.gwt.user.client.ui.TreeItem;
 
 import java.util.List;
 import java.util.Map;
@@ -17,16 +19,13 @@ public final class YaScreenPageEditor extends YaCodePageEditor {
   private YaFormEditor myFormEditor;
   public YaScreenPageEditor(YaProjectEditor projectEditor, YoungAndroidBlocksNode blocksNode) {
     super(projectEditor, blocksNode);
-
     myFormEditor = projectEditor.getFormFileEditor(blocksNode.getFormName());
-
   }
 
   @Override
   public Map<String, MockComponent> getComponents() {
     return myFormEditor.getComponents();
   }
-
 
   @Override
   public List<String> getComponentNames() {
@@ -48,6 +47,45 @@ public final class YaScreenPageEditor extends YaCodePageEditor {
     return myFormEditor.isScreen1();
   }
 
+  @Override
+  protected TreeItem getComponentsTree() {
+     return getForm().buildComponentsTree();
+  }
+
+
+  @Override
+  public void onClose() {
+    getForm().removeFormChangeListener(this);
+    super.onClose();
+  }
+
+  @Override
+  protected void updateSourceStructureExplorer() {
+    MockForm form = getForm();
+    if (form != null) {
+      updateBlocksTree(form.getSelectedComponent().getSourceStructureExplorerItem());
+    }
+  }
+
+
+  @Override
+  public boolean isLoadComplete() {
+    if (getForm() != null) {
+      return loadComplete;
+    } else {
+      return false;
+    }
+  }
+
+  public MockForm getForm() {
+    YaProjectEditor yaProjectEditor = (YaProjectEditor) projectEditor;
+    YaFormEditor myFormEditor = yaProjectEditor.getFormFileEditor(blocksNode.getFormName());
+    if (myFormEditor != null) {
+      return myFormEditor.getForm();
+    } else {
+      throw new ScreenPageHasNoFormException();
+    }
+  }
 
   public synchronized void sendComponentData() {
     try {
@@ -88,4 +126,5 @@ public final class YaScreenPageEditor extends YaCodePageEditor {
     return path.replaceAll("/", ".");
   }
 
+  private class ScreenPageHasNoFormException extends RuntimeException {}
 }

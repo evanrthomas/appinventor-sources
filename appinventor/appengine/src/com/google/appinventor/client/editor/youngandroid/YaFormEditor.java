@@ -5,6 +5,7 @@
 
 package com.google.appinventor.client.editor.youngandroid;
 
+import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.boxes.AssetListBox;
@@ -100,6 +101,8 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
   // UI elements
   private final SimpleVisibleComponentsPanel visibleComponentsPanel;
   private final SimpleNonVisibleComponentsPanel nonVisibleComponentsPanel;
+
+  private YaScreenPageEditor screenPageEditor;
 
   private MockForm form;  // initialized lazily after the file is loaded from the ODE server
 
@@ -352,6 +355,7 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
   }
 
   public String getComponentInstanceTypeName(String instanceName) {
+    Helper.println("YaFormEditor.getComponentInstanceTypeName " + instanceName);
     return getComponents().get(instanceName).getType();
   }
 
@@ -399,6 +403,7 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
   }
 
   private void onFileLoaded(String content) {
+    Helper.println("YaFormEditor.onFileLoaded " + content);
     JSONObject propertiesObject = YoungAndroidSourceAnalyzer.parseSourceFile(
         content, JSON_PARSER);
     form = createMockForm(propertiesObject.getProperties().get("Properties").asObject());
@@ -425,6 +430,7 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
    * recursively for nested components. For the initial invocation parent shall be null.
    */
   private MockComponent createMockComponent(JSONObject propertiesObject, MockContainer parent) {
+    Helper.println("YaFormEditor.createMockComponent() " + propertiesObject.toJson());
     Map<String, JSONValue> properties = propertiesObject.getProperties();
 
     // Component name and type
@@ -437,6 +443,12 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
 
       // Instantiate new root component
       mockComponent = new MockForm(this);
+
+      // Add component type to the blocks editor
+      YaProjectEditor yaProjectEditor = (YaProjectEditor) projectEditor;
+      YaCodePageEditor blockEditor = yaProjectEditor.getBlocksFileEditor(formNode.getFormName());
+      Helper.println("YaFormEditor.createComponent() mockCOmponentNameBefore " + mockComponent.getName());
+      blockEditor.addComponent(mockComponent);
     } else {
       mockComponent = SimpleComponentDescriptor.createMockComponent(componentType, this);
 
@@ -451,6 +463,7 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
     // Set the name of the component (on instantiation components are assigned a generated name)
     String componentName = properties.get("$Name").asString().getString();
     mockComponent.changeProperty("Name", componentName);
+    Helper.println("YaFormEditor.createMockComponent() componentNameAfter " +  mockComponent.getName());
 
     // Set component properties
     for (String name : properties.keySet()) {
@@ -459,10 +472,6 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
       }
     }
 
-    // Add component type to the blocks editor
-    YaProjectEditor yaProjectEditor = (YaProjectEditor) projectEditor;
-    YaCodePageEditor blockEditor = yaProjectEditor.getBlocksFileEditor(formNode.getFormName());
-    blockEditor.addComponent(mockComponent);
 
     // Add nested components
     if (properties.containsKey("$Components")) {

@@ -634,4 +634,8 @@ public final class MockForm extends MockContainer {
       myVAlignmentPropertyEditor.disable();
     } else myVAlignmentPropertyEditor.enable();
   }
+
+  public String toString() {
+    return properties.getPropertyValue("Name");
+  }
 }

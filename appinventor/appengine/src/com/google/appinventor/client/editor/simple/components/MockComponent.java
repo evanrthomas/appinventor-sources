@@ -417,6 +417,10 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
     return properties.getPropertyValue(PROPERTY_NAME_NAME);
   }
 
+  public String getTypeDescription() {
+    return SimpleComponentDatabase.getInstance().getTypeDescription(getType());
+  }
+
   /**
    * Returns true if there is a property with the given name.
    *

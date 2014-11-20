@@ -171,7 +171,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
             DesignToolbar.View.FORM);
       } else if (selectedFileEditor instanceof YaCodePageEditor) {
         YaCodePageEditor blocksEditor = (YaCodePageEditor) selectedFileEditor;
-        designToolbar.switchToScreen(projectId, blocksEditor.getForm().getName(), 
+        designToolbar.switchToScreen(projectId, blocksEditor.getName(),
             DesignToolbar.View.BLOCKS);
       } else {
         // shouldn't happen!

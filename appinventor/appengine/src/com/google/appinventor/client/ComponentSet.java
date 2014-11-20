@@ -12,6 +12,13 @@ public class ComponentSet {
     components = new ArrayList<MockComponent>();
   }
 
+  public ComponentSet(Collection<MockComponent> comps) {
+    this();
+    for (MockComponent comp: comps) {
+      addComponent(comp);
+    }
+  }
+
   public void addComponent(MockComponent component) {
     components.add(component);
   }
@@ -23,7 +30,7 @@ public class ComponentSet {
 
     //TODO (evan): give MockComponent an addListener method, so we can listen for changes on the MockComponents
     //and maintain a  Map<Name, MockComponent>
-    for (MockComponent comp: components) {
+    for (MockComponent comp: flatten(components)) {
       if (comp.getName().equals(name)) {
         return comp;
       }
@@ -32,7 +39,7 @@ public class ComponentSet {
   }
 
   public Collection<MockComponent> getComponents() {
-    return components;
+    return flatten(components);
   }
 
   public static TreeItem buildTree(ComponentSet components) {
@@ -42,6 +49,26 @@ public class ComponentSet {
     }
     itemNode.setState(false);
     return itemNode;
+  }
+
+
+  public static Collection<MockComponent> flatten(MockComponent parent) {
+    //TODO (evan): make this return a lazily evaled iterator intead of flattening immediatley
+    Collection<MockComponent> toReturn = new ArrayList<MockComponent>();
+    toReturn.add(parent);
+    for (MockComponent comp: parent.getChildren()) {
+      toReturn.addAll(flatten(comp));
+    }
+    return toReturn;
+  }
+
+  public static Collection<MockComponent> flatten(Collection<MockComponent> comps) {
+    //TODO (evan): make this return a lazily evaled iterator intead of flattening immediatley
+    Collection<MockComponent> toReturn = new ArrayList<MockComponent>();
+    for (MockComponent comp: comps) {
+      toReturn.addAll(flatten(comp));
+    }
+    return toReturn;
   }
 
 }

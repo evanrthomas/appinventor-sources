@@ -47,7 +47,6 @@ public class EditableProperties extends Properties<EditableProperty> {
    * @param editor  property editor
    * @param type  type of property; see {@code TYPE_*} constants in {@link EditableProperty}
    */
-
   public void addProperty(String name, String defaultValue, String caption,
       PropertyEditor editor, int type) {
     addProperty(new EditableProperty(this, name, defaultValue, caption, editor, type));

@@ -12,7 +12,6 @@ import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
 import com.google.appinventor.client.editor.simple.SimpleEditor;
 import com.google.appinventor.client.editor.simple.components.FormChangeListener;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
-import com.google.appinventor.client.editor.simple.components.MockForm;
 import com.google.appinventor.client.explorer.SourceStructureExplorer;
 import com.google.appinventor.client.explorer.SourceStructureExplorerItem;
 import com.google.appinventor.client.output.OdeLog;
@@ -45,7 +44,7 @@ import static com.google.appinventor.client.Ode.MESSAGES;
  * @author sharon@google.com (Sharon Perl) added Blockly functionality
  */
 public abstract class YaCodePageEditor extends SimpleEditor
-    implements FormChangeListener, BlockDrawerSelectionListener {
+    implements FormChangeListener, BlockDrawerSelectionListener { //TODO (evan) move FormChanveLisener to ScreenPageEditor
 
   // A constant to substract from the total height of the Viewer window, set through
   // the computed height of the user's window (Window.getClientHeight())
@@ -64,12 +63,12 @@ public abstract class YaCodePageEditor extends SimpleEditor
   // projectid_formname for this blocks editor. Our index into the static nameToCodePageEditor map.
   private String fullFormName;
 
-  private final YACachedBlocksNode blocksNode;
+  protected final YACachedBlocksNode blocksNode;
 
   // References to other panels that we need to control.
   private final SourceStructureExplorer sourceStructureExplorer;
 
-  private final ComponentSet components;
+  protected final ComponentSet components;
 
   //blocks will contain this property if they were imported form another shared page
   private final String IS_IMPORTED = "isImported";
@@ -83,7 +82,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   protected final BlocklyPanel blocksArea;
 
   // True once we've finished loading the current file.
-  private boolean loadComplete = false;
+  protected boolean loadComplete = false;
 
   // if selectedDrawer != null, it is either "component_" + instance name or
   // "builtin_" + drawer name
@@ -94,10 +93,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
   // moved from one container to another). In that case we do not want to add it to the
   // blocks area again.
   private Set<String> componentUuids = new HashSet<String>();
-
-
-  // Used to determine if the newly generated yail should be sent to the debugging phone
-  private String lastYail = "";
 
   //Timer used to poll blocks editor to check if it is initialized
   private static Timer timer;
@@ -137,11 +132,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   //SimpleEditor methods
   @Override
   public boolean isLoadComplete() {
-    if (getForm() != null) {
-      return loadComplete;
-    } else {
-      return false;
-    }
+    return loadComplete;
   }
 
   private List<YACachedBlocksNode> sharedPageDependenciesFor(YACachedBlocksNode parent) {
@@ -274,7 +265,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   public void showWhenInitialized() {
     //check if blocks are initialized
-    Helper.println("YaBocksEditor.showWhenInitialized()");
     updateBlocksTree(null);
     if(BlocklyPanel.blocksInited(fullFormName)) {
       blocksArea.showDifferentForm(fullFormName);
@@ -308,9 +298,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
     loadFile(null);
     PaletteBox.getPaletteBox().setVisible(false);
 
-    // Update the source structure explorer with the tree of this form's components.
-    MockForm form = getForm();
-    if (form != null) {
+      // Update the source structure explorer with the tree of this form's components.
       // start with no component selected in sourceStructureExplorer. We
       // don't want a component drawer open in the blocks editor when we
       // come back to it.
@@ -323,9 +311,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
       BlockSelectorBox.getBlockSelectorBox().setVisible(true);
       AssetListBox.getAssetListBox().setVisible(true);
       hideComponentBlocks();
-    } else {
-      OdeLog.wlog("Can't get form editor for blocks: " + getFileId());
-    }
   }
 
   @Override
@@ -347,7 +332,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
   @Override
   public void onClose() {
     // our partner YaFormEditor added us as a FormChangeListener, but we remove ourself.
-    getForm().removeFormChangeListener(this);
     BlockSelectorBox.getBlockSelectorBox().removeBlockDrawerSelectionListener(this);
     nameToCodePageEditor.remove(fullFormName);
   }
@@ -399,16 +383,23 @@ public abstract class YaCodePageEditor extends SimpleEditor
   }
 
 
-  private void updateBlocksTree(SourceStructureExplorerItem itemToSelect) {
-    Helper.println("updateBlocksTree()");
+  protected void updateBlocksTree(SourceStructureExplorerItem itemToSelect) {
     TreeItem items[] = new TreeItem[3];
     items[0] = BlockSelectorBox.getBlockSelectorBox().getBuiltInBlocksTree();
-    items[1] = ComponentSet.buildTree(components);
-    items[2] = BlockSelectorBox.getBlockSelectorBox().getGenericComponentsTree(components);
+    items[1] = getComponentsTree();
+    items[2] = getAnyComponentsTree();
     sourceStructureExplorer.updateTree(items, itemToSelect);
     BlockSelectorBox.getBlockSelectorBox().setContent(sourceStructureExplorer);
-    //BlockSelectorBox.getBlockSelectorBox().setVisible(true); //Note (evan): Don't think this line is necessary
   }
+
+  protected abstract TreeItem getComponentsTree();
+
+  private TreeItem getAnyComponentsTree() {
+    return BlockSelectorBox.getBlockSelectorBox().
+            getGenericComponentsTree(new ComponentSet(ComponentSet.flatten(components.getComponents())));
+  }
+
+
 
   // Do whatever is needed to save Blockly state when our project is about to be
   // detached from the parent document. Note that this is not for saving the blocks file itself.
@@ -439,28 +430,30 @@ public abstract class YaCodePageEditor extends SimpleEditor
   public static String getComponentInstanceTypeName(String formName, String instanceName) {
       //use form name to get blocks editor
       Helper.println("YaCodePageEditor.getComponentInstanceTypeName() formName " + formName + " instanceName " + instanceName);
-      YaCodePageEditor codePageEditor = nameToCodePageEditor.get(formName);
-      return codePageEditor.components.getComponentByName(instanceName).getType();
+      ComponentSet componentsForForm = nameToCodePageEditor.get(formName).components;
+      Helper.println(componentsForForm.getComponents());
+      String s = componentsForForm.getComponentByName(instanceName).getType();
+      Helper.println("YaCodePageEditor.getComponentInstanceTypeName() finished");
+      return s;
   }
 
   public void addComponent(MockComponent comp) {
     if (componentUuids.add(comp.getUuid())) {
-      //MockComponent comp = SimpleComponentDescriptor.createMockComponent(typeName, this);
       components.addComponent(comp);
-      String typeDescription = COMPONENT_DATABASE.getTypeDescription(comp.getType());
-      blocksArea.addComponent(typeDescription, comp.getName(), comp.getUuid());
+      Helper.println("YaCodePageEditor.addComponent() " + comp.getName());
+      blocksArea.addComponent(comp);
     }
   }
 
-  public void removeComponent(String typeName, String instanceName, String uuid) {
-    if (componentUuids.remove(uuid)) {
-      blocksArea.removeComponent(typeName, instanceName, uuid);
+  public void removeComponent(MockComponent component) {
+    if (componentUuids.remove(component.getUuid())) {
+      blocksArea.removeComponent(component);
       //TODO(evan): components.remove(typeName, instanceName, uuid)
     }
   }
 
-  public void renameComponent(String typeName, String oldName, String newName, String uuid) {
-    blocksArea.renameComponent(typeName, oldName, newName, uuid);
+  public void renameComponent(String oldName, MockComponent comp) {
+    blocksArea.renameComponent(oldName, comp);
   }
 
   public void showComponentBlocks(String instanceName) {
@@ -510,15 +503,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
     blocksArea.hideBuiltinBlocks();
   }
 
-  public MockForm getForm() {
-    YaProjectEditor yaProjectEditor = (YaProjectEditor) projectEditor;
-    YaFormEditor myFormEditor = yaProjectEditor.getFormFileEditor(blocksNode.getFormName());
-    if (myFormEditor != null) {
-      return myFormEditor.getForm();
-    } else {
-      return null;
-    }
-  }
 
 
   // FormChangeListener implementation
@@ -544,7 +528,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   @Override
   public void onComponentRemoved(MockComponent component, boolean permanentlyDeleted) {
     if (permanentlyDeleted) {
-      removeComponent(component.getType(), component.getName(), component.getUuid());
+      removeComponent(component);
       if (loadComplete) {
         updateSourceStructureExplorer();
       }
@@ -558,6 +542,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
    */
   @Override
   public void onComponentAdded(MockComponent component) {
+    Helper.println("YaCodePageEditor.onComponentAdded() " + component.getName());
     addComponent(component);
     if (loadComplete) {
       // Update source structure panel
@@ -572,7 +557,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
    */
   @Override
   public void onComponentRenamed(MockComponent component, String oldName) {
-    renameComponent(component.getType(), oldName, component.getName(), component.getUuid());
+    renameComponent(oldName, component);
     if (loadComplete) {
       updateSourceStructureExplorer();
       // renaming could potentially confuse an open drawer so close just in case
@@ -581,12 +566,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
     }
   }
 
-  private void updateSourceStructureExplorer() {
-    MockForm form = getForm();
-    if (form != null) {
-      updateBlocksTree(form.getSelectedComponent().getSourceStructureExplorerItem());
-    }
-  }
+  protected abstract void updateSourceStructureExplorer();
 
   /*
    * @see com.google.appinventor.client.editor.simple.components.FormChangeListener#
@@ -607,7 +587,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
   @Override
   public void onBuiltinDrawerSelected(String drawerName) {
     // Only do something if we are the current file editor
-    Helper.println(("YaCodePageEditor.onBuiltinDrawerSelected()"));
     if (Ode.getInstance().getCurrentFileEditor() == this) {
       showBuiltinBlocks(drawerName);
     }
@@ -620,7 +599,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
   @Override
   public void onGenericDrawerSelected(String drawerName) {
     // Only do something if we are the current file editor
-    Helper.println("YaCodePageEditor.onGenericDrawerSelected()");
     if (Ode.getInstance().getCurrentFileEditor() == this) {
       showGenericBlocks(drawerName);
     }
@@ -652,6 +630,10 @@ public abstract class YaCodePageEditor extends SimpleEditor
     }
   }
 
+  public String getName() {
+    //TODO(evan): get name from header instead of random
+    return blocksNode.getName();
+  }
   /*
    * Switch language to the specified language if applicable
    */

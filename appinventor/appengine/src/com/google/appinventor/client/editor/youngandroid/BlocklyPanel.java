@@ -7,6 +7,7 @@ package com.google.appinventor.client.editor.youngandroid;
 
 import com.google.appinventor.client.*;
 import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
+import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.common.collect.Maps;
@@ -39,10 +40,7 @@ public class BlocklyPanel extends HTMLPanel {
 
   private static class ComponentOp {
     public OpType op;
-    public String instanceName;     // for ADD, REMOVE, RENAME
-    public String uid;              // for ADD, REMOVE, RENAME
-    public String typeDescription;  // for ADD
-    public String typeName;         // for REMOVE, RENAME
+    public MockComponent component;
     public String oldName;          // for RENAME
   }
 
@@ -145,26 +143,33 @@ public class BlocklyPanel extends HTMLPanel {
     if (savedComponents != null) { // shouldn't be!
       OdeLog.log("Restoring " + savedComponents.size() +
           " previous blockly components for form " + formName);
+
       for (ComponentOp op : savedComponents.values()) {
-        doAddComponent(formName, op.typeDescription, op.instanceName, op.uid);
+        doAddComponent(formName, op.component.getTypeDescription(), op.component.getName(), op.component.getUuid());
       }
     }
 
+    Helper.println("BlocklyPanel.initBlocksArea() formName::" + formName);
+    String typeDescription, instanceName, uid;
     if (componentOps.containsKey(formName)) {
       OdeLog.log("Replaying " + componentOps.get(formName).size() + " ops waiting in queue");
       for (ComponentOp op : componentOps.get(formName)) {
+        typeDescription = op.component.getTypeDescription();
+        instanceName = op.component.getName();
+        uid = op.component.getUuid();
         switch (op.op) {
           case ADD:
-            doAddComponent(formName, op.typeDescription, op.instanceName, op.uid);
-            addSavedComponent(formName, op.typeDescription, op.instanceName, op.uid);
+            Helper.println("BlocklyPanel.initBlocksArea() replaying ADD " + op.component.getName());
+            doAddComponent(formName, typeDescription, instanceName, uid);
+            addSavedComponent(formName, op.component);
             break;
           case REMOVE:
-            doRemoveComponent(formName, op.typeName, op.instanceName, op.uid);
-            removeSavedComponent(formName, op.typeName, op.instanceName, op.uid);
+            doRemoveComponent(formName, typeDescription, instanceName, uid);
+            removeSavedComponent(formName, op.component);
             break;
           case RENAME:
-            doRenameComponent(formName, op.typeName, op.oldName, op.instanceName, op.uid);
-            renameSavedComponent(formName, op.typeName, op.oldName, op.instanceName, op.uid);
+            doRenameComponent(formName, typeDescription, op.oldName, instanceName, uid);
+            renameSavedComponent(formName, op.oldName, op.component);
             break;
         }
       }
@@ -203,43 +208,36 @@ public class BlocklyPanel extends HTMLPanel {
   /**
    * Add a component to the blocks workspace
    *
-   * @param typeDescription JSON string describing the component type,
-   *                        formatted as described in
-   *                        {@link com.google.appinventor.components.scripts.ComponentDescriptorGenerator}
-   * @param instanceName    the name of the component instance
-   * @param uid             the unique id of the component instance
+   * @param component the component to be added
    */
-  public void addComponent(String typeDescription, String instanceName, String uid) {
+  public void addComponent(MockComponent component) {
+
     if (!blocksInited(formName)) {
+      //Helper.println("BlocklyPanel.addComponent() to be replayed" + instanceName);
       ComponentOp cop = new ComponentOp();
       cop.op = OpType.ADD;
-      cop.instanceName = instanceName;
-      cop.typeDescription = typeDescription;
-      cop.uid = uid;
+      cop.component = component;
       if (!componentOps.containsKey(formName)) {
         componentOps.put(formName, new ArrayList<ComponentOp>());
       }
       componentOps.get(formName).add(cop);
     } else {
-      doAddComponent(formName, typeDescription, instanceName, uid);
-      addSavedComponent(formName, typeDescription, instanceName, uid);
+      doAddComponent(formName, component.getTypeDescription(), component.getName(), component.getUuid());
+      addSavedComponent(formName, component);
     }
   }
 
-  private static void addSavedComponent(String formName, String typeDescription,
-                                        String instanceName, String uid) {
+  private static void addSavedComponent(String formName, MockComponent comp) {
     Map<String, ComponentOp> myComponents = currentComponents.get(formName);
-    if (!myComponents.containsKey(uid)) {
+    if (!myComponents.containsKey(comp.getUuid())) {
       // we expect there to be no saved component with this uid yet!
       ComponentOp savedComponent = new ComponentOp();
       savedComponent.op = OpType.ADD;
-      savedComponent.instanceName = instanceName;
-      savedComponent.typeDescription = typeDescription;
-      savedComponent.uid = uid;
-      myComponents.put(uid, savedComponent);
+      savedComponent.component = comp;
+      myComponents.put(comp.getUuid(), savedComponent);
     } else {
-      OdeLog.wlog("BlocklyPanel: already have component with uid " + uid
-          + ", instanceName is " + myComponents.get(uid).instanceName);
+      OdeLog.wlog("BlocklyPanel: already have component with uid " + comp.getUuid()
+          + ", instanceName is " + myComponents.get(comp.getUuid()).component.getName());
     }
 
   }
@@ -248,37 +246,32 @@ public class BlocklyPanel extends HTMLPanel {
    * Remove the component instance instanceName, with the given typeName
    * and uid from the workspace.
    *
-   * @param typeName     component type name (e.g., "Canvas" or "Button")
-   * @param instanceName instance name
-   * @param uid          unique id
+   * @param comp the component to be removed
    */
-  public void removeComponent(String typeName, String instanceName, String uid) {
+  public void removeComponent(MockComponent comp) {
     if (!blocksInited(formName)) {
       ComponentOp cop = new ComponentOp();
       cop.op = OpType.REMOVE;
-      cop.instanceName = instanceName;
-      cop.typeName = typeName;
-      cop.uid = uid;
+      cop.component = comp;
       if (!componentOps.containsKey(formName)) {
         componentOps.put(formName, new ArrayList<ComponentOp>());
       }
       componentOps.get(formName).add(cop);
     } else {
-      doRemoveComponent(formName, typeName, instanceName, uid);
-      removeSavedComponent(formName, typeName, instanceName, uid);
+      doRemoveComponent(formName, comp.getTypeDescription(), comp.getName(), comp.getUuid());
+      removeSavedComponent(formName, comp);
     }
   }
 
-  private static void removeSavedComponent(String formName, String typeName,
-    String instanceName, String uid) {
+  private static void removeSavedComponent(String formName, MockComponent comp) {
     Map<String, ComponentOp> myComponents = currentComponents.get(formName);
-    if (myComponents.containsKey(uid)
-        && myComponents.get(uid).instanceName.equals(instanceName)) {
+    if (myComponents.containsKey(comp.getUuid())
+        && myComponents.get(comp.getUuid()).component.getName().equals(comp.getName())) {
       // we expect it to be there
-      myComponents.remove(uid);
+      myComponents.remove(comp.getUuid());
     } else {
-      OdeLog.wlog("BlocklyPanel: can't find saved component with uid " + uid
-          + " and name " + instanceName);
+      OdeLog.wlog("BlocklyPanel: can't find saved component with uid " + comp.getUuid()
+          + " and name " + comp.getName());
     }
   }
 
@@ -286,46 +279,40 @@ public class BlocklyPanel extends HTMLPanel {
    * Rename the component whose old name is oldName (and whose
    * unique id is uid and type name is typeName) to newName.
    *
-   * @param typeName component type name (e.g., "Canvas" or "Button")
    * @param oldName  old instance name
-   * @param newName  new instance name
-   * @param uid      unique id
+   * @param comp     the component to be removed
    */
-  public void renameComponent(String typeName, String oldName,
-    String newName, String uid) {
+  public void renameComponent(String oldName, MockComponent comp) {
     if (!blocksInited(formName)) {
       ComponentOp cop = new ComponentOp();
       cop.op = OpType.RENAME;
-      cop.instanceName = newName;
+      cop.component = comp;
       cop.oldName = oldName;
-      cop.typeName = typeName;
-      cop.uid = uid;
       if (!componentOps.containsKey(formName)) {
         componentOps.put(formName, new ArrayList<ComponentOp>());
       }
       componentOps.get(formName).add(cop);
     } else {
-      doRenameComponent(formName, typeName, oldName, newName, uid);
-      renameSavedComponent(formName, typeName, oldName, newName, uid);
+      doRenameComponent(formName, comp.getType(), oldName, comp.getName(), comp.getUuid());
+      renameSavedComponent(formName, oldName, comp);
     }
   }
 
-  private static void renameSavedComponent(String formName, String typeName,
-    String oldName, String newName, String uid) {
-    Map<String, ComponentOp> myComponents = currentComponents.get(formName);
-    if (myComponents.containsKey(uid)) {
-      // we expect it to be there
-      ComponentOp savedComponent = myComponents.get(uid);
-      if (savedComponent.instanceName.equals(oldName)) {  // it should!
-        savedComponent.instanceName = newName;  // rename saved component
-      } else {
-        OdeLog.wlog("BlocklyPanel: saved component with uid " + uid +
-            " has name " + savedComponent.instanceName + ", expected " + oldName);
-      }
-    } else {
-      OdeLog.wlog("BlocklyPanel: can't find saved component with uid " + uid +
-          " and name " + oldName);
-    }
+  private static void renameSavedComponent(String formName, String oldName, MockComponent comp) {
+    //Map<String, ComponentOp> myComponents = currentComponents.get(formName);
+    //if (myComponents.containsKey(comp.getUuid())) {
+    //  // we expect it to be there
+    //  ComponentOp savedComponent = myComponents.get(comp.getUuid());
+    //  if (savedComponent.instanceName.equals(oldName)) {  // it should!
+    //    savedComponent.instanceName = newName;  // rename saved component
+    //  } else {
+    //    OdeLog.wlog("BlocklyPanel: saved component with uid " + uid +
+    //        " has name " + savedComponent.instanceName + ", expected " + oldName);
+    //  }
+    //} else {
+    //  OdeLog.wlog("BlocklyPanel: can't find saved component with uid " + uid +
+    //      " and name " + oldName);
+//    }
   }
 
   /**

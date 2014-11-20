@@ -8,6 +8,7 @@ import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.editor.simple.palette.SimplePalettePanel;
 import com.google.appinventor.client.editor.youngandroid.palette.YoungAndroidPalettePanel;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
+import com.google.gwt.user.client.ui.TreeItem;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -70,5 +71,19 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
 
   public boolean isScreen1() {
     return false;
+  }
+
+
+  @Override
+  protected void updateSourceStructureExplorer() {
+    //TODO (evan): implement
+    //MockForm form = getForm();
+    //if (form != null) {
+    //  updateBlocksTree(form.getSelectedComponent().getSourceStructureExplorerItem());
+    //}
+  }
+
+  protected TreeItem getComponentsTree() {
+    return ComponentSet.buildTree(components);
   }
 }
