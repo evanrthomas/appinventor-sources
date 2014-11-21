@@ -7,7 +7,6 @@ package com.google.appinventor.client.editor.youngandroid;
 
 import com.google.appinventor.client.DesignToolbar;
 import com.google.appinventor.client.ErrorReporter;
-import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.boxes.AssetListBox;
 import com.google.appinventor.client.editor.FileEditor;
@@ -166,8 +165,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
     if (selectedFileEditor != null) {
       if (selectedFileEditor instanceof YaFormEditor) {
         YaFormEditor formEditor = (YaFormEditor) selectedFileEditor;
-        Helper.println("YaProjectEditor.onShow() special conversion " + formEditor.isLoadComplete());
-        designToolbar.switchToScreen(projectId, formEditor.getForm().getName(), 
+        designToolbar.switchToScreen(projectId, formEditor.getForm().getName(),
             DesignToolbar.View.FORM);
       } else if (selectedFileEditor instanceof YaCodePageEditor) {
         YaCodePageEditor blocksEditor = (YaCodePageEditor) selectedFileEditor;

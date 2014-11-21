@@ -10,7 +10,6 @@ import com.google.appinventor.client.boxes.BlockSelectorBox;
 import com.google.appinventor.client.boxes.PaletteBox;
 import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
 import com.google.appinventor.client.editor.simple.SimpleEditor;
-import com.google.appinventor.client.editor.simple.components.FormChangeListener;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.explorer.SourceStructureExplorer;
 import com.google.appinventor.client.explorer.SourceStructureExplorerItem;
@@ -44,7 +43,7 @@ import static com.google.appinventor.client.Ode.MESSAGES;
  * @author sharon@google.com (Sharon Perl) added Blockly functionality
  */
 public abstract class YaCodePageEditor extends SimpleEditor
-    implements FormChangeListener, BlockDrawerSelectionListener { //TODO (evan) move FormChanveLisener to ScreenPageEditor
+    implements BlockDrawerSelectionListener { //TODO (evan) move FormChanveLisener to ScreenPageEditor
 
   // A constant to substract from the total height of the Viewer window, set through
   // the computed height of the user's window (Window.getClientHeight())
@@ -86,7 +85,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   // if selectedDrawer != null, it is either "component_" + instance name or
   // "builtin_" + drawer name
-  private String selectedDrawer = null;
+  protected String selectedDrawer = null;
 
   // Keep a list of components that we know about. Need this to detect when a call to add a
   // component is adding one that we already have (which can happen when a component gets
@@ -429,18 +428,13 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   public static String getComponentInstanceTypeName(String formName, String instanceName) {
       //use form name to get blocks editor
-      Helper.println("YaCodePageEditor.getComponentInstanceTypeName() formName " + formName + " instanceName " + instanceName);
       ComponentSet componentsForForm = nameToCodePageEditor.get(formName).components;
-      Helper.println(componentsForForm.getComponents());
-      String s = componentsForForm.getComponentByName(instanceName).getType();
-      Helper.println("YaCodePageEditor.getComponentInstanceTypeName() finished");
-      return s;
+      return componentsForForm.getComponentByName(instanceName).getType();
   }
 
   public void addComponent(MockComponent comp) {
     if (componentUuids.add(comp.getUuid())) {
       components.addComponent(comp);
-      Helper.println("YaCodePageEditor.addComponent() " + comp.getName());
       blocksArea.addComponent(comp);
     }
   }
@@ -505,78 +499,8 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
 
 
-  // FormChangeListener implementation
-  // Note: our companion YaFormEditor adds us as a listener on the form
-
-  /*
-   * @see com.google.appinventor.client.editor.simple.components.FormChangeListener#
-   * onComponentPropertyChanged
-   * (com.google.appinventor.client.editor.simple.components.MockComponent, java.lang.String,
-   * java.lang.String)
-   */
-  @Override
-  public void onComponentPropertyChanged(
-      MockComponent component, String propertyName, String propertyValue) {
-    // nothing to do here
-  }
-
-  /*
-   * @see
-   * com.google.appinventor.client.editor.simple.components.FormChangeListener#onComponentRemoved
-   * (com.google.appinventor.client.editor.simple.components.MockComponent, boolean)
-   */
-  @Override
-  public void onComponentRemoved(MockComponent component, boolean permanentlyDeleted) {
-    if (permanentlyDeleted) {
-      removeComponent(component);
-      if (loadComplete) {
-        updateSourceStructureExplorer();
-      }
-    }
-  }
-
-  /*
-   * @see
-   * com.google.appinventor.client.editor.simple.components.FormChangeListener#onComponentAdded
-   * (com.google.appinventor.client.editor.simple.components.MockComponent)
-   */
-  @Override
-  public void onComponentAdded(MockComponent component) {
-    Helper.println("YaCodePageEditor.onComponentAdded() " + component.getName());
-    addComponent(component);
-    if (loadComplete) {
-      // Update source structure panel
-      updateSourceStructureExplorer();
-    }
-  }
-
-  /*
-   * @see
-   * com.google.appinventor.client.editor.simple.components.FormChangeListener#onComponentRenamed
-   * (com.google.appinventor.client.editor.simple.components.MockComponent, java.lang.String)
-   */
-  @Override
-  public void onComponentRenamed(MockComponent component, String oldName) {
-    renameComponent(oldName, component);
-    if (loadComplete) {
-      updateSourceStructureExplorer();
-      // renaming could potentially confuse an open drawer so close just in case
-      hideComponentBlocks();
-      selectedDrawer = null;
-    }
-  }
 
   protected abstract void updateSourceStructureExplorer();
-
-  /*
-   * @see com.google.appinventor.client.editor.simple.components.FormChangeListener#
-   * onComponentSelectionChange
-   * (com.google.appinventor.client.editor.simple.components.MockComponent, boolean)
-   */
-  @Override
-  public void onComponentSelectionChange(MockComponent component, boolean selected) {
-    // not relevant for blocks editor - this happens on clicks in the mock form areas
-  }
 
   // BlockDrawerSelectionListener implementation
 

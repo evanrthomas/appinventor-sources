@@ -2,6 +2,7 @@
 package com.google.appinventor.client.editor.youngandroid;
 
 import com.google.appinventor.client.editor.simple.SimpleNonVisibleComponentsPanel;
+import com.google.appinventor.client.editor.simple.components.FormChangeListener;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.editor.simple.components.MockForm;
 import com.google.appinventor.client.editor.simple.palette.SimplePalettePanel;
@@ -13,7 +14,7 @@ import com.google.gwt.user.client.ui.TreeItem;
 import java.util.List;
 import java.util.Map;
 
-public final class YaScreenPageEditor extends YaCodePageEditor {
+public final class YaScreenPageEditor extends YaCodePageEditor implements FormChangeListener {
 
   // The form editor associated with this blocks editor
   private YaFormEditor myFormEditor;
@@ -57,6 +58,78 @@ public final class YaScreenPageEditor extends YaCodePageEditor {
   public void onClose() {
     getForm().removeFormChangeListener(this);
     super.onClose();
+  }
+
+
+  // FormChangeListener implementation
+  // Note: our companion YaFormEditor adds us as a listener on the form
+
+  /*
+   * @see com.google.appinventor.client.editor.simple.components.FormChangeListener#
+   * onComponentPropertyChanged
+   * (com.google.appinventor.client.editor.simple.components.MockComponent, java.lang.String,
+   * java.lang.String)
+   */
+  @Override
+  public void onComponentPropertyChanged(
+          MockComponent component, String propertyName, String propertyValue) {
+    // nothing to do here
+  }
+
+  /*
+   * @see
+   * com.google.appinventor.client.editor.simple.components.FormChangeListener#onComponentRemoved
+   * (com.google.appinventor.client.editor.simple.components.MockComponent, boolean)
+   */
+  @Override
+  public void onComponentRemoved(MockComponent component, boolean permanentlyDeleted) {
+    if (permanentlyDeleted) {
+      removeComponent(component);
+      if (loadComplete) {
+        updateSourceStructureExplorer();
+      }
+    }
+  }
+
+  /*
+   * @see
+   * com.google.appinventor.client.editor.simple.components.FormChangeListener#onComponentAdded
+   * (com.google.appinventor.client.editor.simple.components.MockComponent)
+   */
+  @Override
+  public void onComponentAdded(MockComponent component) {
+    addComponent(component);
+    if (loadComplete) {
+      // Update source structure panel
+      updateSourceStructureExplorer();
+    }
+  }
+
+  /*
+   * @see
+   * com.google.appinventor.client.editor.simple.components.FormChangeListener#onComponentRenamed
+   * (com.google.appinventor.client.editor.simple.components.MockComponent, java.lang.String)
+   */
+  @Override
+  public void onComponentRenamed(MockComponent component, String oldName) {
+    renameComponent(oldName, component);
+    if (loadComplete) {
+      updateSourceStructureExplorer();
+      // renaming could potentially confuse an open drawer so close just in case
+      hideComponentBlocks();
+      selectedDrawer = null;
+    }
+  }
+
+
+  /*
+   * @see com.google.appinventor.client.editor.simple.components.FormChangeListener#
+   * onComponentSelectionChange
+   * (com.google.appinventor.client.editor.simple.components.MockComponent, boolean)
+   */
+  @Override
+  public void onComponentSelectionChange(MockComponent component, boolean selected) {
+    // not relevant for blocks editor - this happens on clicks in the mock form areas
   }
 
   @Override
