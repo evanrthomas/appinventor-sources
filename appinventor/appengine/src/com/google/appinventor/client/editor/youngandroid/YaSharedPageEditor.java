@@ -1,13 +1,13 @@
 package com.google.appinventor.client.editor.youngandroid;
 
 import com.google.appinventor.client.ComponentSet;
+import com.google.appinventor.client.Helper;
+import com.google.appinventor.client.YACachedBlocksNode;
 import com.google.appinventor.client.editor.simple.SimpleNonVisibleComponentsPanel;
 import com.google.appinventor.client.editor.simple.SimpleVisibleComponentsPanel;
 import com.google.appinventor.client.editor.simple.components.MockCanvas;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
-import com.google.appinventor.client.editor.simple.palette.SimplePalettePanel;
 import com.google.appinventor.client.editor.youngandroid.palette.YoungAndroidPalettePanel;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
 import com.google.gwt.user.client.ui.TreeItem;
 
 import java.util.ArrayList;
@@ -21,28 +21,16 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
   private final SimpleNonVisibleComponentsPanel nonVisibleComponentsPanel;
   private final YoungAndroidPalettePanel palettePanel;
 
-  public YaSharedPageEditor(YaProjectEditor projectEditor, YoungAndroidBlocksNode blocksNode) {
+  public YaSharedPageEditor(YaProjectEditor projectEditor, YACachedBlocksNode blocksNode) {
     super(projectEditor, blocksNode);
-    components = new ComponentSet();
-    components.addComponent(new MockCanvas(this));
 
     nonVisibleComponentsPanel = new SimpleNonVisibleComponentsPanel();
     visibleComponentsPanel = new SimpleVisibleComponentsPanel(this, nonVisibleComponentsPanel);
     palettePanel = new YoungAndroidPalettePanel(null);
 
-    //palettePanel.loadComponents(new DropTargetProvider() {
-    //  @Override
-    //  public DropTarget[] getDropTargets() {
-    //  // TODO(markf): Figure out a good way to memorize the targets or refactor things so that
-    //  // getDropTargets() doesn't get called for each component.
-    //  // NOTE: These targets must be specified in depth-first order.
-    //  List<DropTarget> dropTargets = form.getDropTargetsWithin();
-    //  dropTargets.add(visibleComponentsPanel);
-    //  dropTargets.add(nonVisibleComponentsPanel);
-    //  return dropTargets.toArray(new DropTarget[dropTargets.size()]);
-    //  }
-//    });
-
+    components = new ComponentSet();
+    components.addComponent(new MockCanvas(this));
+    Helper.println("YaSharedPage INITIED!!!");
   }
 
   @Override
@@ -59,14 +47,6 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
     ArrayList<String> names = new ArrayList<String>();
     names.addAll(getComponents().keySet());
     return names;
-  }
-
-  public SimplePalettePanel getComponentPalettePanel() {
-    return palettePanel;
-  }
-
-  public SimpleNonVisibleComponentsPanel getNonVisibleComponentsPanel() {
-    return nonVisibleComponentsPanel;
   }
 
   public boolean isScreen1() {

@@ -1,24 +1,22 @@
 
 package com.google.appinventor.client.editor.youngandroid;
 
-import com.google.appinventor.client.editor.simple.SimpleNonVisibleComponentsPanel;
+import com.google.appinventor.client.YACachedBlocksNode;
 import com.google.appinventor.client.editor.simple.components.FormChangeListener;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.editor.simple.components.MockForm;
-import com.google.appinventor.client.editor.simple.palette.SimplePalettePanel;
 import com.google.appinventor.shared.rpc.project.FileDescriptorWithContent;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
 import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
 import com.google.gwt.user.client.ui.TreeItem;
 
 import java.util.List;
 import java.util.Map;
 
-public final class YaScreenPageEditor extends YaCodePageEditor implements FormChangeListener {
+public final class YaFormPageEditor extends YaCodePageEditor implements FormChangeListener  {
 
   // The form editor associated with this blocks editor
   private YaFormEditor myFormEditor;
-  public YaScreenPageEditor(YaProjectEditor projectEditor, YoungAndroidBlocksNode blocksNode) {
+  protected YaFormPageEditor(YaProjectEditor projectEditor, YACachedBlocksNode blocksNode) {
     super(projectEditor, blocksNode);
     myFormEditor = projectEditor.getFormFileEditor(blocksNode.getFormName());
   }
@@ -33,15 +31,6 @@ public final class YaScreenPageEditor extends YaCodePageEditor implements FormCh
     return myFormEditor.getComponentNames();
   }
 
-  @Override
-  public SimplePalettePanel getComponentPalettePanel() {
-    return  myFormEditor.getComponentPalettePanel();
-  }
-
-  @Override
-  public SimpleNonVisibleComponentsPanel getNonVisibleComponentsPanel() {
-    return myFormEditor.getNonVisibleComponentsPanel();
-  }
 
   @Override
   public boolean isScreen1() {

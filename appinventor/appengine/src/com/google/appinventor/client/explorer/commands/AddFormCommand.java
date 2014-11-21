@@ -5,9 +5,8 @@
 
 package com.google.appinventor.client.explorer.commands;
 
-import static com.google.appinventor.client.Ode.MESSAGES;
-
 import com.google.appinventor.client.DesignToolbar;
+import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.editor.FileEditor;
@@ -21,20 +20,14 @@ import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidFormNo
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidPackageNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.event.dom.client.KeyUpHandler;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.*;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import static com.google.appinventor.client.Ode.MESSAGES;
 
 /**
  * A command that creates a new form.
@@ -236,8 +229,7 @@ public final class AddFormCommand extends ChainableCommand {
               if (formEditor != null && blocksEditor != null && !ode.screensLocked()) {
                 DesignToolbar designToolbar = Ode.getInstance().getDesignToolbar();
                 long projectId = formEditor.getProjectId();
-                designToolbar.addScreen(projectId, formName, formEditor, 
-                    blocksEditor);
+                designToolbar.addScreen(projectId, new DesignToolbar.Screen(formName, formEditor,  blocksEditor));
                 designToolbar.switchToScreen(projectId, formName, DesignToolbar.View.FORM);
                 executeNextCommand(projectRootNode);
               } else {
@@ -258,6 +250,7 @@ public final class AddFormCommand extends ChainableCommand {
 
       // Create the new form on the backend. The backend will create the form (.scm) and blocks
       // (.blk) files.
+      Helper.println("AddFormCommand adding to backend" + formFileId);
       ode.getProjectService().addFile(projectRootNode.getProjectId(), formFileId, callback);
     }
 

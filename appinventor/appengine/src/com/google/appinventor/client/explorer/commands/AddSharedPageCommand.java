@@ -6,6 +6,7 @@
 package com.google.appinventor.client.explorer.commands;
 
 import com.google.appinventor.client.DesignToolbar;
+import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.editor.FileEditor;
@@ -14,7 +15,6 @@ import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidFormNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidPackageNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
 import com.google.gwt.core.client.Scheduler;
@@ -46,7 +46,7 @@ public final class AddSharedPageCommand extends ChainableCommand {
     OdeLog.log("AddSharedPageCommand.execute()");
     if (node instanceof YoungAndroidProjectNode) {
       OdeLog.log("AddSharedPageCommand.execute() instanceof success");
-      addFormAction((YoungAndroidProjectNode) node, "SharedPage");
+      addBlocksNode((YoungAndroidProjectNode) node, "SharedPage");
     } else {
       OdeLog.log("AddSharedPageCommand.execute() illegal argument");
       executionFailedOrCanceled();
@@ -56,17 +56,14 @@ public final class AddSharedPageCommand extends ChainableCommand {
 
 
   /**
-   * Adds a new form to the project.
-   *
-   * @param formName the new form name
+   * Adds a new shared page to the project.
    */
-  private void addFormAction(final YoungAndroidProjectNode projectRootNode,
-                               final String formName) {
+  private void addBlocksNode(final YoungAndroidProjectNode projectRootNode,
+                               final String name) {
     final Ode ode = Ode.getInstance();
     final YoungAndroidPackageNode packageNode = projectRootNode.getPackageNode();
-    String qualifiedFormName = packageNode.getPackageName() + '.' + formName;
-    final String formFileId = YoungAndroidFormNode.getFormFileId(qualifiedFormName);
-    final String blocksFileId = YoungAndroidBlocksNode.getBlocklyFileId(qualifiedFormName);
+    String qualifiedName = packageNode.getPackageName() + '.' + name;
+    final String blocksFileId = YoungAndroidBlocksNode.getBlocklyFileId(qualifiedName);
 
     OdeAsyncCallback<Long> callback = new OdeAsyncCallback<Long>(
             // failure message
@@ -76,9 +73,8 @@ public final class AddSharedPageCommand extends ChainableCommand {
         final Ode ode = Ode.getInstance();
         ode.updateModificationDate(projectRootNode.getProjectId(), modDate);
 
-        // Add the new form and blocks nodes to the project
+        // Add the new blocks node to the project
         final Project project = ode.getProjectManager().getProject(projectRootNode);
-        project.addNode(packageNode, new YoungAndroidFormNode(formFileId));
         project.addNode(packageNode, new YoungAndroidBlocksNode(blocksFileId));
 
         // Add the screen to the DesignToolbar and select the new form editor.
@@ -96,13 +92,11 @@ public final class AddSharedPageCommand extends ChainableCommand {
             //TODO (evan): consider making a YoungAndroidSharedBlocksNode here, and adding that to the screen instead
             ProjectEditor projectEditor =
                     ode.getEditorManager().getOpenProjectEditor(project.getProjectId());
-            FileEditor formEditor = projectEditor.getFileEditor(formFileId);
             FileEditor blocksEditor = projectEditor.getFileEditor(blocksFileId);
-            if (formEditor != null && blocksEditor != null && !ode.screensLocked()) {
+            if (blocksEditor != null && !ode.screensLocked()) {
               DesignToolbar designToolbar = Ode.getInstance().getDesignToolbar();
-              long projectId = formEditor.getProjectId();
-              designToolbar.addScreen(projectId, formName, formEditor,
-                      blocksEditor);
+              long projectId = blocksEditor.getProjectId();
+              designToolbar.addScreen(projectId, new DesignToolbar.Screen(name, blocksEditor));
               executeNextCommand(projectRootNode);
             } else {
               // The form editor and/or blocks editor is still not there. Try again later.
@@ -110,7 +104,6 @@ public final class AddSharedPageCommand extends ChainableCommand {
             }
           }
         });
-
       }
 
       @Override
@@ -120,10 +113,9 @@ public final class AddSharedPageCommand extends ChainableCommand {
       }
     };
 
-    // Create the new form on the backend. The backend will create the form (.scm) and blocks
-    // (.blk) files.
-    ode.getProjectService().addFile(projectRootNode.getProjectId(), formFileId, callback);
+    // Create the new blocks file (.bky) on the backend
+    Helper.println("AddSharedPage adding to backend " + blocksFileId);
+    ode.getProjectService().addFile(projectRootNode.getProjectId(), blocksFileId, callback);
   }
-
 }
 

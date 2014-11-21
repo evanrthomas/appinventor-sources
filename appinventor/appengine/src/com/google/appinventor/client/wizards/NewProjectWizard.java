@@ -60,7 +60,7 @@ public abstract class NewProjectWizard extends Wizard {
   protected void createNewProject(String projectType, final String projectName,
       NewProjectParameters params, final NewProjectCommand onSuccessCommand) {
     // Callback for updating the project explorer after the project was created on the back-end
-    //TODO (evan): project type should be an enum for APP or LIBRARY_PAGE
+    //TODO (evan): project type should be an enum for APP or SHARED_PAGE
     final Ode ode = Ode.getInstance();
     OdeAsyncCallback<UserProject> callback =
         new OdeAsyncCallback<UserProject>(

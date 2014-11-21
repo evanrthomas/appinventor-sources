@@ -16,7 +16,10 @@ import com.google.appinventor.client.explorer.SourceStructureExplorerItem;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.shared.rpc.project.ChecksumedFileException;
 import com.google.appinventor.shared.rpc.project.ChecksumedLoadFile;
+import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
+import com.google.appinventor.shared.storage.StorageUtil;
+import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
 import com.google.common.collect.Maps;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
@@ -43,7 +46,7 @@ import static com.google.appinventor.client.Ode.MESSAGES;
  * @author sharon@google.com (Sharon Perl) added Blockly functionality
  */
 public abstract class YaCodePageEditor extends SimpleEditor
-    implements BlockDrawerSelectionListener { //TODO (evan) move FormChanveLisener to ScreenPageEditor
+    implements BlockDrawerSelectionListener {
 
   // A constant to substract from the total height of the Viewer window, set through
   // the computed height of the user's window (Window.getClientHeight())
@@ -96,10 +99,10 @@ public abstract class YaCodePageEditor extends SimpleEditor
   //Timer used to poll blocks editor to check if it is initialized
   private static Timer timer;
 
-  YaCodePageEditor(YaProjectEditor projectEditor, YoungAndroidBlocksNode blocksNode) {
-    super(projectEditor, blocksNode);
+  protected YaCodePageEditor(YaProjectEditor projectEditor, YACachedBlocksNode blocksNode) {
+    super(projectEditor, blocksNode.getRealNode());
 
-    this.blocksNode = YACachedBlocksNode.getOrCreateCachedNode(blocksNode);
+    this.blocksNode = blocksNode;
     components = new ComponentSet();
 
     fullFormName = blocksNode.getProjectId() + "_" + blocksNode.getFormName();
@@ -125,6 +128,29 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
     // Listen for selection events for built-in drawers
     BlockSelectorBox.getBlockSelectorBox().addBlockDrawerSelectionListener(this);
+
+  }
+  public static YaCodePageEditor newEditor (YaProjectEditor project, YoungAndroidBlocksNode sourceNode) {
+
+    YACachedBlocksNode cachedNode =  YACachedBlocksNode.getOrCreateCachedNode(sourceNode);
+    if (isFormPageEditor(sourceNode)) {
+      return new YaFormPageEditor(project, cachedNode);
+    } else {
+      return new YaSharedPageEditor(project, cachedNode);
+    }
+  }
+
+  public static boolean isFormPageEditor(YoungAndroidBlocksNode sourceNode) {
+
+    String formFileId = StorageUtil.trimOffExtension(sourceNode.getFileId()) +
+            YoungAndroidSourceAnalyzer.FORM_PROPERTIES_EXTENSION;
+    for (ProjectNode source : sourceNode.getProjectRoot().getAllSourceNodes()) { //TODO (evan): shouldn't have to do an O(n) loop here. YaProjectEditor has already looped over these once. Make YaProjectEditor store all of these and then look up from the project editor
+      if (source.getFileId().equals(formFileId)) {
+        return true;
+      }
+    }
+    return false;
+
 
   }
 
@@ -191,6 +217,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   // FileEditor methods
   @Override
   public void loadFile(final Command afterFileLoaded) {
+    //entry
     List<YACachedBlocksNode> backendNodes = new ArrayList<YACachedBlocksNode>();
     backendNodes.add(blocksNode);
     backendNodes.addAll(sharedPageDependenciesFor(blocksNode));
@@ -268,8 +295,8 @@ public abstract class YaCodePageEditor extends SimpleEditor
     if(BlocklyPanel.blocksInited(fullFormName)) {
       blocksArea.showDifferentForm(fullFormName);
       loadBlocksEditor();
-      if (this instanceof YaScreenPageEditor) {
-        ((YaScreenPageEditor) this).sendComponentData();  // Send Blockly the component information for generating Yail
+      if (this instanceof YaFormPageEditor) {
+        ((YaFormPageEditor) this).sendComponentData();  // Send Blockly the component information for generating Yail
       }
       blocksArea.renderBlockly(); //Re-render Blockly due to firefox bug
     } else {
@@ -376,8 +403,8 @@ public abstract class YaCodePageEditor extends SimpleEditor
     if (editor != null) {
       OdeLog.log("Got blocks area changed for " + formName);
       Ode.getInstance().getEditorManager().scheduleAutoSave(editor);
-      if (editor instanceof YaScreenPageEditor)
-        ((YaScreenPageEditor)editor).sendComponentData();
+      if (editor instanceof YaFormPageEditor)
+        ((YaFormPageEditor)editor).sendComponentData();
     }
   }
 
@@ -433,9 +460,14 @@ public abstract class YaCodePageEditor extends SimpleEditor
   }
 
   public void addComponent(MockComponent comp) {
+    Helper.println("YaCodePageEditor.addComponent() " + comp.getName());
     if (componentUuids.add(comp.getUuid())) {
       components.addComponent(comp);
       blocksArea.addComponent(comp);
+    }
+    //recursivley add all children elements
+    for (MockComponent child: comp.getChildren()) {
+      addComponent(child);
     }
   }
 
@@ -451,6 +483,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   }
 
   public void showComponentBlocks(String instanceName) {
+    Helper.println("YaCodePageEditor.showComponentBlocks() " + instanceName);
     String instanceDrawer = "component_" + instanceName;
     if (selectedDrawer == null || !blocksArea.drawerShowing()
         || !selectedDrawer.equals(instanceDrawer)) {
@@ -511,6 +544,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   @Override
   public void onBuiltinDrawerSelected(String drawerName) {
     // Only do something if we are the current file editor
+    Helper.println("YaCodePageEditor.onBuiltinDrawerSelected()");
     if (Ode.getInstance().getCurrentFileEditor() == this) {
       showBuiltinBlocks(drawerName);
     }
@@ -523,6 +557,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   @Override
   public void onGenericDrawerSelected(String drawerName) {
     // Only do something if we are the current file editor
+    Helper.println("YaCodePageEditor.onBuiltinDrawerSelected()");
     if (Ode.getInstance().getCurrentFileEditor() == this) {
       showGenericBlocks(drawerName);
     }

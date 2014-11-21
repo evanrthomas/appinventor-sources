@@ -538,6 +538,7 @@ public class ProjectServiceImpl extends OdeRemoteServiceServlet implements Proje
 
   @Override
   public long addFile(long projectId, String fileId) {
+    log("ProjectServiceImpl.addFile() projectId " + projectId + " fileId " + fileId);
     final String userId = userInfoProvider.getUserId();
     return getProjectRpcImpl(userId, projectId).addFile(userId, projectId, fileId);
   }

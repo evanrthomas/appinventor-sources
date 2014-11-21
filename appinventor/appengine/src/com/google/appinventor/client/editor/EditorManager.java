@@ -9,7 +9,7 @@ import com.google.appinventor.client.ErrorReporter;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.YACachedBlocksNode;
-import com.google.appinventor.client.editor.youngandroid.YaScreenPageEditor;
+import com.google.appinventor.client.editor.youngandroid.YaFormPageEditor;
 import com.google.appinventor.client.editor.youngandroid.YailGenerationException;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.output.OdeLog;
@@ -296,10 +296,10 @@ public final class EditorManager {
         // and return without executing nextCommand.
         ProjectEditor projectEditor = openProjectEditors.get(projectId);
         for (FileEditor fileEditor : projectEditor.getOpenFileEditors()) {
-          if (fileEditor instanceof YaScreenPageEditor) {
-            YaScreenPageEditor yaScreenPageEditor = (YaScreenPageEditor) fileEditor;
+          if (fileEditor instanceof YaFormPageEditor) {
+            YaFormPageEditor yaFormPageEditor = (YaFormPageEditor) fileEditor;
             try {
-              yailFiles.add(yaScreenPageEditor.getYail());
+              yailFiles.add(yaFormPageEditor.getYail());
             } catch (YailGenerationException e) {
               ErrorReporter.reportInfo(MESSAGES.yailGenerationError(e.getFormName(), 
                   e.getMessage()));

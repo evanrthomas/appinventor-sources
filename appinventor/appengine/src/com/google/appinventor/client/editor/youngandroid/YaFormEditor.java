@@ -12,10 +12,7 @@ import com.google.appinventor.client.boxes.PaletteBox;
 import com.google.appinventor.client.boxes.PropertiesBox;
 import com.google.appinventor.client.boxes.SourceStructureBox;
 import com.google.appinventor.client.editor.ProjectEditor;
-import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
-import com.google.appinventor.client.editor.simple.SimpleEditor;
-import com.google.appinventor.client.editor.simple.SimpleNonVisibleComponentsPanel;
-import com.google.appinventor.client.editor.simple.SimpleVisibleComponentsPanel;
+import com.google.appinventor.client.editor.simple.*;
 import com.google.appinventor.client.editor.simple.components.FormChangeListener;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.editor.simple.components.MockContainer;
@@ -59,7 +56,7 @@ import static com.google.appinventor.client.Ode.MESSAGES;
  * @author markf@google.com (Mark Friedman)
  * @author lizlooney@google.com (Liz Looney)
  */
-public final class YaFormEditor extends SimpleEditor implements FormChangeListener {
+public final class YaFormEditor extends SimpleEditor implements FormChangeListener  {
 
   private static class FileContentHolder {
     private String content;
@@ -262,12 +259,11 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
     return new ArrayList<String>(this.getComponents().keySet());
   }
 
-  @Override
+
   public SimplePalettePanel getComponentPalettePanel() {
     return palettePanel;
   }
 
-  @Override
   public SimpleNonVisibleComponentsPanel getNonVisibleComponentsPanel() {
     return nonVisibleComponentsPanel;
   }
@@ -403,6 +399,10 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
         content, JSON_PARSER);
     form = createMockForm(propertiesObject.getProperties().get("Properties").asObject());
 
+    YaProjectEditor yaProjectEditor = (YaProjectEditor) projectEditor;
+    YaCodePageEditor blockEditor = yaProjectEditor.getBlocksFileEditor(formNode.getFormName());
+    blockEditor.addComponent(form);
+
     // Initialize the nonVisibleComponentsPanel and visibleComponentsPanel.
     nonVisibleComponentsPanel.setForm(form);
     visibleComponentsPanel.setForm(form);
@@ -434,14 +434,8 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
     MockComponent mockComponent;
     if (componentType.equals(MockForm.TYPE)) {
       Preconditions.checkArgument(parent == null);
-
       // Instantiate new root component
       mockComponent = new MockForm(this);
-
-      // Add component type to the blocks editor
-      YaProjectEditor yaProjectEditor = (YaProjectEditor) projectEditor;
-      YaCodePageEditor blockEditor = yaProjectEditor.getBlocksFileEditor(formNode.getFormName());
-      blockEditor.addComponent(mockComponent);
     } else {
       mockComponent = SimpleComponentDescriptor.createMockComponent(componentType, this);
 
@@ -508,7 +502,7 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
     // Also have the blocks editor listen to changes. Do this here instead
     // of in the blocks editor so that we don't risk it missing any updates.
     OdeLog.log("Adding blocks editor as a listener for " + form.getName());
-    form.addFormChangeListener((YaScreenPageEditor)(((YaProjectEditor) projectEditor) //TODO (evan): stop all this casting nonsense
+    form.addFormChangeListener((YaFormPageEditor)(((YaProjectEditor) projectEditor) //TODO (evan): stop all this casting nonsense
         .getBlocksFileEditor(form.getName())));
   }
 

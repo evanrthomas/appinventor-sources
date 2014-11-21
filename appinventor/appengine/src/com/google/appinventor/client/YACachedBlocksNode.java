@@ -15,7 +15,7 @@ public class YACachedBlocksNode {
   private final  YoungAndroidBlocksNode realNode;
   private String content;
 
-  private YACachedBlocksNode(YoungAndroidBlocksNode node) {
+   YACachedBlocksNode(YoungAndroidBlocksNode node) {
     realNode = node;
   }
 
@@ -33,6 +33,10 @@ public class YACachedBlocksNode {
       }
     }
     return null;
+  }
+
+  public YoungAndroidBlocksNode getRealNode() {
+    return realNode;
   }
 
   public void init() {
@@ -56,7 +60,7 @@ public class YACachedBlocksNode {
   }
 
   public void load(OdeAsyncCallback<ChecksumedLoadFile> callback) {
-    if (content == null) {
+    if (content == null) { //TODO (evan): set content here
       Ode.getInstance().getProjectService().load2(realNode.getProjectId(), realNode.getFileId(), callback);
     } else {
       try {

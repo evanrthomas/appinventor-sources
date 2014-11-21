@@ -20,10 +20,10 @@ public interface ComponentDatabaseInterface {
    * default value.
    */
   public static class PropertyDefinition {
-    private final String name;
-    private final String defaultValue;
-    private final String caption;
-    private final String editorType;
+    public final String name;
+    public final String defaultValue;
+    public final String caption;
+    public final String editorType;
 
     public PropertyDefinition(String name, String defaultValue, String editorType) {
       this(name, defaultValue, name, editorType);

@@ -39,9 +39,10 @@ import static com.google.appinventor.client.Ode.MESSAGES;
 public class DesignToolbar extends Toolbar {
 
   /*
-   * A Screen groups together the form editor and blocks editor for an
+   * A Screen is either a (form editor, blocks editor) tuple (if blocksEditor is a formpage)
+   * or a blocksEditor singleton (if blocksEditor is a sharedpage). This is for the
    * application screen. Name is the name of the screen (form) displayed
-   * in the screens pull-down.
+   * in the screen's pull-down.
    */
   public static class Screen {
     public final String screenName;
@@ -51,6 +52,12 @@ public class DesignToolbar extends Toolbar {
     public Screen(String name, FileEditor formEditor, FileEditor blocksEditor) {
       this.screenName = name;
       this.formEditor = formEditor;
+      this.blocksEditor = blocksEditor;
+    }
+
+    public Screen(String name, FileEditor blocksEditor) {
+      this.screenName = name;
+      this.formEditor = null;
       this.blocksEditor = blocksEditor;
     }
   }
@@ -75,9 +82,9 @@ public class DesignToolbar extends Toolbar {
     }
 
     // Returns true if we added the screen (it didn't previously exist), false otherwise.
-    public boolean addScreen(String name, FileEditor formEditor, FileEditor blocksEditor) {
-      if (!screens.containsKey(name)) {
-        screens.put(name, new Screen(name, formEditor, blocksEditor));
+    public boolean addScreen(Screen screen) {
+      if (!screens.containsKey(screen.screenName)) {
+        screens.put(screen.screenName, screen);
         return true;
       } else {
         return false;
@@ -385,20 +392,24 @@ public class DesignToolbar extends Toolbar {
    * name is the form name, formEditor is the file editor for the form UI,
    * and blocksEditor is the file editor for the form's blocks.
    */
-  public void addScreen(long projectId, String name, FileEditor formEditor,
-      FileEditor blocksEditor) {
+  public void addScreen(long projectId, Screen screen) {
+
+    Helper.println("designToolbar.addScreen() " + screen.screenName);
     if (!projectMap.containsKey(projectId)) {
-      OdeLog.wlog("DesignToolbar can't find project " + name + " with id " + projectId
+      OdeLog.wlog("DesignToolbar can't find project " + screen.screenName + " with id " + projectId
           + ". Ignoring addScreen().");
       return;
     }
     DesignProject project = projectMap.get(projectId);
-    if (project.addScreen(name, formEditor, blocksEditor)) {
+    if (project.addScreen(screen)) {
       if (currentProject == project) {
-        addDropDownButtonItem(WIDGET_NAME_SCREENS_DROPDOWN, new DropDownItem(name,
-            name, new SwitchScreenAction(projectId, name)));
+
+        addDropDownButtonItem(WIDGET_NAME_SCREENS_DROPDOWN, new DropDownItem(screen.screenName,
+            screen.screenName, new SwitchScreenAction(projectId, screen.screenName)));
       }
     }
+
+    Helper.println("designToolbar.addScreen() complete");
   }
 
 /*

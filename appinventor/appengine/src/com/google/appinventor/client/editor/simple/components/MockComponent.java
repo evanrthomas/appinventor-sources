@@ -5,12 +5,11 @@
 
 package com.google.appinventor.client.editor.simple.components;
 
-import com.google.appinventor.client.Images;
-import com.google.appinventor.client.Ode;
-import com.google.appinventor.client.TranslationDesignerPallete;
+import com.google.appinventor.client.*;
 import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
 import com.google.appinventor.client.editor.simple.SimpleEditor;
 import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
+import com.google.appinventor.client.editor.youngandroid.properties.*;
 import com.google.appinventor.client.explorer.SourceStructureExplorerItem;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.output.OdeLog;
@@ -21,11 +20,13 @@ import com.google.appinventor.client.widgets.dnd.DragSourceSupport;
 import com.google.appinventor.client.widgets.dnd.DropTarget;
 import com.google.appinventor.client.widgets.properties.*;
 import com.google.appinventor.client.youngandroid.TextValidators;
+import com.google.appinventor.components.common.PropertyTypeConstants;
 import com.google.appinventor.shared.rpc.project.HasAssetsFolder;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidAssetsFolder;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
 import com.google.appinventor.shared.settings.SettingsConstants;
+import com.google.appinventor.shared.simple.ComponentDatabaseInterface;
 import com.google.appinventor.shared.storage.StorageUtil;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.*;
@@ -48,6 +49,10 @@ import static com.google.appinventor.client.Ode.MESSAGES;
  */
 public abstract class MockComponent extends Composite implements PropertyChangeListener,
     SourcesMouseEvents, DragSource {
+
+  // Component database: information about components (including their properties and events)
+  private static final SimpleComponentDatabase COMPONENT_DATABASE =
+          SimpleComponentDatabase.getInstance();
   // Common property names (not all components support all properties).
   protected static final String PROPERTY_NAME_NAME = "Name";
   protected static final String PROPERTY_NAME_UUID = "Uuid";
@@ -316,7 +321,87 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
     addProperty(PROPERTY_NAME_UUID, "-1", null, new TextPropertyEditor());
     changeProperty(PROPERTY_NAME_UUID, "" + Random.nextInt());
 
-    editor.getComponentPalettePanel().configureComponent(this);
+    configureComponent();
+  }
+
+
+
+  public void configureComponent() {
+    String componentType = getType();
+
+    // Configure properties
+    for (ComponentDatabaseInterface.PropertyDefinition property : COMPONENT_DATABASE.getPropertyDefinitions(componentType)) {
+      addProperty(property.getName(), property.getDefaultValue(),
+              TranslationDesignerProperties.getCorrespondingString(property.getCaption()),
+              createPropertyEditor(property.getEditorType()));
+      /*OdeLog.log("Property Caption: " + property.getCaption() + ", "
+          + TranslationComponentProperty.getName(property.getCaption()));*/
+    }
+  }
+
+  /*
+   * Creates a new property editor.
+   */
+  private PropertyEditor createPropertyEditor(String editorType) {
+    if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_HORIZONTAL_ALIGNMENT)) {
+      return new YoungAndroidHorizontalAlignmentChoicePropertyEditor();
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_VERTICAL_ALIGNMENT)) {
+      return new YoungAndroidVerticalAlignmentChoicePropertyEditor();
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_ASSET)) {
+      return new YoungAndroidAssetSelectorPropertyEditor(editor);
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_BLUETOOTHCLIENT)) {
+      return new YoungAndroidComponentSelectorPropertyEditor(editor, //HERE
+              // Pass the set of component types that will be shown in the property editor,
+              // in this case, just "BluetoothClient".
+              Collections.singleton("BluetoothClient"));
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_BOOLEAN)) {
+      return new YoungAndroidBooleanPropertyEditor();
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_BUTTON_SHAPE)) {
+      return new YoungAndroidButtonShapeChoicePropertyEditor();
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_COLOR)) {
+      return new YoungAndroidColorChoicePropertyEditor();
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_COMPONENT)) {
+      return new YoungAndroidComponentSelectorPropertyEditor(editor);
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_FLOAT)) {
+      return new FloatPropertyEditor();
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_INTEGER)) {
+      return new IntegerPropertyEditor();
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_LEGO_NXT_SENSOR_PORT)) {
+      return new YoungAndroidLegoNxtSensorPortChoicePropertyEditor();
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_LEGO_NXT_GENERATED_COLOR)) {
+      return new YoungAndroidColorChoicePropertyEditor(
+              YoungAndroidColorChoicePropertyEditor.NXT_GENERATED_COLORS);
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_NON_NEGATIVE_FLOAT)) {
+      return new NonNegativeFloatPropertyEditor();
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_NON_NEGATIVE_INTEGER)) {
+      return new NonNegativeIntegerPropertyEditor();
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_SCREEN_ORIENTATION)) {
+      return new YoungAndroidScreenOrientationChoicePropertyEditor();
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_SCREEN_ANIMATION)) {
+      return new YoungAndroidScreenAnimationChoicePropertyEditor();
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_SENSOR_DIST_INTERVAL)) {
+      return new YoungAndroidSensorDistIntervalChoicePropertyEditor();
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_SENSOR_TIME_INTERVAL)) {
+      return new YoungAndroidSensorTimeIntervalChoicePropertyEditor();
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_STRING)) {
+      return new StringPropertyEditor();
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_TEXTALIGNMENT)) {
+      return new YoungAndroidAlignmentChoicePropertyEditor();
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_TEXTAREA)) {
+      return new TextAreaPropertyEditor();
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_TOAST_LENGTH)) {
+      return new YoungAndroidToastLengthChoicePropertyEditor();
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_TYPEFACE)) {
+      return new YoungAndroidFontTypefaceChoicePropertyEditor();
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_VISIBILITY)) {
+      return new YoungAndroidVisibilityChoicePropertyEditor();
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_TEXT_RECEIVING)) {
+      return new YoungAndroidTextReceivingPropertyEditor();
+    } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_ACCELEROMETER_SENSITIVITY)) {
+      return new YoungAndroidAccelerometerSensitivityChoicePropertyEditor();
+    } else {
+      return new TextPropertyEditor();
+    }
   }
 
   public boolean isPropertyPersisted(String propertyName) {

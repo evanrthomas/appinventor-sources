@@ -13,31 +13,18 @@ import com.google.appengine.api.files.FileService;
 import com.google.appengine.api.files.FileServiceFactory;
 import com.google.appengine.api.files.FileWriteChannel;
 import com.google.appengine.api.memcache.ErrorHandlers;
+import com.google.appengine.api.memcache.Expiration;
 import com.google.appengine.api.memcache.MemcacheService;
 import com.google.appengine.api.memcache.MemcacheServiceFactory;
-import com.google.appengine.api.memcache.Expiration;
+import com.google.appengine.tools.cloudstorage.*;
 import com.google.appinventor.server.CrashReport;
 import com.google.appinventor.server.FileExporter;
 import com.google.appinventor.server.flags.Flag;
-import com.google.appinventor.server.storage.StoredData.CorruptionRecord;
-import com.google.appinventor.server.storage.StoredData.FeedbackData;
-import com.google.appinventor.server.storage.StoredData.FileData;
-import com.google.appinventor.server.storage.StoredData.MotdData;
-import com.google.appinventor.server.storage.StoredData.NonceData;
-import com.google.appinventor.server.storage.StoredData.ProjectData;
-import com.google.appinventor.server.storage.StoredData.UserData;
-import com.google.appinventor.server.storage.StoredData.UserFileData;
-import com.google.appinventor.server.storage.StoredData.UserProjectData;
-import com.google.appinventor.server.storage.StoredData.RendezvousData;
-import com.google.appinventor.server.storage.StoredData.WhiteListData;
+import com.google.appinventor.server.storage.StoredData.*;
 import com.google.appinventor.shared.rpc.BlocksTruncatedException;
 import com.google.appinventor.shared.rpc.Motd;
 import com.google.appinventor.shared.rpc.Nonce;
-import com.google.appinventor.shared.rpc.project.Project;
-import com.google.appinventor.shared.rpc.project.ProjectSourceZip;
-import com.google.appinventor.shared.rpc.project.RawFile;
-import com.google.appinventor.shared.rpc.project.TextFile;
-import com.google.appinventor.shared.rpc.project.UserProject;
+import com.google.appinventor.shared.rpc.project.*;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
 import com.google.appinventor.shared.rpc.user.User;
 import com.google.appinventor.shared.storage.StorageUtil;
@@ -45,41 +32,22 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Strings;
 import com.google.common.io.ByteStreams;
-
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Objectify;
 import com.googlecode.objectify.ObjectifyService;
 import com.googlecode.objectify.Query;
 
-import java.io.ByteArrayOutputStream;
-
-// GCS imports
-import com.google.appengine.tools.cloudstorage.GcsFileOptions;
-import com.google.appengine.tools.cloudstorage.GcsFilename;
-import com.google.appengine.tools.cloudstorage.GcsInputChannel;
-import com.google.appengine.tools.cloudstorage.GcsOutputChannel;
-import com.google.appengine.tools.cloudstorage.GcsService;
-import com.google.appengine.tools.cloudstorage.GcsServiceFactory;
-import com.google.appengine.tools.cloudstorage.RetryParams;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.channels.Channels;
+import javax.annotation.Nullable;
+import java.io.*;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.ConcurrentModificationException;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.nio.channels.Channels;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import java.util.Date;
 
-import javax.annotation.Nullable;
+// GCS imports
 
 /**
  * Implements the StorageIo interface using Objectify as the underlying data

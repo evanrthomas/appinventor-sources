@@ -211,9 +211,9 @@ public class BlocklyPanel extends HTMLPanel {
    * @param component the component to be added
    */
   public void addComponent(MockComponent component) {
+    Helper.println("BlocklyPanel.addComponent() " + component.getName());
 
     if (!blocksInited(formName)) {
-      //Helper.println("BlocklyPanel.addComponent() to be replayed" + instanceName);
       ComponentOp cop = new ComponentOp();
       cop.op = OpType.ADD;
       cop.component = component;
@@ -793,6 +793,7 @@ public class BlocklyPanel extends HTMLPanel {
 
   private static native void doAddComponent(String formName, String typeDescription,
                                             String instanceName, String uid) /*-{
+    console.log("doAddComponent " + instanceName);
     $wnd.Blocklies[formName].Component.add(instanceName, uid);
   }-*/;
 

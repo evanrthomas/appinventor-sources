@@ -8,7 +8,6 @@ package com.google.appinventor.client.editor.simple;
 import com.google.appinventor.client.editor.FileEditor;
 import com.google.appinventor.client.editor.ProjectEditor;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
-import com.google.appinventor.client.editor.simple.palette.SimplePalettePanel;
 import com.google.appinventor.shared.rpc.project.FileNode;
 
 import java.util.List;
@@ -46,19 +45,6 @@ public abstract class SimpleEditor extends FileEditor {
    */
   public abstract List<String> getComponentNames();
 
-  /**
-   * Returns the component palette panel
-   *
-   * @return  component palette panel
-   */
-  public abstract SimplePalettePanel getComponentPalettePanel();
-
-  /**
-   * Returns the non-visible components panel
-   *
-   * @return  non-visible components panel
-   */
-  public abstract SimpleNonVisibleComponentsPanel getNonVisibleComponentsPanel();
 
   /**
    * Returns true if this editor is for Screen1.

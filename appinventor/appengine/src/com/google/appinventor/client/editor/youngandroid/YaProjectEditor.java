@@ -7,6 +7,7 @@ package com.google.appinventor.client.editor.youngandroid;
 
 import com.google.appinventor.client.DesignToolbar;
 import com.google.appinventor.client.ErrorReporter;
+import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.boxes.AssetListBox;
 import com.google.appinventor.client.editor.FileEditor;
@@ -42,9 +43,8 @@ import java.util.HashMap;
 public final class YaProjectEditor extends ProjectEditor implements ProjectChangeListener {
   
   // FileEditors in a YA project come in sets. Every form in the project has 
-  // a YaFormEditor for editing the UI, and a YaBlocksEditor for editing the 
-  // blocks representation of the program logic. Some day it may also have an 
-  // editor for the textual representation of the program logic.
+  // a blocksEditor for editing the code, some also have a formEditor (if the blocks editor is a formpage).
+  // Some day it may also have an editor for the textual representation of the program logic.
   private class EditorSet {
     YaFormEditor formEditor = null;
     YaCodePageEditor blocksEditor = null;
@@ -121,9 +121,10 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
     // add form editors first, then blocks editors because the blocks editors
     // need access to their corresponding form editors to set up properly
     for (ProjectNode source : projectRootNode.getAllSourceNodes()) {
+      Helper.println("YaProjectEditor.loadProject() " + source.getFileId());
       if (source instanceof YoungAndroidFormNode) {
         addFormEditor((YoungAndroidFormNode) source);
-      } 
+      }
     }
     for (ProjectNode source : projectRootNode.getAllSourceNodes()) {
       if (source instanceof YoungAndroidBlocksNode) {
@@ -135,8 +136,8 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
     for (String formName : editorMap.keySet()) {
       EditorSet editors = editorMap.get(formName);
       if (editors.formEditor != null && editors.blocksEditor != null) {
-        designToolbar.addScreen(projectRootNode.getProjectId(), formName, editors.formEditor, 
-            editors.blocksEditor);
+        designToolbar.addScreen(projectRootNode.getProjectId(),
+                new DesignToolbar.Screen( formName, editors.formEditor, editors.blocksEditor));
         if (isScreen1(formName)) {
           screen1Added = true;
           if (readyToShowScreen1()) {  // probably not yet but who knows?
@@ -224,8 +225,8 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
       // see if we have both editors yet
       EditorSet editors = editorMap.get(formName);
       if (editors.formEditor != null && editors.blocksEditor != null) {
-        Ode.getInstance().getDesignToolbar().addScreen(node.getProjectId(), formName, 
-            editors.formEditor, editors.blocksEditor);
+        Ode.getInstance().getDesignToolbar().addScreen(node.getProjectId(),
+                new DesignToolbar.Screen(formName,  editors.formEditor, editors.blocksEditor));
       }
     }
   }
@@ -316,7 +317,9 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
     };
   }
   
-  private void addFormEditor(YoungAndroidFormNode formNode) {
+  private void addFormEditor(final YoungAndroidFormNode formNode) {
+
+
     final YaFormEditor newFormEditor = new YaFormEditor(this, formNode);
     final String formName = formNode.getFormName();
     OdeLog.log("Adding form editor for " + formName);
@@ -356,7 +359,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
   }
 
   private void addBlocksEditor(YoungAndroidBlocksNode blocksNode) {
-    final YaCodePageEditor newBlocksEditor = new YaScreenPageEditor(this, blocksNode);
+    final YaCodePageEditor newBlocksEditor = YaCodePageEditor.newEditor(this, blocksNode);
     final String formName = blocksNode.getFormName();
     OdeLog.log("Adding blocks editor for " + formName);
     if (editorMap.containsKey(formName)) {

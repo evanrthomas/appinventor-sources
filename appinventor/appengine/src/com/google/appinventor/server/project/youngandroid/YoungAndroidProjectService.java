@@ -425,39 +425,36 @@ public final class YoungAndroidProjectService extends CommonProjectService {
 
   @Override
   public long addFile(String userId, long projectId, String fileId) {
-    if (fileId.endsWith(FORM_PROPERTIES_EXTENSION) ||
-        fileId.endsWith(BLOCKLY_SOURCE_EXTENSION)) {
-      // If the file to be added is a form file or a blocks file, add a new form file, a new
-      // blocks file, and a new yail file (as a placeholder for later code generation)
+    if (fileId.endsWith(FORM_PROPERTIES_EXTENSION) || fileId.endsWith(BLOCKLY_SOURCE_EXTENSION)) {
       String qualifiedFormName = YoungAndroidSourceNode.getQualifiedName(fileId);
-      String formFileName = YoungAndroidFormNode.getFormFileId(qualifiedFormName);
-      String blocklyFileName = YoungAndroidBlocksNode.getBlocklyFileId(qualifiedFormName);
       String yailFileName = YoungAndroidYailNode.getYailFileId(qualifiedFormName);
+      String blocklyFileName = YoungAndroidBlocksNode.getBlocklyFileId(qualifiedFormName);
+      String formFileName = YoungAndroidFormNode.getFormFileId(qualifiedFormName);
 
       List<String> sourceFiles = storageIo.getProjectSourceFiles(userId, projectId);
-      if (!sourceFiles.contains(formFileName) &&
-          !sourceFiles.contains(blocklyFileName) &&
-          !sourceFiles.contains(yailFileName)) {
-
-        String formFileContents = getInitialFormPropertiesFileContents(qualifiedFormName);
-        storageIo.addSourceFilesToProject(userId, projectId, false, formFileName);
-        storageIo.uploadFileForce(projectId, formFileName, userId, formFileContents,
-            StorageUtil.DEFAULT_CHARSET);
-
-        String blocklyFileContents = getInitialBlocklySourceFileContents(qualifiedFormName);
-        storageIo.addSourceFilesToProject(userId, projectId, false, blocklyFileName);
-        storageIo.uploadFileForce(projectId, blocklyFileName, userId, blocklyFileContents,
-            StorageUtil.DEFAULT_CHARSET);
+      if (!sourceFiles.contains(formFileName) && !sourceFiles.contains(blocklyFileName) && !sourceFiles.contains(yailFileName)) {
 
         String yailFileContents = "";  // start empty
+        String blocklyFileContents = getInitialBlocklySourceFileContents(qualifiedFormName);
+
+        if (fileId.endsWith(FORM_PROPERTIES_EXTENSION)) {
+          String formFileContents = getInitialFormPropertiesFileContents(qualifiedFormName);
+          storageIo.addSourceFilesToProject(userId, projectId, false, formFileName);
+          storageIo.uploadFileForce(projectId, formFileName, userId, formFileContents,
+                  StorageUtil.DEFAULT_CHARSET);
+        }
+        storageIo.addSourceFilesToProject(userId, projectId, false, blocklyFileName);
+        storageIo.uploadFileForce(projectId, blocklyFileName, userId, blocklyFileContents,
+                StorageUtil.DEFAULT_CHARSET);
+
         storageIo.addSourceFilesToProject(userId, projectId, false, yailFileName);
         return storageIo.uploadFileForce(projectId, yailFileName, userId, yailFileContents,
-            StorageUtil.DEFAULT_CHARSET);
+                StorageUtil.DEFAULT_CHARSET);
       } else {
         throw new IllegalStateException("One or more files to be added already exists.");
       }
 
-    } else {
+    }  else {
       return super.addFile(userId, projectId, fileId);
     }
   }

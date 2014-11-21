@@ -5,6 +5,7 @@
 
 package com.google.appinventor.client.editor.simple.components;
 
+import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.editor.simple.SimpleEditor;
 import com.google.appinventor.client.editor.simple.palette.SimplePaletteItem;
 import com.google.appinventor.client.widgets.dnd.DragSource;
@@ -43,6 +44,7 @@ public final class MockCanvas extends MockContainer {
     canvasWidget.setStylePrimaryName("ode-SimpleMockContainer");
     canvasWidget.add(rootPanel);
 
+    Helper.println("MockCanvas() initComponent");
     initComponent(canvasWidget);
   }
 
