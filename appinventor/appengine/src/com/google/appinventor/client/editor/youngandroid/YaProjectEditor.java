@@ -134,8 +134,9 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
     // Add the screens to the design toolbar, along with their associated editors
     DesignToolbar designToolbar = Ode.getInstance().getDesignToolbar();
     for (String formName : editorMap.keySet()) {
+      Helper.println("YaProjectEditor.loadProject() editors " + formName);
       EditorSet editors = editorMap.get(formName);
-      if (editors.formEditor != null && editors.blocksEditor != null) {
+      if (editors.blocksEditor != null) {
         designToolbar.addScreen(projectRootNode.getProjectId(),
                 new DesignToolbar.Screen( formName, editors.formEditor, editors.blocksEditor));
         if (isScreen1(formName)) {
@@ -147,8 +148,6 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
                 formName, DesignToolbar.View.FORM);
           }
         }
-      } else if (editors.formEditor == null) {
-        OdeLog.wlog("Missing form editor for " + formName);
       } else {
         OdeLog.wlog("Missing blocks editor for " + formName);
       }

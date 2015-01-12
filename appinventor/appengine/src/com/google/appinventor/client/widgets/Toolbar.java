@@ -5,16 +5,13 @@
 
 package com.google.appinventor.client.widgets;
 
+import com.google.appinventor.client.Helper;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.MenuItem;
-import com.google.gwt.user.client.ui.PopupPanel;
-import com.google.gwt.user.client.ui.Widget;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -237,6 +234,7 @@ public class Toolbar extends Composite {
    * @param item item to add to drop down
    */
   protected void addDropDownButtonItem(String dropDownName, DropDownButton.DropDownItem item) {
+    Helper.println("Toolbar.addDropDownButtonItem() " + dropDownName);
     final DropDownButton button = dropDownButtonMap.get(dropDownName);
     if (button != null && item != null) {
       button.addItem(item);

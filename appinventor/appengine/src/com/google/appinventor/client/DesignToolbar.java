@@ -83,6 +83,7 @@ public class DesignToolbar extends Toolbar {
 
     // Returns true if we added the screen (it didn't previously exist), false otherwise.
     public boolean addScreen(Screen screen) {
+      Helper.println("DesignProject.addScreen() " + screen.screenName + " " + !screens.containsKey(screen.screenName));
       if (!screens.containsKey(screen.screenName)) {
         screens.put(screen.screenName, screen);
         return true;
@@ -394,7 +395,7 @@ public class DesignToolbar extends Toolbar {
    */
   public void addScreen(long projectId, Screen screen) {
 
-    Helper.println("designToolbar.addScreen() " + screen.screenName);
+    Helper.println("DesignToolbar.addScreen() " + screen.screenName + " " + screen.formEditor + " " + screen.blocksEditor);
     if (!projectMap.containsKey(projectId)) {
       OdeLog.wlog("DesignToolbar can't find project " + screen.screenName + " with id " + projectId
           + ". Ignoring addScreen().");
