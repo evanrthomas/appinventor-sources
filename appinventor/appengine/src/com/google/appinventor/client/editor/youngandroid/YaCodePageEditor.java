@@ -130,17 +130,21 @@ public abstract class YaCodePageEditor extends SimpleEditor
     BlockSelectorBox.getBlockSelectorBox().addBlockDrawerSelectionListener(this);
 
   }
+
+  public boolean isFormPageEditor() {
+    return false;
+  }
   public static YaCodePageEditor newEditor (YaProjectEditor project, YoungAndroidBlocksNode sourceNode) {
 
     YACachedBlocksNode cachedNode =  YACachedBlocksNode.getOrCreateCachedNode(sourceNode);
-    if (isFormPageEditor(sourceNode)) {
+    if (isFormPageSourceNode(sourceNode)) {
       return new YaFormPageEditor(project, cachedNode);
     } else {
       return new YaSharedPageEditor(project, cachedNode);
     }
   }
 
-  public static boolean isFormPageEditor(YoungAndroidBlocksNode sourceNode) {
+  public static boolean isFormPageSourceNode(YoungAndroidBlocksNode sourceNode) {
 
     String formFileId = StorageUtil.trimOffExtension(sourceNode.getFileId()) +
             YoungAndroidSourceAnalyzer.FORM_PROPERTIES_EXTENSION;

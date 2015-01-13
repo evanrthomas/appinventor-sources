@@ -317,8 +317,6 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
   }
   
   private void addFormEditor(final YoungAndroidFormNode formNode) {
-
-
     final YaFormEditor newFormEditor = new YaFormEditor(this, formNode);
     final String formName = formNode.getFormName();
     OdeLog.log("Adding form editor for " + formName);
@@ -357,7 +355,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
     return screen1FormLoaded && screen1BlocksLoaded && screen1Added;
   }
 
-  private void addBlocksEditor(YoungAndroidBlocksNode blocksNode) {
+  private void addBlocksEditor(final YoungAndroidBlocksNode blocksNode) {
     final YaCodePageEditor newBlocksEditor = YaCodePageEditor.newEditor(this, blocksNode);
     final String formName = blocksNode.getFormName();
     OdeLog.log("Adding blocks editor for " + formName);
@@ -369,6 +367,19 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
       editors.blocksEditor = newBlocksEditor;
       editorMap.put(formName, editors);
     }
+
+
+    newBlocksEditor.loadFile(new Command() {
+      @Override
+      public void execute() {
+        int pos = Collections.binarySearch(fileIds, newBlocksEditor.getFileId(),
+                getFileIdComparator());
+        if (pos < 0) {
+          pos = -pos - 1;
+        }
+        insertFileEditor(newBlocksEditor, pos);
+      }
+    });
   }
   
   private void removeFormEditor(String formName) {

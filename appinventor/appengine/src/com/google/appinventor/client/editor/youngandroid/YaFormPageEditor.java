@@ -33,6 +33,11 @@ public final class YaFormPageEditor extends YaCodePageEditor implements FormChan
 
 
   @Override
+  public boolean isFormPageEditor() {
+    return true;
+  }
+
+  @Override
   public boolean isScreen1() {
     return myFormEditor.isScreen1();
   }

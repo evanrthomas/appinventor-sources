@@ -5,23 +5,20 @@
 
 package com.google.appinventor.client.editor;
 
+import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.settings.Settings;
-import com.google.appinventor.shared.settings.SettingsConstants;
 import com.google.appinventor.client.settings.project.ProjectSettings;
 import com.google.appinventor.shared.rpc.project.ProjectRootNode;
+import com.google.appinventor.shared.settings.SettingsConstants;
 import com.google.common.collect.Maps;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.DeckPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Abstract superclass for all project editors.
@@ -156,6 +153,7 @@ public abstract class ProjectEditor extends Composite {
     // selectedFileEdtior == fileEditor already. This handles the case of switching back
     // to a previously opened project from another project.
     selectedFileEditor = fileEditor;
+    Helper.println("ProjectEditor.selectFileEditor() showing widget for fileEditor " + fileEditor.fileNode.getFileId() + " index " + index + " getWidgetCount " + deckPanel.getWidgetCount());
     deckPanel.showWidget(index);
     selectedFileEditor.onShow();
   }

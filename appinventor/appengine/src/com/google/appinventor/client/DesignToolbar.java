@@ -276,15 +276,18 @@ public class DesignToolbar extends Toolbar {
     }
     currentView = view;
     Screen screen = currentProject.screens.get(newScreenName);
-    ProjectEditor projectEditor = screen.formEditor.getProjectEditor();
+    ProjectEditor projectEditor = screen.blocksEditor.getProjectEditor();
     currentProject.setCurrentScreen(newScreenName);
     setDropDownButtonCaption(WIDGET_NAME_SCREENS_DROPDOWN, newScreenName);
     OdeLog.log("Setting currentScreen to " + newScreenName);
-    if (currentView == View.FORM) {
+    Helper.println("DesignToolbar.doSwitchScreen1() switching editors " + screen.screenName);
+    if (currentView == View.FORM && screen.formEditor != null) {
+      Helper.println("DesignToolbar.doSwitchScreen1() first branch " + screen.screenName);
       projectEditor.selectFileEditor(screen.formEditor);
       toggleEditor(false);
       Ode.getInstance().getTopToolbar().updateFileMenuButtons(1);
-    } else {  // must be View.BLOCKS
+    } else {
+      Helper.println("DesignToolbar.doSwitchScreen1() seciond branch " + screen.screenName);
       projectEditor.selectFileEditor(screen.blocksEditor);
       toggleEditor(true);
       Ode.getInstance().getTopToolbar().updateFileMenuButtons(1);
