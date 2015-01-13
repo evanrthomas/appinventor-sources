@@ -125,8 +125,6 @@ public final class YaFormPageEditor extends YaCodePageEditor implements FormChan
   protected void updateSourceStructureExplorer() {
     MockForm form = getForm();
     if (form != null) {
-      Helper.println("YaFormPageEditor.updateSourceStructureExplorer() (form.getSelectedComponent() == null) ??? "
-                      + (form.getSelectedComponent() == null));
       MockComponent selectedComp =  form.getSelectedComponent();
       //TODO (evan) : might be able to remove this ternary statement, I think selectedComp will always be non-null
       updateBlocksTree(selectedComp == null ? null : selectedComp.getSourceStructureExplorerItem());

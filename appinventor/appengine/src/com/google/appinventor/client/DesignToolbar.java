@@ -83,7 +83,6 @@ public class DesignToolbar extends Toolbar {
 
     // Returns true if we added the screen (it didn't previously exist), false otherwise.
     public boolean addScreen(Screen screen) {
-      Helper.println("DesignProject.addScreen() " + screen.screenName + " " + !screens.containsKey(screen.screenName));
       if (!screens.containsKey(screen.screenName)) {
         screens.put(screen.screenName, screen);
         return true;
@@ -280,14 +279,11 @@ public class DesignToolbar extends Toolbar {
     currentProject.setCurrentScreen(newScreenName);
     setDropDownButtonCaption(WIDGET_NAME_SCREENS_DROPDOWN, newScreenName);
     OdeLog.log("Setting currentScreen to " + newScreenName);
-    Helper.println("DesignToolbar.doSwitchScreen1() switching editors " + screen.screenName);
     if (currentView == View.FORM && screen.formEditor != null) {
-      Helper.println("DesignToolbar.doSwitchScreen1() first branch " + screen.screenName);
       projectEditor.selectFileEditor(screen.formEditor);
       toggleEditor(false);
       Ode.getInstance().getTopToolbar().updateFileMenuButtons(1);
     } else {
-      Helper.println("DesignToolbar.doSwitchScreen1() seciond branch " + screen.screenName);
       projectEditor.selectFileEditor(screen.blocksEditor);
       toggleEditor(true);
       Ode.getInstance().getTopToolbar().updateFileMenuButtons(1);
@@ -398,7 +394,6 @@ public class DesignToolbar extends Toolbar {
    */
   public void addScreen(long projectId, Screen screen) {
 
-    Helper.println("DesignToolbar.addScreen() " + screen.screenName + " " + screen.formEditor + " " + screen.blocksEditor);
     if (!projectMap.containsKey(projectId)) {
       OdeLog.wlog("DesignToolbar can't find project " + screen.screenName + " with id " + projectId
           + ". Ignoring addScreen().");
@@ -413,7 +408,6 @@ public class DesignToolbar extends Toolbar {
       }
     }
 
-    Helper.println("designToolbar.addScreen() complete");
   }
 
 /*

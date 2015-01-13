@@ -292,6 +292,8 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   public void showWhenInitialized() {
     //check if blocks are initialized
+    Helper.println("YaCodePageEditor.showWhenInitialized() name:: "
+            + getName() + " components ?? " + components.getComponents().size());
     updateBlocksTree(null);
     if(BlocklyPanel.blocksInited(fullFormName)) {
       blocksArea.showDifferentForm(fullFormName);
@@ -411,15 +413,12 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
 
   protected void updateBlocksTree(SourceStructureExplorerItem itemToSelect) {
-    Helper.println("YaCodePageEditor.updateBlocksTree()");
-    Helper.indent();
     TreeItem items[] = new TreeItem[3];
     items[0] = BlockSelectorBox.getBlockSelectorBox().getBuiltInBlocksTree();
     items[1] = getComponentsTree();
     items[2] = getAnyComponentsTree();
     sourceStructureExplorer.updateTree(items, itemToSelect);
     BlockSelectorBox.getBlockSelectorBox().setContent(sourceStructureExplorer);
-    Helper.unindent();
   }
 
   protected abstract TreeItem getComponentsTree();
@@ -464,8 +463,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
   }
 
   public void addComponent(MockComponent comp) {
-
-    Helper.println("YaCodePageEditor.addComponent() " + comp.getName() + " for name:: " + getName());
     if (componentUuids.add(comp.getUuid())) {
       components.addComponent(comp);
       blocksArea.addComponent(comp);
@@ -488,7 +485,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
   }
 
   public void showComponentBlocks(String instanceName) {
-    Helper.println("YaCodePageEditor.showComponentBlocks() " + instanceName);
     String instanceDrawer = "component_" + instanceName;
     if (selectedDrawer == null || !blocksArea.drawerShowing()
         || !selectedDrawer.equals(instanceDrawer)) {
@@ -549,7 +545,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
   @Override
   public void onBuiltinDrawerSelected(String drawerName) {
     // Only do something if we are the current file editor
-    Helper.println("YaCodePageEditor.onBuiltinDrawerSelected()");
     if (Ode.getInstance().getCurrentFileEditor() == this) {
       showBuiltinBlocks(drawerName);
     }
@@ -562,7 +557,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
   @Override
   public void onGenericDrawerSelected(String drawerName) {
     // Only do something if we are the current file editor
-    Helper.println("YaCodePageEditor.onBuiltinDrawerSelected()");
     if (Ode.getInstance().getCurrentFileEditor() == this) {
       showGenericBlocks(drawerName);
     }

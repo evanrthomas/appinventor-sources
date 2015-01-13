@@ -224,7 +224,6 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
     sourceStructureExplorerItem = new SourceStructureExplorerItem() {
       @Override
       public void onSelected() {
-        Helper.println("MockComponent " + getName() + " onSelected()" );
         // are we showing the blocks editor? if so, toggle the component drawer
         if (Ode.getInstance().getCurrentFileEditor() instanceof YaCodePageEditor) {
           YaCodePageEditor blocksEditor =

@@ -44,7 +44,6 @@ public final class MockCanvas extends MockContainer {
     canvasWidget.setStylePrimaryName("ode-SimpleMockContainer");
     canvasWidget.add(rootPanel);
 
-    Helper.println("MockCanvas() initComponent");
     initComponent(canvasWidget);
   }
 

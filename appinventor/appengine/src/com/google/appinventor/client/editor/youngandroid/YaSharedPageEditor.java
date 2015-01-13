@@ -3,11 +3,8 @@ package com.google.appinventor.client.editor.youngandroid;
 import com.google.appinventor.client.ComponentSet;
 import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.YACachedBlocksNode;
-import com.google.appinventor.client.editor.simple.SimpleNonVisibleComponentsPanel;
-import com.google.appinventor.client.editor.simple.SimpleVisibleComponentsPanel;
 import com.google.appinventor.client.editor.simple.components.MockCanvas;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
-import com.google.appinventor.client.editor.youngandroid.palette.YoungAndroidPalettePanel;
 import com.google.gwt.user.client.ui.TreeItem;
 
 import java.util.ArrayList;
@@ -16,19 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 public final class YaSharedPageEditor extends YaCodePageEditor {
-  private final ComponentSet components;
-  private final SimpleVisibleComponentsPanel visibleComponentsPanel;
-  private final SimpleNonVisibleComponentsPanel nonVisibleComponentsPanel;
-  private final YoungAndroidPalettePanel palettePanel;
 
   public YaSharedPageEditor(YaProjectEditor projectEditor, YACachedBlocksNode blocksNode) {
     super(projectEditor, blocksNode);
-
-    nonVisibleComponentsPanel = new SimpleNonVisibleComponentsPanel();
-    visibleComponentsPanel = new SimpleVisibleComponentsPanel(this, nonVisibleComponentsPanel);
-    palettePanel = new YoungAndroidPalettePanel(null);
-
-    components = new ComponentSet();
     addComponent(new MockCanvas(this));
   }
 
@@ -54,7 +41,8 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
 
   @Override
   protected void updateSourceStructureExplorer() {
-    updateBlocksTree(null);
+    //TODO (evan): not really sure how updateSourceStructureExplorer and updateBlocksTree are different
+    //updateBlocksTree(null);
   }
 
   protected TreeItem getComponentsTree() {

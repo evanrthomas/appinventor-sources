@@ -149,7 +149,6 @@ public class BlocklyPanel extends HTMLPanel {
       }
     }
 
-    Helper.println("BlocklyPanel.initBlocksArea() formName::" + formName);
     String typeDescription, instanceName, uid;
     if (componentOps.containsKey(formName)) {
       OdeLog.log("Replaying " + componentOps.get(formName).size() + " ops waiting in queue");
@@ -159,7 +158,6 @@ public class BlocklyPanel extends HTMLPanel {
         uid = op.component.getUuid();
         switch (op.op) {
           case ADD:
-            Helper.println("BlocklyPanel.initBlocksArea() replaying ADD " + op.component.getName());
             doAddComponent(formName, typeDescription, instanceName, uid);
             addSavedComponent(formName, op.component);
             break;
@@ -211,8 +209,6 @@ public class BlocklyPanel extends HTMLPanel {
    * @param component the component to be added
    */
   public void addComponent(MockComponent component) {
-    Helper.println("BlocklyPanel.addComponent() " + component.getName());
-
     if (!blocksInited(formName)) {
       ComponentOp cop = new ComponentOp();
       cop.op = OpType.ADD;

@@ -153,7 +153,6 @@ public abstract class ProjectEditor extends Composite {
     // selectedFileEdtior == fileEditor already. This handles the case of switching back
     // to a previously opened project from another project.
     selectedFileEditor = fileEditor;
-    Helper.println("ProjectEditor.selectFileEditor() showing widget for fileEditor " + fileEditor.fileNode.getFileId() + " index " + index + " getWidgetCount " + deckPanel.getWidgetCount());
     deckPanel.showWidget(index);
     selectedFileEditor.onShow();
   }

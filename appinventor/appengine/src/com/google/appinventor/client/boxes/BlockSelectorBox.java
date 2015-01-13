@@ -139,7 +139,6 @@ public final class BlockSelectorBox extends Box {
       SourceStructureExplorerItem sourceItem = new BlockSelectorItem() {
         @Override
         public void onSelected() {
-          Helper.println("BlockSelectorBox.getBuitInBlocksTree() ... onSelected()");
           fireBuiltinDrawerSelected(drawerName);
         }
       };
@@ -213,7 +212,6 @@ public final class BlockSelectorBox extends Box {
   }
 
   public void addBlockDrawerSelectionListener(BlockDrawerSelectionListener listener) {
-    Helper.println("BlockSelectorBox.addBlockDrawerSelectionListener()");
     drawerListeners.add(listener);
   }
 
@@ -222,7 +220,6 @@ public final class BlockSelectorBox extends Box {
   }
 
   private void fireBuiltinDrawerSelected(String drawerName) {
-    Helper.println("BlockSelectorBox.fireBuiltinDrawerSelected()");
     for (BlockDrawerSelectionListener listener : drawerListeners) {
       listener.onBuiltinDrawerSelected(drawerName);
     }

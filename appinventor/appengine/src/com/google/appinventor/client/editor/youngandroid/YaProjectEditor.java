@@ -121,7 +121,6 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
     // add form editors first, then blocks editors because the blocks editors
     // need access to their corresponding form editors to set up properly
     for (ProjectNode source : projectRootNode.getAllSourceNodes()) {
-      Helper.println("YaProjectEditor.loadProject() " + source.getFileId());
       if (source instanceof YoungAndroidFormNode) {
         addFormEditor((YoungAndroidFormNode) source);
       }
@@ -134,7 +133,6 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
     // Add the screens to the design toolbar, along with their associated editors
     DesignToolbar designToolbar = Ode.getInstance().getDesignToolbar();
     for (String formName : editorMap.keySet()) {
-      Helper.println("YaProjectEditor.loadProject() editors " + formName);
       EditorSet editors = editorMap.get(formName);
       if (editors.blocksEditor != null) {
         designToolbar.addScreen(projectRootNode.getProjectId(),
