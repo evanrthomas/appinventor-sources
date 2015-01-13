@@ -29,8 +29,7 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
     palettePanel = new YoungAndroidPalettePanel(null);
 
     components = new ComponentSet();
-    components.addComponent(new MockCanvas(this));
-    Helper.println("YaSharedPage INITIED!!!");
+    addComponent(new MockCanvas(this));
   }
 
   @Override
@@ -53,17 +52,13 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
     return false;
   }
 
-
   @Override
   protected void updateSourceStructureExplorer() {
-    //TODO (evan): implement
-    //MockForm form = getForm();
-    //if (form != null) {
-    //  updateBlocksTree(form.getSelectedComponent().getSourceStructureExplorerItem());
-    //}
+    updateBlocksTree(null);
   }
 
   protected TreeItem getComponentsTree() {
+    Helper.println("YaSharedPageEditor.getComponentsTree() has any copmonents ??? " + components.getComponents().size());
     return ComponentSet.buildTree(components);
   }
 }

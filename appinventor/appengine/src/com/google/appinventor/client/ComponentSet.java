@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class ComponentSet {
-  Collection<MockComponent> components;
+  private Collection<MockComponent> components;
   public ComponentSet() {
     components = new ArrayList<MockComponent>();
   }
@@ -50,7 +50,6 @@ public class ComponentSet {
     itemNode.setState(false);
     return itemNode;
   }
-
 
   public static Collection<MockComponent> flatten(MockComponent parent) {
     //TODO (evan): make this return a lazily evaled iterator intead of flattening immediatley

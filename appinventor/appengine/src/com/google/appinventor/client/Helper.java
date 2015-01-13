@@ -5,10 +5,27 @@ import com.google.appinventor.client.output.OdeLog;
 import java.util.Collection;
 
 public class Helper {
-  public static void println(String s) {
+  private static int tablevel  = 0;
 
-    consolePrint(s);
-    OdeLog.log(s);
+  public static void indent() {
+    tablevel += 1;
+  }
+
+  public static void unindent() {
+    tablevel -= 1;
+  }
+
+  private static String repeat(String s, int n) {
+    String s2 = "";
+    for (int i = 0; i<n; i++) {
+      s2 += s;
+    }
+    return s2;
+  }
+
+  public static void println(String s) {
+    consolePrint(repeat("\t", tablevel) + s);
+    OdeLog.log(repeat("\t", tablevel) + s);
   }
 
   public static<T> void println(Collection<T> items) {

@@ -1,6 +1,7 @@
 
 package com.google.appinventor.client.editor.youngandroid;
 
+import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.YACachedBlocksNode;
 import com.google.appinventor.client.editor.simple.components.FormChangeListener;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
@@ -29,12 +30,6 @@ public final class YaFormPageEditor extends YaCodePageEditor implements FormChan
   @Override
   public List<String> getComponentNames() {
     return myFormEditor.getComponentNames();
-  }
-
-
-  @Override
-  public boolean isFormPageEditor() {
-    return true;
   }
 
   @Override
@@ -130,7 +125,11 @@ public final class YaFormPageEditor extends YaCodePageEditor implements FormChan
   protected void updateSourceStructureExplorer() {
     MockForm form = getForm();
     if (form != null) {
-      updateBlocksTree(form.getSelectedComponent().getSourceStructureExplorerItem());
+      Helper.println("YaFormPageEditor.updateSourceStructureExplorer() (form.getSelectedComponent() == null) ??? "
+                      + (form.getSelectedComponent() == null));
+      MockComponent selectedComp =  form.getSelectedComponent();
+      //TODO (evan) : might be able to remove this ternary statement, I think selectedComp will always be non-null
+      updateBlocksTree(selectedComp == null ? null : selectedComp.getSourceStructureExplorerItem());
     }
   }
 

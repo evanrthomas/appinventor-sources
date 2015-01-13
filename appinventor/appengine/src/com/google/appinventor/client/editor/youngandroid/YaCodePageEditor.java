@@ -131,9 +131,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   }
 
-  public boolean isFormPageEditor() {
-    return false;
-  }
   public static YaCodePageEditor newEditor (YaProjectEditor project, YoungAndroidBlocksNode sourceNode) {
 
     YACachedBlocksNode cachedNode =  YACachedBlocksNode.getOrCreateCachedNode(sourceNode);
@@ -414,12 +411,15 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
 
   protected void updateBlocksTree(SourceStructureExplorerItem itemToSelect) {
+    Helper.println("YaCodePageEditor.updateBlocksTree()");
+    Helper.indent();
     TreeItem items[] = new TreeItem[3];
     items[0] = BlockSelectorBox.getBlockSelectorBox().getBuiltInBlocksTree();
     items[1] = getComponentsTree();
     items[2] = getAnyComponentsTree();
     sourceStructureExplorer.updateTree(items, itemToSelect);
     BlockSelectorBox.getBlockSelectorBox().setContent(sourceStructureExplorer);
+    Helper.unindent();
   }
 
   protected abstract TreeItem getComponentsTree();
@@ -464,7 +464,8 @@ public abstract class YaCodePageEditor extends SimpleEditor
   }
 
   public void addComponent(MockComponent comp) {
-    Helper.println("YaCodePageEditor.addComponent() " + comp.getName());
+
+    Helper.println("YaCodePageEditor.addComponent() " + comp.getName() + " for name:: " + getName());
     if (componentUuids.add(comp.getUuid())) {
       components.addComponent(comp);
       blocksArea.addComponent(comp);
@@ -478,7 +479,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   public void removeComponent(MockComponent component) {
     if (componentUuids.remove(component.getUuid())) {
       blocksArea.removeComponent(component);
-      //TODO(evan): components.remove(typeName, instanceName, uuid)
+      //TODO (evan): components.remove(typeName, instanceName, uuid)
     }
   }
 

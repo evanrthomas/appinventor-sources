@@ -23,13 +23,16 @@ goog.require('Blockly.TranslationMethods');
 goog.require('Blockly.TranslationParams');
 
 Blockly.Component.add = function(name, uid) {
+  console.log("Blockly.Component.add " + name + " " + uid);
   if (Blockly.ComponentInstances.haveInstance(name, uid)) {
+    console.log("Blockly.Component.add haveInstance " + name + " " + uid);
     return;
   }
   Blockly.TypeBlock.needsReload.components = true;
   //get type name for instance
   var typeName = Blockly.Component.instanceNameToTypeName(name);
   Blockly.ComponentInstances.addInstance(name, uid, typeName);
+  console.log("Blockly.Component.add added " + name + " " + uid + " " + typeName);
 };
 
 /**
