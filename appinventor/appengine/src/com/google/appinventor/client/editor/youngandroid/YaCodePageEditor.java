@@ -187,6 +187,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
                 @Override
                 public void onSuccess(ChecksumedLoadFile result) {
                   try {
+                    Helper.println("YaCodePageEditor.loadFile() " + result.getContent());
                     if (!result.getContent().equals("")) {
                       JavaScriptObject fileContentsAsXml = textToDom(result.getContent());
                       JsArray<JavaScriptObject> blocks = getTopLevelBlocks(fileContentsAsXml);
@@ -252,11 +253,11 @@ public abstract class YaCodePageEditor extends SimpleEditor
     return $wnd.exported.attachAttributes(blocks, attributes);
   }-*/;
 
-  private native JavaScriptObject textToDom(String s) /*-{
+  protected native JavaScriptObject textToDom(String s) /*-{
     return $wnd.exported.textToDom(s);
   }-*/;
 
-  private native String domToText(JavaScriptObject xml) /*-{
+  protected native String domToText(JavaScriptObject xml) /*-{
     return $wnd.exported.domToText(xml);
   }-*/;
 
@@ -292,9 +293,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   public void showWhenInitialized() {
     //check if blocks are initialized
-    Helper.println("YaCodePageEditor.showWhenInitialized() name:: "
-            + getName() + " components ?? " + components.getComponents().size());
-    Helper.indent();
     updateBlocksTree(null);
     if(BlocklyPanel.blocksInited(fullFormName)) {
       blocksArea.showDifferentForm(fullFormName);
@@ -314,7 +312,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
       }
       timer.schedule(200); // Run every 200 milliseconds
     }
-    Helper.unindent();
   }
 
   /*
@@ -389,7 +386,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
   }
 
   private static List<YaCodePageEditor> getParents(YaCodePageEditor editor) {
-    //printJS("getParents() " + editor.fullFormName);
     ArrayList<YaCodePageEditor> parents = new  ArrayList<YaCodePageEditor>();
     if (!editor.fullFormName.contains("SharedPage")) {
       return parents;
@@ -412,7 +408,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
         ((YaFormPageEditor)editor).sendComponentData();
     }
   }
-
 
   protected void updateBlocksTree(SourceStructureExplorerItem itemToSelect) {
     TreeItem items[] = new TreeItem[3];
@@ -532,9 +527,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
   public void hideBuiltinBlocks() {
     blocksArea.hideBuiltinBlocks();
   }
-
-
-
 
   protected abstract void updateSourceStructureExplorer();
 

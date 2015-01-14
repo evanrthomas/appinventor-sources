@@ -5,7 +5,10 @@
 
 package com.google.appinventor.client.editor.simple.components;
 
-import com.google.appinventor.client.*;
+import com.google.appinventor.client.Images;
+import com.google.appinventor.client.Ode;
+import com.google.appinventor.client.TranslationDesignerPallete;
+import com.google.appinventor.client.TranslationDesignerProperties;
 import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
 import com.google.appinventor.client.editor.simple.SimpleEditor;
 import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
@@ -28,6 +31,7 @@ import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjec
 import com.google.appinventor.shared.settings.SettingsConstants;
 import com.google.appinventor.shared.simple.ComponentDatabaseInterface;
 import com.google.appinventor.shared.storage.StorageUtil;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.*;
 import com.google.gwt.user.client.Random;
@@ -995,6 +999,15 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
 
   }
 
+  public JavaScriptObject toXmlRepr() {
+    return componentInfoToXml(getName(), type);
+
+  }
+
+
+  private static native JavaScriptObject componentInfoToXml(String name, String type) /*-{
+    return $wnd.exported.componentInfoToXml(name, type);
+  }-*/;
   // Layout
 
   LayoutInfo createLayoutInfo(Map<MockComponent, LayoutInfo> layoutInfoMap) {

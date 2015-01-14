@@ -6,7 +6,6 @@
 package com.google.appinventor.client.explorer.commands;
 
 import com.google.appinventor.client.DesignToolbar;
-import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.editor.FileEditor;
@@ -250,7 +249,6 @@ public final class AddFormCommand extends ChainableCommand {
 
       // Create the new form on the backend. The backend will create the form (.scm) and blocks
       // (.blk) files.
-      Helper.println("AddFormCommand adding to backend" + formFileId);
       ode.getProjectService().addFile(projectRootNode.getProjectId(), formFileId, callback);
     }
 

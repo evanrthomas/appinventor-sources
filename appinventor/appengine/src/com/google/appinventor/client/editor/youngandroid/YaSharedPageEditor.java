@@ -9,6 +9,8 @@ import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.editor.simple.palette.SimpleComponentDescriptor;
 import com.google.appinventor.client.editor.youngandroid.palette.YoungAndroidPalettePanel;
 import com.google.appinventor.client.widgets.TextButton;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArray;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -48,6 +50,19 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
   }
 
   @Override
+  public String getRawFileContent() {
+    JsArray<JavaScriptObject> componentsXmlArr = JavaScriptObject.createArray().cast();
+    for (MockComponent comp: components.getComponents()) {
+      componentsXmlArr.push(comp.toXmlRepr());
+    }
+    JavaScriptObject newcontents = setDemandedComponentsHeader(textToDom(super.getRawFileContent()),
+            componentsXmlArr);
+    String s = domToText(newcontents);
+    Helper.println("YaSharedPageEditor.getRawFileContent() " +  s);
+    return s;
+  }
+
+  @Override
   protected void updateSourceStructureExplorer() {
     //TODO (evan): not really sure how updateSourceStructureExplorer and updateBlocksTree are different
     updateBlocksTree(null);
@@ -56,14 +71,13 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
   protected TreeItem getComponentsTree() {
     TreeItem tree = ComponentSet.buildTree(components);
     TextButton button = new TextButton("Add Component");
-    YoungAndroidPalettePanel palettePanel =  new YoungAndroidPalettePanel(YaSharedPageEditor.this)    ;
+    YoungAndroidPalettePanel palettePanel =  new YoungAndroidPalettePanel(YaSharedPageEditor.this);
     final PopupPanel panel = new PopupPanel(true, true);
     panel.setWidget(palettePanel);
 
     palettePanel.loadComponents(null, new YoungAndroidPalettePanel.YoungAndroidPalettePanelClickHandler() {
       @Override
       public void onClick(SimpleComponentDescriptor descriptor, ClickEvent event) {
-        Helper.println("click " + descriptor.getName());
         addComponent(descriptor.createMockComponentFromPalette());
         updateSourceStructureExplorer();
         panel.hide();
@@ -81,4 +95,10 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
 
     return tree;
   }
+
+  private native JavaScriptObject setDemandedComponentsHeader(
+          JavaScriptObject blocklyXml, JsArray<JavaScriptObject> arr) /*-{
+    return $wnd.exported.setDemandedComponentsHeader(blocklyXml, arr);
+  }-*/;
+
 }

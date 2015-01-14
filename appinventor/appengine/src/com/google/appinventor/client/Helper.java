@@ -13,6 +13,9 @@ public class Helper {
 
   public static void unindent() {
     tablevel -= 1;
+    if (tablevel < 0) {
+      tablevel = 0;
+    }
   }
 
   private static String repeat(String s, int n) {

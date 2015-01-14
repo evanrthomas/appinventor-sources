@@ -5,7 +5,6 @@
 
 package com.google.appinventor.client.explorer;
 
-import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.widgets.TextButton;
 import com.google.gwt.event.dom.client.*;
@@ -232,7 +231,6 @@ public class SourceStructureExplorer extends Composite {
    * @param select true to select, false to unselect
    */
   private void selectItem(SourceStructureExplorerItem item, boolean select) {
-    Helper.println("selectItem()");
     Iterator<TreeItem> iter = tree.treeItemIterator();
     while (iter.hasNext()) {
       TreeItem treeItem = iter.next();
