@@ -2,15 +2,17 @@ package com.google.appinventor.client.editor.youngandroid;
 
 import com.google.appinventor.client.ComponentSet;
 import com.google.appinventor.client.Helper;
+import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.YACachedBlocksNode;
-import com.google.appinventor.client.editor.simple.components.MockButton;
-import com.google.appinventor.client.editor.simple.components.MockCanvas;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.editor.simple.palette.SimpleComponentDescriptor;
 import com.google.appinventor.client.editor.youngandroid.palette.YoungAndroidPalettePanel;
 import com.google.appinventor.client.widgets.TextButton;
+import com.google.appinventor.shared.rpc.project.ChecksumedFileException;
+import com.google.appinventor.shared.rpc.project.ChecksumedLoadFile;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -25,8 +27,16 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
 
   public YaSharedPageEditor(YaProjectEditor projectEditor, YACachedBlocksNode blocksNode) {
     super(projectEditor, blocksNode);
-    addComponent(new MockCanvas(this));
-    addComponent(new MockButton(this));
+    blocksNode.load(new OdeAsyncCallback<ChecksumedLoadFile>() {
+      @Override
+      public void onSuccess(ChecksumedLoadFile result) {
+        try {
+          addComponentsFromHeader(textToDom(result.getContent()));
+        } catch (ChecksumedFileException e) {
+          onFailure(e);
+        }
+      }
+    });
   }
 
   @Override
@@ -44,6 +54,22 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
     names.addAll(getComponents().keySet());
     return names;
   }
+
+  private void addComponentsFromHeader(JavaScriptObject blocklyXml) {
+    JsArray<Element> comps = getComponentsFromHeader(blocklyXml);
+    for (int i =0; i<comps.length(); i++) {
+      MockComponent comp  = SimpleComponentDescriptor.createMockComponent(
+              comps.get(i).getAttribute("type"),
+              this);
+      comp.changeProperty("name", comps.get(i).getAttribute("name"));
+      addComponent(comp);
+    }
+  }
+
+  private native JsArray<Element> getComponentsFromHeader(JavaScriptObject blocklyXml) /*-{
+    debugger;
+    return blocklyXml.querySelectorAll('header > demanded_components > *');
+  }-*/;
 
   public boolean isScreen1() {
     return false;
