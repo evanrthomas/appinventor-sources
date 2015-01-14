@@ -8,14 +8,16 @@ package com.google.appinventor.client.editor.youngandroid.palette;
 
 import com.google.appinventor.client.TranslationDesignerPallete;
 import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
+import com.google.appinventor.client.editor.simple.SimpleEditor;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.editor.simple.palette.DropTargetProvider;
 import com.google.appinventor.client.editor.simple.palette.SimpleComponentDescriptor;
 import com.google.appinventor.client.editor.simple.palette.SimplePaletteItem;
 import com.google.appinventor.client.editor.simple.palette.SimplePalettePanel;
-import com.google.appinventor.client.editor.youngandroid.YaFormEditor;
 import com.google.appinventor.common.version.AppInventorFeatures;
 import com.google.appinventor.components.common.ComponentCategory;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.StackPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -36,7 +38,7 @@ public class YoungAndroidPalettePanel extends Composite implements SimplePalette
     SimpleComponentDatabase.getInstance();
 
   // Associated editor
-  private final YaFormEditor editor;
+  private final SimpleEditor editor;
 
   private final StackPanel stackPalette;
   private final Map<ComponentCategory, VerticalPanel> categoryPanels;
@@ -46,11 +48,9 @@ public class YoungAndroidPalettePanel extends Composite implements SimplePalette
    *
    * @param editor parent editor of this panel
    */
-  public YoungAndroidPalettePanel(YaFormEditor editor) {
+  public YoungAndroidPalettePanel(SimpleEditor editor) {
     this.editor = editor;
-
     stackPalette = new StackPanel();
-
     categoryPanels = new HashMap<ComponentCategory, VerticalPanel>();
 
     for (ComponentCategory category : ComponentCategory.values()) {
@@ -98,6 +98,10 @@ public class YoungAndroidPalettePanel extends Composite implements SimplePalette
    */
   @Override
   public void loadComponents(DropTargetProvider dropTargetProvider) {
+    loadComponents(dropTargetProvider, null);
+  }
+
+  public void loadComponents(DropTargetProvider dropTargetProvider, final YoungAndroidPalettePanelClickHandler handler) {
     for (String component : COMPONENT_DATABASE.getComponentNames()) {
       String categoryString = COMPONENT_DATABASE.getCategoryString(component);
       String helpString = COMPONENT_DATABASE.getHelpString(component);
@@ -106,11 +110,19 @@ public class YoungAndroidPalettePanel extends Composite implements SimplePalette
       Boolean nonVisible = COMPONENT_DATABASE.getNonVisible(component);
       ComponentCategory category = ComponentCategory.valueOf(categoryString);
       if (showOnPalette && showCategory(category)) {
-        addPaletteItem(new SimplePaletteItem(
-            new SimpleComponentDescriptor(component, editor, helpString,
-              categoryDocUrlString, showOnPalette, nonVisible),
-            dropTargetProvider),
-          category);
+        final SimpleComponentDescriptor descriptor =   new SimpleComponentDescriptor(component, editor, helpString,
+              categoryDocUrlString, showOnPalette, nonVisible);
+        SimplePaletteItem item = new SimplePaletteItem(descriptor, dropTargetProvider);
+        if (handler != null) {
+          item.addClickHandler(new ClickHandler() {
+            @Override
+            public void onClick(ClickEvent event) {
+              handler.onClick(descriptor, event);
+
+            }
+          });
+        }
+        addPaletteItem(item, category);
       }
     }
   }
@@ -122,5 +134,9 @@ public class YoungAndroidPalettePanel extends Composite implements SimplePalette
   private void addPaletteItem(SimplePaletteItem component, ComponentCategory category) {
     VerticalPanel panel = categoryPanels.get(category);
     panel.add(component);
+  }
+
+  public interface YoungAndroidPalettePanelClickHandler {
+    public void onClick(SimpleComponentDescriptor descriptor, ClickEvent event);
   }
 }

@@ -3,8 +3,15 @@ package com.google.appinventor.client.editor.youngandroid;
 import com.google.appinventor.client.ComponentSet;
 import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.YACachedBlocksNode;
+import com.google.appinventor.client.editor.simple.components.MockButton;
 import com.google.appinventor.client.editor.simple.components.MockCanvas;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
+import com.google.appinventor.client.editor.simple.palette.SimpleComponentDescriptor;
+import com.google.appinventor.client.editor.youngandroid.palette.YoungAndroidPalettePanel;
+import com.google.appinventor.client.widgets.TextButton;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.TreeItem;
 
 import java.util.ArrayList;
@@ -17,6 +24,7 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
   public YaSharedPageEditor(YaProjectEditor projectEditor, YACachedBlocksNode blocksNode) {
     super(projectEditor, blocksNode);
     addComponent(new MockCanvas(this));
+    addComponent(new MockButton(this));
   }
 
   @Override
@@ -42,11 +50,35 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
   @Override
   protected void updateSourceStructureExplorer() {
     //TODO (evan): not really sure how updateSourceStructureExplorer and updateBlocksTree are different
-    //updateBlocksTree(null);
+    updateBlocksTree(null);
   }
 
   protected TreeItem getComponentsTree() {
-    Helper.println("YaSharedPageEditor.getComponentsTree() has any copmonents ??? " + components.getComponents().size());
-    return ComponentSet.buildTree(components);
+    TreeItem tree = ComponentSet.buildTree(components);
+    TextButton button = new TextButton("Add Component");
+    YoungAndroidPalettePanel palettePanel =  new YoungAndroidPalettePanel(YaSharedPageEditor.this)    ;
+    final PopupPanel panel = new PopupPanel(true, true);
+    panel.setWidget(palettePanel);
+
+    palettePanel.loadComponents(null, new YoungAndroidPalettePanel.YoungAndroidPalettePanelClickHandler() {
+      @Override
+      public void onClick(SimpleComponentDescriptor descriptor, ClickEvent event) {
+        Helper.println("click " + descriptor.getName());
+        addComponent(descriptor.createMockComponentFromPalette());
+        updateSourceStructureExplorer();
+        panel.hide();
+      }
+    });
+
+    button.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        panel.show();
+      }
+    });
+
+    tree.addItem(button);
+
+    return tree;
   }
 }

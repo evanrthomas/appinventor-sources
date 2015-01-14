@@ -294,6 +294,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
     //check if blocks are initialized
     Helper.println("YaCodePageEditor.showWhenInitialized() name:: "
             + getName() + " components ?? " + components.getComponents().size());
+    Helper.indent();
     updateBlocksTree(null);
     if(BlocklyPanel.blocksInited(fullFormName)) {
       blocksArea.showDifferentForm(fullFormName);
@@ -313,6 +314,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
       }
       timer.schedule(200); // Run every 200 milliseconds
     }
+    Helper.unindent();
   }
 
   /*
