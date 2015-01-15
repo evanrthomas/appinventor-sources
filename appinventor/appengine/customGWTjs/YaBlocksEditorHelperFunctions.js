@@ -9,7 +9,7 @@ var textToDom = function(text) {
       dom.firstChild !== dom.lastChild) {
     // Whatever we got back from the parser is not XML.
     console.log('invalid text ' + text);
-    throw 'text is not a valid xml tree';
+    throw 'my textToDom text is not a valid xml tree';
   }
   return dom.firstChild;
 }

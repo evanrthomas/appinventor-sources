@@ -86,27 +86,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
 
     final String formName = formNamePassedIn;
     final YaCodePageEditor newBlocksEditor = editorMap.get(formName).blocksEditor;
-    newBlocksEditor.loadFile(new Command() {
-        @Override
-        public void execute() {
-          YaCodePageEditor newBlocksEditor = editorMap.get(formName).blocksEditor;
-          int pos = Collections.binarySearch(fileIds, newBlocksEditor.getFileId(),
-              getFileIdComparator());
-          if (pos < 0) {
-            pos = -pos - 1;
-          }
-          insertFileEditor(newBlocksEditor, pos);
-          if (isScreen1(formName)) {
-            screen1BlocksLoaded = true;
-            if (readyToShowScreen1()) {
-              OdeLog.log("YaProjectEditor.addBlocksEditor.loadFile.execute: switching to screen "
-                  + formName + " for project " + newBlocksEditor.getProjectId());
-              Ode.getInstance().getDesignToolbar().switchToScreen(newBlocksEditor.getProjectId(),
-                  formName, DesignToolbar.View.FORM);
-            }
-          }
-        }
-      });
+    newBlocksEditor.loadFile(null);
 
   }
 
@@ -334,6 +314,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
         if (pos < 0) {
           pos = -pos - 1;
         }
+        Helper.println("YaProjectEditor.addFormEditor()");
         insertFileEditor(newFormEditor, pos);
         if (isScreen1(formName)) {
           screen1FormLoaded = true;
@@ -368,16 +349,27 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
 
 
     newBlocksEditor.loadFile(new Command() {
-      @Override
-      public void execute() {
-        int pos = Collections.binarySearch(fileIds, newBlocksEditor.getFileId(),
-                getFileIdComparator());
-        if (pos < 0) {
-          pos = -pos - 1;
+        @Override
+        public void execute() {
+          YaCodePageEditor newBlocksEditor = editorMap.get(formName).blocksEditor;
+          int pos = Collections.binarySearch(fileIds, newBlocksEditor.getFileId(),
+              getFileIdComparator());
+          if (pos < 0) {
+            pos = -pos - 1;
+          }
+          Helper.println("YaProjectEditor.loadBlocksEditor()");
+          insertFileEditor(newBlocksEditor, pos);
+          if (isScreen1(formName)) {
+            screen1BlocksLoaded = true;
+            if (readyToShowScreen1()) {
+              OdeLog.log("YaProjectEditor.addBlocksEditor.loadFile.execute: switching to screen "
+                  + formName + " for project " + newBlocksEditor.getProjectId());
+              Ode.getInstance().getDesignToolbar().switchToScreen(newBlocksEditor.getProjectId(),
+                  formName, DesignToolbar.View.FORM);
+            }
+          }
         }
-        insertFileEditor(newBlocksEditor, pos);
-      }
-    });
+      });
   }
   
   private void removeFormEditor(String formName) {

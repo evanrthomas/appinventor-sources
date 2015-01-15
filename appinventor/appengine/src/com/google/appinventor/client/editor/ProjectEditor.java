@@ -116,7 +116,16 @@ public abstract class ProjectEditor extends Composite {
     String fileId = fileEditor.getFileId();
     openFileEditors.put(fileId, fileEditor);
     fileIds.add(beforeIndex, fileId);
+
+    String s = "";
+    for (int i=0; i<deckPanel.getWidgetCount(); i++ ) {
+      s += deckPanel.getWidget(0).getTitle() + " ";
+    }
+
+    Helper.println("ProjectEditor.insertFileEditor() count "
+            + deckPanel.getWidgetCount() + " index " + beforeIndex + " widget titles " + s);
     deckPanel.insert(fileEditor, beforeIndex);
+    Helper.println("ProjectEditor.insertFileEditor() success");
     OdeLog.log("Inserted file editor for " + fileEditor.getFileId() + " at pos " + beforeIndex);
 
   }

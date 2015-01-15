@@ -187,7 +187,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
                 @Override
                 public void onSuccess(ChecksumedLoadFile result) {
                   try {
-                    Helper.println("YaCodePageEditor.loadFile() " + result.getContent());
+                    Helper.println("YaCodePageEditor.loadXmlAndMerge() " + result.getContent());
                     if (!result.getContent().equals("")) {
                       JavaScriptObject fileContentsAsXml = textToDom(result.getContent());
                       JsArray<JavaScriptObject> blocks = getTopLevelBlocks(fileContentsAsXml);

@@ -922,9 +922,20 @@ public interface OdeMessages extends Messages {
   @Description("Title of new Screen dialog.")
   String newFormTitle();
 
+
+  @DefaultMessage("New Shared Page")
+  @Description("Title of new Shared Page dialog.")
+  String newSharedPageTitle();
+
   @DefaultMessage("Screen name:")
   @Description("Label in front of name in new screen dialog.")
   String formNameLabel();
+
+
+  @DefaultMessage("Name:")
+  @Description("Label in front of name in new shared page dialog.")
+  String sharedPageNameLabel();
+
 
   @DefaultMessage("WARNING: The number of screens in this app might exceed the limits of App Inventor. " +
                   "Click <a target=\"_blank\" href=\"/reference/other/manyscreens.html\">here</a> for advice about " +
@@ -941,6 +952,11 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Duplicate Screen name!")
   @Description("Error shown when a new form name would be the same as an existing one")
   String duplicateFormNameError();
+
+
+  @DefaultMessage("Duplicate Name!")
+  @Description("Error shown when a new shared page name would be the same as an existing code page editor")
+  String duplicateSharedPageError();
 
   @DefaultMessage("Server error: could not add form. Please try again later!")
   @Description("Error message reported when adding a form failed on the server.")

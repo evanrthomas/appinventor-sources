@@ -13,11 +13,23 @@ import com.google.appinventor.client.editor.FileEditor;
 import com.google.appinventor.client.editor.ProjectEditor;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.output.OdeLog;
+import com.google.appinventor.client.widgets.LabeledTextBox;
+import com.google.appinventor.client.youngandroid.TextValidators;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidPackageNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
+import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.dom.client.*;
+import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.VerticalPanel;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import static com.google.appinventor.client.Ode.MESSAGES;
 
@@ -27,14 +39,6 @@ import static com.google.appinventor.client.Ode.MESSAGES;
  * @author lizlooney@google.com (Liz Looney)
  */
 public final class AddSharedPageCommand extends ChainableCommand {
-
-  private static final int MAX_FORM_COUNT = 10;
-
-  /**
-   * Creates a new command for creating a new form
-   */
-  public AddSharedPageCommand() {
-  }
 
   @Override
   public boolean willCallExecuteNextCommand() {
@@ -46,14 +50,14 @@ public final class AddSharedPageCommand extends ChainableCommand {
     OdeLog.log("AddSharedPageCommand.execute()");
     if (node instanceof YoungAndroidProjectNode) {
       OdeLog.log("AddSharedPageCommand.execute() instanceof success");
-      addBlocksNode((YoungAndroidProjectNode) node, "SharedPage");
+      NewSharedPageDialog dialogBox = new NewSharedPageDialog((YoungAndroidProjectNode)node);
+      dialogBox.show();
     } else {
       OdeLog.log("AddSharedPageCommand.execute() illegal argument");
       executionFailedOrCanceled();
       throw new IllegalArgumentException("node must be a YoungAndroidProjectNode");
     }
   }
-
 
   /**
    * Adds a new shared page to the project.
@@ -114,8 +118,112 @@ public final class AddSharedPageCommand extends ChainableCommand {
     };
 
     // Create the new blocks file (.bky) on the backend
-    Helper.println("AddSharedPage adding to backend " + blocksFileId);
     ode.getProjectService().addFile(projectRootNode.getProjectId(), blocksFileId, callback);
   }
-}
 
+  private class NewSharedPageDialog extends DialogBox {
+    // UI elements
+    private final LabeledTextBox textBox;
+
+    private final Set<String> otherBlocksEditors;
+
+
+    NewSharedPageDialog(final YoungAndroidProjectNode projectRootNode) {
+      super(false, true);
+      getElement().getStyle().setZIndex(101); //set z-index to be above the shared page modal overlay
+
+      setText(MESSAGES.newSharedPageTitle());
+      VerticalPanel contentPanel = new VerticalPanel();
+
+      // Collect the existing names so we can prevent duplicate form names.
+      otherBlocksEditors = new HashSet<String>();
+
+      for (ProjectNode source : projectRootNode.getAllSourceNodes()) {
+        if (source instanceof YoungAndroidBlocksNode) {
+          String name = ((YoungAndroidBlocksNode) source).getName();
+          Helper.println(name);
+          otherBlocksEditors.add(name);
+        }
+      }
+
+      textBox = new LabeledTextBox(MESSAGES.sharedPageNameLabel());
+      textBox.getTextBox().addKeyUpHandler(new KeyUpHandler() {
+        @Override
+        public void onKeyUp(KeyUpEvent event) {
+          int keyCode = event.getNativeKeyCode();
+          if (keyCode == KeyCodes.KEY_ENTER) {
+            handleOkClick(projectRootNode);
+          } else if (keyCode == KeyCodes.KEY_ESCAPE) {
+            hide();
+            executionFailedOrCanceled();
+          }
+        }
+      });
+      contentPanel.add(textBox);
+
+      String cancelText = MESSAGES.cancelButton();
+      String okText = MESSAGES.okButton();
+
+      Button cancelButton = new Button(cancelText);
+      cancelButton.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          hide();
+          executionFailedOrCanceled();
+        }
+      });
+      Button okButton = new Button(okText);
+      okButton.addClickHandler(new ClickHandler() {
+        @Override
+        public void onClick(ClickEvent event) {
+          handleOkClick(projectRootNode);
+        }
+      });
+      HorizontalPanel buttonPanel = new HorizontalPanel();
+      buttonPanel.add(cancelButton);
+      buttonPanel.add(okButton);
+      buttonPanel.setSize("100%", "24px");
+      contentPanel.add(buttonPanel);
+      contentPanel.setSize("320px", "100%");
+
+      add(contentPanel);
+    }
+
+    private void handleOkClick(YoungAndroidProjectNode projectRootNode) {
+      String name = textBox.getText();
+      if (validate(name)) {
+        hide();
+        addBlocksNode(projectRootNode, name);
+      } else {
+        textBox.setFocus(true);
+      }
+    }
+
+    private boolean validate(String name) {
+      // Check that it meets the formatting requirements.
+      if (!TextValidators.isValidIdentifier(name)) {
+        Window.alert(MESSAGES.malformedFormNameError());
+        return false;
+      }
+
+      // Check that it's unique.
+      if (otherBlocksEditors.contains(name + YoungAndroidSourceAnalyzer.BLOCKLY_SOURCE_EXTENSION)) {
+        Window.alert(MESSAGES.duplicateSharedPageError());
+        return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public void show() {
+      super.show();
+      Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+        @Override
+        public void execute() {
+          textBox.setFocus(true);
+        }
+      });
+    }
+  }
+}

@@ -9,6 +9,7 @@ import com.google.appinventor.client.editor.FileEditor;
 import com.google.appinventor.client.editor.ProjectEditor;
 import com.google.appinventor.client.editor.youngandroid.BlocklyPanel;
 import com.google.appinventor.client.explorer.commands.AddFormCommand;
+import com.google.appinventor.client.explorer.commands.AddSharedPageCommand;
 import com.google.appinventor.client.explorer.commands.ChainableCommand;
 import com.google.appinventor.client.explorer.commands.DeleteFileCommand;
 import com.google.appinventor.client.output.OdeLog;
@@ -23,7 +24,8 @@ import com.google.common.collect.Maps;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -309,25 +311,30 @@ public class DesignToolbar extends Toolbar {
     }
   }
 
-  private class OpenSharedPagesOverlay implements Command {
-    private VerticalPanel panel;
-    private VerticalPanel popUpPanelContents;
-    private PopupPanel popup;
-    private HTML message;
-    private Button button;
-    private ClickListener listener;
-    private SimplePanel holder;
+  private static class OpenSharedPagesOverlay implements Command {
     @Override
     public void execute() {
+      Helper.println("OpenSharedPagesOverlay.execute() " + OpenSharedPagesOverlay.class );
+      exportMethods();
       openOverlay();
+    }
+
+    private static void newSharedPage() { //called from javascript
+      ProjectRootNode rootNode = Ode.getInstance().getCurrentYoungAndroidProjectRootNode();
+      ChainableCommand cmd = new AddSharedPageCommand();
+      cmd.startExecuteChain(Tracking.PROJECT_ACTION_ADD_SHARED_PAGE_YA, rootNode);
 
     }
+
+    public native void exportMethods() /*-{
+      $wnd.exported.newSharedPage =
+          $entry(@com.google.appinventor.client.DesignToolbar$OpenSharedPagesOverlay::newSharedPage());
+    }-*/;
 
     public native void openOverlay() /*-{
      $wnd.exported.openSharedPagesOverlay();
     }-*/;
   }
-
 
   private class SwitchToFormEditorAction implements Command {
     @Override

@@ -112,6 +112,7 @@ window.exported.openSharedPagesOverlay =  function() {
 
  document.getElementById('fade').style.display = 'block';
  document.getElementById('overlay').style.display = 'block';
+ document.getElementById('new_shared_page_btn').onclick = window.exported.newSharedPage
 
  var clearOverlay = function() {
    document.getElementById('fade').style.display = 'none';

@@ -31,7 +31,10 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
       @Override
       public void onSuccess(ChecksumedLoadFile result) {
         try {
-          addComponentsFromHeader(textToDom(result.getContent()));
+          String content;
+          if ((content = result.getContent()) != "") {
+            addComponentsFromHeader(textToDom(content));
+          }
         } catch (ChecksumedFileException e) {
           onFailure(e);
         }
@@ -67,7 +70,6 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
   }
 
   private native JsArray<Element> getComponentsFromHeader(JavaScriptObject blocklyXml) /*-{
-    debugger;
     return blocklyXml.querySelectorAll('header > demanded_components > *');
   }-*/;
 
