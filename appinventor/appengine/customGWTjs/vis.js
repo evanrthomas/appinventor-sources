@@ -19772,7 +19772,6 @@ return /******/ (function(modules) { // webpackBootstrap
    * select this node
    */
   Node.prototype.select = function() {
-    debugger;
     this.selected = true;
     this._reset();
   };

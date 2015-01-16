@@ -1,5 +1,5 @@
 var getPageDrawer = function(title, color, components) {
-  return function drawPage(ctx, x, y) {
+  return function drawPage(ctx, x, y, node) {
     var pageWidth = 140;
     var pageHeight = pageWidth*1.3;
     var x = x - pageWidth/2;
@@ -7,7 +7,7 @@ var getPageDrawer = function(title, color, components) {
 
     ctx.beginPath();
     ctx.lineWidth="5";
-    ctx.strokeStyle = color || "black";
+    ctx.strokeStyle = node.selected ? 'yellow' : color || "black";
     ctx.rect(x,y, pageWidth, pageHeight);
     ctx.font="17px Georgia";
     ctx.fillText(title,x + 10,y + 20);
@@ -29,7 +29,7 @@ var getPageDrawer = function(title, color, components) {
       ctx.restore();
 
     }
-    return  {top:y, bottom:y + pageHeight, left:x, right:x + pageWidth};
+    return {top:y, bottom:y + pageHeight, left:x, right:x + pageWidth};
   }
 }
 
@@ -59,13 +59,13 @@ var openSharedPagesOverlay =  function() {
 
   var pages = window.exported.getProjectPages();
 
-  var nodes = [];
+  var nodes = new vis.DataSet();
   var id = 0;
   var formPages = pages.formPages;
   var sharedPages = pages.sharedPages;
 
   for (var i = 0; i < formPages.length; i ++) {
-    nodes.push({id: id++, 
+    nodes.add({id: id++, 
       shape: 'custom',
       radius:200,
       customDraw:getPageDrawer(formPages[i].name, 
@@ -75,7 +75,7 @@ var openSharedPagesOverlay =  function() {
   }
   for (var i = 0; i < sharedPages.length; i ++) {
     var name = sharedPages[i].name;
-    nodes.push({id: id++, 
+    nodes.add({id: id++, 
       shape: 'custom',
       radius:200,
       customDraw:getPageDrawer(sharedPages[i].name, 
@@ -85,26 +85,40 @@ var openSharedPagesOverlay =  function() {
   }
 
   // create an array with edges
-  var edges = [
+  var edges = new vis.DataSet();
+  edges.add([
     {from: 1, to: 2},
-  ];
+    {from: 1, to: 3},
+  ]);
 
   // create a network
   var container = document.getElementById('vis_network_area');
   var data = {
     nodes: nodes,
-    edges: edges
+    edges: edges,
   };
 
   var options = {
-    physics: {
-      barnesHut: {enabled: false}, 
-      repulsion: {nodeDistance: 100}
-    }, 
-    edges : {
-      style:'arrow',
-    }
-  };
+    dragNodes : false,
+    stabilize : false,
+    //hierarchicalLayout: {
+    //  levelSeperation: 200,
+    //  direction: 'LR',
+    //  enabled:true,
+    //},
+    physics : {
+      barnesHut : {
+        enabled: false,
+      },
+      repulsion: {
+        centralGravity:1,
+        nodeDistance:180,
+      },
+    },
+    edges: {
+      style: 'arrow',
+    },
+  }; 
   var network = new vis.Network(container, data, options);
 
 
