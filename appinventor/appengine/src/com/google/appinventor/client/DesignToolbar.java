@@ -20,6 +20,7 @@ import com.google.appinventor.client.widgets.Toolbar;
 import com.google.appinventor.common.version.AppInventorFeatures;
 import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
+import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -333,7 +334,11 @@ public class DesignToolbar extends Toolbar {
 
     private JSONObject pageDescriptor(YaCodePageEditor editor) {
       JSONObject json = new JSONObject();
-      json.put("name", new JSONString(editor.getName()));
+      String name = editor.getName();
+      if (name.endsWith(YoungAndroidSourceAnalyzer.BLOCKLY_SOURCE_EXTENSION)) {
+        name = name.substring(0, name.length() - YoungAndroidSourceAnalyzer.BLOCKLY_SOURCE_EXTENSION.length());
+      }
+      json.put("name", new JSONString(name));
       json.put("project_id", new JSONNumber((double)editor.getProjectId()));
       return json;
     }

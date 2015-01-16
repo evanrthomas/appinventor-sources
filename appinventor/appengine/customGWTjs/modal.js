@@ -1,5 +1,9 @@
-var drawPage = function(x,y,title, color, components) {
-    pages.push({i:pages.length, x:x, y:y, title:title});
+var getPageDrawer = function(title, color, components) {
+  return function drawPage(ctx, width, height) {
+    var x = 0;
+    var y = 0;
+    var pageWidth = 140;
+    var pageHeight = pageWidth*1.3;
     ctx.beginPath();
     ctx.lineWidth="5";
     ctx.strokeStyle = color || "black";
@@ -36,6 +40,7 @@ var drawPage = function(x,y,title, color, components) {
       ctx.stroke();
       ctx.restore();
     }
+  }
 }
 
 
@@ -61,27 +66,33 @@ var openSharedPagesOverlay =  function() {
   })();
 
 
-  var width = 900;
-  var height = 600;
-  var pageWidth = 140;
-  var pageHeight = 1.3*140;
 
+  var pages = window.exported.getProjectPages();
 
-  // create an array with nodes
-  var nodes = [
-    {id: 1, label: 'Node 1'},
-    {id: 2, label: 'Node 2'},
-    {id: 3, label: 'Node 3'},
-    {id: 4, label: 'Node 4'},
-    {id: 5, label: 'Node 5'}
-  ];
+  var nodes = [];
+  var id = 0;
+  var formPages = pages.formPages;
+  var sharedPages = pages.sharedPages;
+
+  for (var i = 0; i < formPages.length; i ++) {
+    nodes.push({id: id++, 
+      shape: 'custom',
+      radius:200,
+      customDraw:getPageDrawer(formPages[i].name, 'green'), 
+    });
+  }
+  for (var i = 0; i < sharedPages.length; i ++) {
+    var name = sharedPages[i].name;
+    nodes.push({id: id++, 
+      shape: 'custom',
+      radius:200,
+      customDraw:getPageDrawer(sharedPages[i].name, 'blue'), 
+    });
+  }
 
   // create an array with edges
   var edges = [
     {from: 1, to: 2},
-    {from: 1, to: 3},
-    {from: 2, to: 4},
-    {from: 2, to: 5}
   ];
 
   // create a network
@@ -90,7 +101,6 @@ var openSharedPagesOverlay =  function() {
     nodes: nodes,
     edges: edges
   };
-  debugger;
   var network = new vis.Network(container, data, {});
 
 
