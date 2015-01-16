@@ -1,6 +1,6 @@
 package com.google.appinventor.client.editor.youngandroid;
 
-import com.google.appinventor.client.ComponentSet;
+import com.google.appinventor.client.ComponentList;
 import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.YACachedBlocksNode;
@@ -97,7 +97,7 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
   }
 
   protected TreeItem getComponentsTree() {
-    TreeItem tree = ComponentSet.buildTree(components);
+    TreeItem tree = ComponentList.buildTree(components);
     TextButton button = new TextButton("Add Component");
     YoungAndroidPalettePanel palettePanel =  new YoungAndroidPalettePanel(YaSharedPageEditor.this);
     final PopupPanel panel = new PopupPanel(true, true);

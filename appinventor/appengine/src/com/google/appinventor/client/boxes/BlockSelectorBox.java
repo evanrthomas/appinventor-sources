@@ -187,7 +187,7 @@ public final class BlockSelectorBox extends Box {
    *          only component types that appear in this Form will be included
    * @return tree item for this form
    */
-  public TreeItem getGenericComponentsTree(ComponentSet components) {
+  public TreeItem getGenericComponentsTree(ComponentList components) {
     Map<String, String> typesAndIcons = Maps.newHashMap();
     for (MockComponent comp : components.getComponents()) {
       comp.collectTypesAndIcons(typesAndIcons);

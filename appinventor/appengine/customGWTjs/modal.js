@@ -13,31 +13,18 @@ var getPageDrawer = function(title, color, components) {
     ctx.fillText(title,x + 10,y + 20);
     ctx.stroke();
 
-    components = components || [];
-    components.sort();
     for (var i=0; i<components.length; i++) {
-      var comp;
-      var alpha = 1;
+      var comp = components[i];
       ctx.save();
-      if (typeof components[i] == 'object') {
-        comp = components[i][0];
-        if (!components[i][1]) {
-          ctx.drawImage(error, x - 25, y - 5 , 20, 20);
-          ctx.globalAlpha = 0.5;
-        }
-
-      } else {
-        comp = components[i];
-      }
 
       var img = new Image();
-      img.src ='images/' + comp + '.png';
+      img.src = comp.iconUrl;
       img.setAttribute('width', '12px');
       img.setAttribute('height', '12px');
       ctx.font="15px Georgia";
       ctx.drawImage(img, x+ 10, y + (i+2)*20 -5);
       ctx.beginPath();
-      ctx.fillText(comp + i,x + 30,y + (i+2)*20 + 10);
+      ctx.fillText(comp.name, x + 30, y + (i+2)*20 + 10);
       ctx.stroke();
       ctx.restore();
 
@@ -81,7 +68,9 @@ var openSharedPagesOverlay =  function() {
     nodes.push({id: id++, 
       shape: 'custom',
       radius:200,
-      customDraw:getPageDrawer(formPages[i].name, 'green'), 
+      customDraw:getPageDrawer(formPages[i].name, 
+        'green', 
+        formPages[i].components), 
     });
   }
   for (var i = 0; i < sharedPages.length; i ++) {
@@ -89,7 +78,9 @@ var openSharedPagesOverlay =  function() {
     nodes.push({id: id++, 
       shape: 'custom',
       radius:200,
-      customDraw:getPageDrawer(sharedPages[i].name, 'blue'), 
+      customDraw:getPageDrawer(sharedPages[i].name, 
+        'blue',
+        sharedPages[i].components), 
     });
   }
 

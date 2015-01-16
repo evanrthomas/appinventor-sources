@@ -6,13 +6,13 @@ import com.google.gwt.user.client.ui.TreeItem;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public class ComponentSet {
+public class ComponentList {
   private Collection<MockComponent> components;
-  public ComponentSet() {
+  public ComponentList() {
     components = new ArrayList<MockComponent>();
   }
 
-  public ComponentSet(Collection<MockComponent> comps) {
+  public ComponentList(Collection<MockComponent> comps) {
     this();
     for (MockComponent comp: comps) {
       addComponent(comp);
@@ -42,7 +42,7 @@ public class ComponentSet {
     return flatten(components);
   }
 
-  public static TreeItem buildTree(ComponentSet components) {
+  public static TreeItem buildTree(ComponentList components) {
     TreeItem itemNode = new TreeItem();
     for (MockComponent comp : components.getComponents()) {
       itemNode.addItem(comp.buildTree());

@@ -68,7 +68,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   // References to other panels that we need to control.
   private final SourceStructureExplorer sourceStructureExplorer;
 
-  protected final ComponentSet components;
+  protected final ComponentList components;
 
   //blocks will contain this property if they were imported form another shared page
   private final String IS_IMPORTED = "isImported";
@@ -101,7 +101,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
     super(projectEditor, blocksNode.getRealNode());
 
     this.blocksNode = blocksNode;
-    components = new ComponentSet();
+    components = new ComponentList();
 
     fullFormName = blocksNode.getProjectId() + "_" + blocksNode.getFormName();
     nameToCodePageEditor.put(fullFormName, this);
@@ -410,7 +410,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   private TreeItem getAnyComponentsTree() {
     return BlockSelectorBox.getBlockSelectorBox().
-            getGenericComponentsTree(new ComponentSet(ComponentSet.flatten(components.getComponents())));
+            getGenericComponentsTree(new ComponentList(ComponentList.flatten(components.getComponents())));
   }
 
 
@@ -443,7 +443,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   public static String getComponentInstanceTypeName(String formName, String instanceName) {
       //use form name to get blocks editor
-      ComponentSet componentsForForm = nameToCodePageEditor.get(formName).components;
+      ComponentList componentsForForm = nameToCodePageEditor.get(formName).components;
       return componentsForForm.getComponentByName(instanceName).getType();
   }
 

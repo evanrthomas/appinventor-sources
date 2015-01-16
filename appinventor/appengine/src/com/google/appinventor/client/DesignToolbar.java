@@ -6,6 +6,7 @@
 package com.google.appinventor.client;
 
 import com.google.appinventor.client.editor.ProjectEditor;
+import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.editor.youngandroid.BlocklyPanel;
 import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
 import com.google.appinventor.client.editor.youngandroid.YaFormEditor;
@@ -340,6 +341,17 @@ public class DesignToolbar extends Toolbar {
       }
       json.put("name", new JSONString(name));
       json.put("project_id", new JSONNumber((double)editor.getProjectId()));
+
+      JSONArray componentArr = new JSONArray();
+      for (String componentName: editor.getComponents().keySet()) {
+        MockComponent component = editor.getComponents().get(componentName);
+        JSONObject jsonComponent = new JSONObject();
+        jsonComponent.put("name", new JSONString(component.getName()));
+        jsonComponent.put("type", new JSONString(component.getType()));
+        jsonComponent.put("iconUrl", new JSONString(component.getIconImage().getUrl()));
+        componentArr.set(componentArr.size(), jsonComponent);
+      }
+      json.put("components", componentArr);
       return json;
     }
 
