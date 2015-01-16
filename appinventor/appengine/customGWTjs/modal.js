@@ -1,9 +1,10 @@
 var getPageDrawer = function(title, color, components) {
-  return function drawPage(ctx, width, height) {
-    var x = 0;
-    var y = 0;
+  return function drawPage(ctx, x, y) {
     var pageWidth = 140;
     var pageHeight = pageWidth*1.3;
+    var x = x - pageWidth/2;
+    var y = y - pageHeight/2;
+
     ctx.beginPath();
     ctx.lineWidth="5";
     ctx.strokeStyle = color || "black";
@@ -39,7 +40,9 @@ var getPageDrawer = function(title, color, components) {
       ctx.fillText(comp + i,x + 30,y + (i+2)*20 + 10);
       ctx.stroke();
       ctx.restore();
+
     }
+    return  {top:y, bottom:y + pageHeight, left:x, right:x + pageWidth};
   }
 }
 

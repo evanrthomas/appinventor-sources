@@ -19772,6 +19772,7 @@ return /******/ (function(modules) { // webpackBootstrap
    * select this node
    */
   Node.prototype.select = function() {
+    debugger;
     this.selected = true;
     this._reset();
   };
@@ -20418,21 +20419,14 @@ return /******/ (function(modules) { // webpackBootstrap
 
   Node.prototype._makeDrawCustom = function(draw) {
     return function(ctx) {
-      this.resize(ctx);
-      this.left = this.x - this.width / 2;
-      this.top = this.y - this.height / 2;
-
-
       ctx.save();
-      ctx.translate(this.x - this.width/2, this.y - this.height/2);
-      draw(ctx, this.width, this.height, this);
+      this.boundingBox = draw(ctx, this.x, this.y, this);
       ctx.restore();
 
-      this.boundingBox.top = this.y - this.height/2;
-      this.boundingBox.left = this.x - this.width/2;
-      this.boundingBox.right = this.x + this.width/2;
-      this.boundingBox.bottom = this.y + this.height/2;
-
+      this.left = this.boundingBox.left;
+      this.top = this.boundingBox.top;
+      this.width = this.boundingBox.right - this.boundingBox.left;
+      this.height = this.boundingBox.bottom - this.boundingBox.top;
     }
   }
 
