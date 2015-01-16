@@ -95,7 +95,17 @@ var openSharedPagesOverlay =  function() {
     nodes: nodes,
     edges: edges
   };
-  var network = new vis.Network(container, data, {});
+
+  var options = {
+    physics: {
+      barnesHut: {enabled: false}, 
+      repulsion: {nodeDistance: 100}
+    }, 
+    edges : {
+      style:'arrow',
+    }
+  };
+  var network = new vis.Network(container, data, options);
 
 
 };
