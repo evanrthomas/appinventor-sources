@@ -1,7 +1,6 @@
 
 package com.google.appinventor.client.editor.youngandroid;
 
-import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.YACachedBlocksNode;
 import com.google.appinventor.client.editor.simple.components.FormChangeListener;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
@@ -20,6 +19,11 @@ public final class YaFormPageEditor extends YaCodePageEditor implements FormChan
   protected YaFormPageEditor(YaProjectEditor projectEditor, YACachedBlocksNode blocksNode) {
     super(projectEditor, blocksNode);
     myFormEditor = projectEditor.getFormFileEditor(blocksNode.getFormName());
+  }
+
+  @Override
+  public boolean isFormPageEditor() {
+    return true;
   }
 
   @Override

@@ -8,8 +8,9 @@ package com.google.appinventor.client.explorer.commands;
 import com.google.appinventor.client.DesignToolbar;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
-import com.google.appinventor.client.editor.FileEditor;
 import com.google.appinventor.client.editor.ProjectEditor;
+import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
+import com.google.appinventor.client.editor.youngandroid.YaFormEditor;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.widgets.LabeledTextBox;
 import com.google.appinventor.client.youngandroid.TextValidators;
@@ -223,8 +224,8 @@ public final class AddFormCommand extends ChainableCommand {
             public void execute() {
               ProjectEditor projectEditor = 
                   ode.getEditorManager().getOpenProjectEditor(project.getProjectId());
-              FileEditor formEditor = projectEditor.getFileEditor(formFileId);
-              FileEditor blocksEditor = projectEditor.getFileEditor(blocksFileId);
+              YaFormEditor formEditor = (YaFormEditor)projectEditor.getFileEditor(formFileId);
+              YaCodePageEditor blocksEditor = (YaCodePageEditor)projectEditor.getFileEditor(blocksFileId);
               if (formEditor != null && blocksEditor != null && !ode.screensLocked()) {
                 DesignToolbar designToolbar = Ode.getInstance().getDesignToolbar();
                 long projectId = formEditor.getProjectId();

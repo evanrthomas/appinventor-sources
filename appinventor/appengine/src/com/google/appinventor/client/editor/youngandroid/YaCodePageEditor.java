@@ -16,10 +16,8 @@ import com.google.appinventor.client.explorer.SourceStructureExplorerItem;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.shared.rpc.project.ChecksumedFileException;
 import com.google.appinventor.shared.rpc.project.ChecksumedLoadFile;
-import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
-import com.google.appinventor.shared.storage.StorageUtil;
-import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
+import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
 import com.google.common.collect.Maps;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
@@ -134,25 +132,15 @@ public abstract class YaCodePageEditor extends SimpleEditor
   public static YaCodePageEditor newEditor (YaProjectEditor project, YoungAndroidBlocksNode sourceNode) {
 
     YACachedBlocksNode cachedNode =  YACachedBlocksNode.getOrCreateCachedNode(sourceNode);
-    if (isFormPageSourceNode(sourceNode)) {
+    if (YoungAndroidSourceNode.isFormPageSourceNode(sourceNode)) {
       return new YaFormPageEditor(project, cachedNode);
     } else {
       return new YaSharedPageEditor(project, cachedNode);
     }
   }
 
-  public static boolean isFormPageSourceNode(YoungAndroidBlocksNode sourceNode) {
-
-    String formFileId = StorageUtil.trimOffExtension(sourceNode.getFileId()) +
-            YoungAndroidSourceAnalyzer.FORM_PROPERTIES_EXTENSION;
-    for (ProjectNode source : sourceNode.getProjectRoot().getAllSourceNodes()) { //TODO (evan): shouldn't have to do an O(n) loop here. YaProjectEditor has already looped over these once. Make YaProjectEditor store all of these and then look up from the project editor
-      if (source.getFileId().equals(formFileId)) {
-        return true;
-      }
-    }
+  public boolean isFormPageEditor()  {
     return false;
-
-
   }
 
   //SimpleEditor methods

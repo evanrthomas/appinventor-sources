@@ -11,6 +11,7 @@ import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.editor.FileEditor;
 import com.google.appinventor.client.editor.ProjectEditor;
+import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.widgets.LabeledTextBox;
@@ -100,7 +101,7 @@ public final class AddSharedPageCommand extends ChainableCommand {
             if (blocksEditor != null && !ode.screensLocked()) {
               DesignToolbar designToolbar = Ode.getInstance().getDesignToolbar();
               long projectId = blocksEditor.getProjectId();
-              designToolbar.addScreen(projectId, new DesignToolbar.Screen(name, blocksEditor));
+              designToolbar.addScreen(projectId, new DesignToolbar.Screen(name, (YaCodePageEditor)blocksEditor));
               executeNextCommand(projectRootNode);
             } else {
               // The form editor and/or blocks editor is still not there. Try again later.

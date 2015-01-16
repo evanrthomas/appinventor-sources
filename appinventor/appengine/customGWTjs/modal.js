@@ -1,6 +1,5 @@
 window.exported = window.exported || {};
 window.exported.openSharedPagesOverlay =  function() {
-  console.log(window.exported.getProjectPages());
   var width = 900;
   var height = 600;
   document.getElementById("canvas").width =  width;

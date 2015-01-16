@@ -5,9 +5,10 @@
 
 package com.google.appinventor.client;
 
-import com.google.appinventor.client.editor.FileEditor;
 import com.google.appinventor.client.editor.ProjectEditor;
 import com.google.appinventor.client.editor.youngandroid.BlocklyPanel;
+import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
+import com.google.appinventor.client.editor.youngandroid.YaFormEditor;
 import com.google.appinventor.client.explorer.commands.AddFormCommand;
 import com.google.appinventor.client.explorer.commands.AddSharedPageCommand;
 import com.google.appinventor.client.explorer.commands.ChainableCommand;
@@ -21,7 +22,12 @@ import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.json.client.JSONArray;
+import com.google.gwt.json.client.JSONNumber;
+import com.google.gwt.json.client.JSONObject;
+import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -48,16 +54,16 @@ public class DesignToolbar extends Toolbar {
    */
   public static class Screen {
     public final String screenName;
-    public final FileEditor formEditor;
-    public final FileEditor blocksEditor;
+    public final YaFormEditor formEditor;
+    public final YaCodePageEditor blocksEditor;
 
-    public Screen(String name, FileEditor formEditor, FileEditor blocksEditor) {
+    public Screen(String name, YaFormEditor formEditor, YaCodePageEditor blocksEditor) {
       this.screenName = name;
       this.formEditor = formEditor;
       this.blocksEditor = blocksEditor;
     }
 
-    public Screen(String name, FileEditor blocksEditor) {
+    public Screen(String name, YaCodePageEditor blocksEditor) {
       this.screenName = name;
       this.formEditor = null;
       this.blocksEditor = blocksEditor;
@@ -311,7 +317,7 @@ public class DesignToolbar extends Toolbar {
     }
   }
 
-  private static class OpenSharedPagesOverlay implements Command {
+  private class OpenSharedPagesOverlay implements Command {
     @Override
     public void execute() {
       Helper.println("OpenSharedPagesOverlay.execute() " + OpenSharedPagesOverlay.class );
@@ -319,16 +325,53 @@ public class DesignToolbar extends Toolbar {
       openOverlay();
     }
 
-    private static void newSharedPage() { //called from javascript
+    private void newSharedPage() {
       ProjectRootNode rootNode = Ode.getInstance().getCurrentYoungAndroidProjectRootNode();
       ChainableCommand cmd = new AddSharedPageCommand();
       cmd.startExecuteChain(Tracking.PROJECT_ACTION_ADD_SHARED_PAGE_YA, rootNode);
+    }
 
+    private JSONObject pageDescriptor(YaCodePageEditor editor) {
+      JSONObject json = new JSONObject();
+      json.put("name", new JSONString(editor.getName()));
+      json.put("project_id", new JSONNumber((double)editor.getProjectId()));
+      return json;
+    }
+
+    private JavaScriptObject getProjectPages() {
+      JSONObject json = new JSONObject();
+      YaCodePageEditor currentPage = currentProject.screens.get(currentProject.currentScreen).blocksEditor;
+      json.put("currentPage",  pageDescriptor(currentPage));
+
+      JSONArray formPages = new JSONArray();
+      JSONArray sharedPages = new JSONArray();
+      YaCodePageEditor page;
+      for (String name: currentProject.screens.keySet()) {
+        page = currentProject.screens.get(name).blocksEditor;
+        if (page.isFormPageEditor()) {
+          formPages.set(formPages.size(), pageDescriptor(page));
+        } else {
+          sharedPages.set(sharedPages.size(), pageDescriptor(page));
+        }
+      }
+
+      json.put("formPages", formPages);
+      json.put("sharedPages", sharedPages);
+
+      //TODO (evan): make array of imports of the form [{from:pageDescriptor, to:pageDescriptor}]
+      JSONArray imports = new JSONArray();
+      json.put("imports", imports);
+      return json.getJavaScriptObject();
     }
 
     public native void exportMethods() /*-{
-      $wnd.exported.newSharedPage =
-          $entry(@com.google.appinventor.client.DesignToolbar$OpenSharedPagesOverlay::newSharedPage());
+      var that = this;
+      $wnd.exported.newSharedPage = $entry(function() {
+        return that.@com.google.appinventor.client.DesignToolbar$OpenSharedPagesOverlay::newSharedPage()();
+       });
+      $wnd.exported.getProjectPages = $entry(function() {
+        return that.@com.google.appinventor.client.DesignToolbar$OpenSharedPagesOverlay::getProjectPages()();
+      });
     }-*/;
 
     public native void openOverlay() /*-{
@@ -377,6 +420,7 @@ public class DesignToolbar extends Toolbar {
       clearDropDownMenu(WIDGET_NAME_SCREENS_DROPDOWN);
       OdeLog.log("DesignToolbar: switching to existing project " + projectName + " with id "
           + projectId);
+      Helper.println("DesignToolbar.switchToProject " + projectMap.get(projectId));
       currentProject = projectMap.get(projectId);
       // TODO(sharon): add screens to drop-down menu in the right order
       for (Screen screen : currentProject.screens.values()) {
