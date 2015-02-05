@@ -1,6 +1,6 @@
 var getPageDrawer = function(title, color, components) {
   return function drawPage(ctx, x, y, node) {
-    var pageWidth = 140;
+    var pageWidth = 100;
     var pageHeight = pageWidth*1.3;
     var x = x - pageWidth/2;
     var y = y - pageHeight/2;
@@ -40,7 +40,6 @@ var clearOverlay = function() {
 }
 
 var openSharedPagesOverlay =  function() {
-
   (function initializeOverlay() {
     document.getElementById('fade').style.display = 'block';
     document.getElementById('overlay').style.display = 'block';
@@ -58,38 +57,47 @@ var openSharedPagesOverlay =  function() {
 
 
   var pages = window.exported.getProjectPages();
+  console.log(window.projectPages = pages);
 
   var nodes = new vis.DataSet();
-  var id = 0;
+  var edges = new vis.DataSet();
   var formPages = pages.formPages;
   var sharedPages = pages.sharedPages;
 
-  for (var i = 0; i < formPages.length; i ++) {
-    nodes.add({id: id++, 
+  formPages.forEach(function(info) {
+    var id = info.projectId + "_" + info.fileId;
+    nodes.add({id: id, 
       shape: 'custom',
-      radius:200,
-      customDraw:getPageDrawer(formPages[i].name, 
+      info: info,
+      customDraw:getPageDrawer(info.name,  //TODO (evan): change the name of customDraw to drawFunction
         'green', 
-        formPages[i].components), 
+        info.components), 
     });
-  }
-  for (var i = 0; i < sharedPages.length; i ++) {
-    var name = sharedPages[i].name;
-    nodes.add({id: id++, 
-      shape: 'custom',
-      radius:200,
-      customDraw:getPageDrawer(sharedPages[i].name, 
-        'blue',
-        sharedPages[i].components), 
+    info.children.forEach(function(child)  {
+      edges.add({
+        from:id,
+        to:child.projectId + "_" + child.fileId,
+      });
     });
-  }
+  });
 
-  // create an array with edges
-  var edges = new vis.DataSet();
-  edges.add([
-    {from: 1, to: 2},
-    {from: 1, to: 3},
-  ]);
+  sharedPages.forEach(function(info) {
+    var id = info.projectId + "_" + info.fileId;
+    nodes.add({id: id, 
+      shape: 'custom',
+      info: info,
+      customDraw:getPageDrawer("shared:" + info.name, 
+        'blue',
+        info.components), 
+    });
+    info.children.forEach(function(child) {
+      edges.add({
+        from:id,
+        to:child.projectId + "_" + child.fileId,
+      });
+    });
+  });
+
 
   // create a network
   var container = document.getElementById('vis_network_area');
@@ -101,6 +109,7 @@ var openSharedPagesOverlay =  function() {
   var options = {
     dragNodes : false,
     stabilize : false,
+    dataManipulation : true,
     //hierarchicalLayout: {
     //  levelSeperation: 200,
     //  direction: 'LR',
@@ -112,16 +121,30 @@ var openSharedPagesOverlay =  function() {
       },
       repulsion: {
         centralGravity:1,
-        nodeDistance:180,
+        nodeDistance:120,
       },
     },
     edges: {
       style: 'arrow',
     },
+    onConnect: function(data, connect) {
+      var parent = nodes.get(data.from).info;
+      var child = nodes.get(data.to).info;
+      child = {
+        projectId: child["projectId"],
+        fileId: child["fileId"],
+      }
+      parent = {
+        projectId: parent["projectId"],
+        fileId: parent["fileId"],
+      }
+      if (window.exported.importNewPage(parent, child)) {
+        connect(data);
+      }
+    }
   }; 
   var network = new vis.Network(container, data, options);
-
-
+  window.network = network;
 };
 
 window.exported = window.exported || {};

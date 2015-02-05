@@ -85,7 +85,7 @@ public class YACachedBlocksNode {
     return realNode.getName();
   }
 
-  public String getFormName() {
+  public String getFileName() {
     return realNode.getFormName();
   }
 

@@ -8,6 +8,9 @@ import com.google.appinventor.client.*;
 import com.google.appinventor.client.boxes.AssetListBox;
 import com.google.appinventor.client.boxes.BlockSelectorBox;
 import com.google.appinventor.client.boxes.PaletteBox;
+import com.google.appinventor.client.editor.EditorManager;
+import com.google.appinventor.client.editor.FileEditor;
+import com.google.appinventor.client.editor.ProjectEditor;
 import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
 import com.google.appinventor.client.editor.simple.SimpleEditor;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
@@ -16,11 +19,13 @@ import com.google.appinventor.client.explorer.SourceStructureExplorerItem;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.shared.rpc.project.ChecksumedFileException;
 import com.google.appinventor.shared.rpc.project.ChecksumedLoadFile;
+import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
 import com.google.common.collect.Maps;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.json.client.JSONObject;
@@ -61,7 +66,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   private static final Map<String, YaCodePageEditor> nameToCodePageEditor = Maps.newHashMap();
 
   // projectid_formname for this blocks editor. Our index into the static nameToCodePageEditor map.
-  private String fullFormName;
+  private String fullName;
 
   protected final YACachedBlocksNode blocksNode;
 
@@ -69,6 +74,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   private final SourceStructureExplorer sourceStructureExplorer;
 
   protected final ComponentList components;
+  private final Set<YaSharedPageEditor> children;
 
   //blocks will contain this property if they were imported form another shared page
   private final String IS_IMPORTED = "isImported";
@@ -102,10 +108,14 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
     this.blocksNode = blocksNode;
     components = new ComponentList();
+    //TODO (evan): make abstract method initComponents(components) and override in children
 
-    fullFormName = blocksNode.getProjectId() + "_" + blocksNode.getFormName();
-    nameToCodePageEditor.put(fullFormName, this);
-    blocksArea = new BlocklyPanel(fullFormName);
+    children = new TreeSet<YaSharedPageEditor>();
+    initChildren(children);
+
+    fullName = blocksNode.getProjectId() + "_" + blocksNode.getFileName();
+    nameToCodePageEditor.put(fullName, this);
+    blocksArea = new BlocklyPanel(fullName);
     blocksArea.setWidth("100%");
     // This code seems to be using a rather old layout, so we cannot simply pass 100% for height.
     // Instead, it needs to be calculated from the client's window, and a listener added to Window
@@ -129,8 +139,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   }
 
-  public static YaCodePageEditor newEditor (YaProjectEditor project, YoungAndroidBlocksNode sourceNode) {
-
+  public static YaCodePageEditor newEditor(YaProjectEditor project, YoungAndroidBlocksNode sourceNode) {
     YACachedBlocksNode cachedNode =  YACachedBlocksNode.getOrCreateCachedNode(sourceNode);
     if (YoungAndroidSourceNode.isFormPageSourceNode(sourceNode)) {
       return new YaFormPageEditor(project, cachedNode);
@@ -139,6 +148,57 @@ public abstract class YaCodePageEditor extends SimpleEditor
     }
   }
 
+  public void initChildren(final Set<YaSharedPageEditor> children) {
+    blocksNode.load(new OdeAsyncCallback<ChecksumedLoadFile>() {
+      @Override
+      public void onSuccess(ChecksumedLoadFile result) {
+        try {
+          JsArray<Element> childrenXml = getChildrenFromHeader(textToDom(result.getContent()));
+          Element childXml;
+          for (int i = 0; i < childrenXml.length(); i++) {
+            childXml = childrenXml.get(i);
+            long projectId = Long.parseLong(childXml.getAttribute("projectId"));
+            String fileId = childXml.getAttribute("fileId");
+            String fullName = projectId + "_" + fileId;
+            YaCodePageEditor child = getCodePageEditor(projectId, fileId);
+            addChild((YaSharedPageEditor)child); //TODO (evan): get rid of this cast
+          }
+        } catch(ChecksumedFileException e) {
+          onFailure(e);
+        }
+      }
+    });
+  }
+
+  public void addChild(YaSharedPageEditor child) {
+    children.add(child);
+  }
+
+  public Set<YaSharedPageEditor> getChildren() {
+    return children;
+  }
+
+  public static YaCodePageEditor getCodePageEditor(long projectId, String fileId) {
+    EditorManager editorManager = Ode.getInstance().getEditorManager();
+    ProjectEditor projectEditor = editorManager.getOpenProjectEditor(projectId);
+    if (projectEditor == null) {
+      ProjectRootNode rootNode = Ode.getInstance().getProjectManager().getProject(projectId).getRootNode();
+      projectEditor = editorManager.openProject(rootNode);
+    }
+    FileEditor editor = projectEditor.getFileEditor(fileId);
+    if (editor instanceof YaCodePageEditor) {
+      //TODO (evan): the instanceof here and the cast are messy, fix this
+      return (YaCodePageEditor)editor;
+    }
+    Helper.println("YaCodePageEditor.getCodePageEditor() returning null " + " projectId = " + projectId +
+    " fileId = " + fileId + " editor " + editor);
+    return null;
+  }
+
+
+  private native JsArray<Element> getChildrenFromHeader(JavaScriptObject xml) /*-{
+    return xml.querySelectorAll('header > children > child');
+  }-*/;
   public boolean isFormPageEditor()  {
     return false;
   }
@@ -263,13 +323,13 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   private native String evalJS(String s) /*-{
      return eval(s);
-    }-*/;
+  }-*/;
 
 
 
   @Override
   public String getTabText() {
-    return MESSAGES.blocksEditorTabName(blocksNode.getFormName());
+    return MESSAGES.blocksEditorTabName(blocksNode.getFileName());
   }
 
   @Override
@@ -282,8 +342,8 @@ public abstract class YaCodePageEditor extends SimpleEditor
   public void showWhenInitialized() {
     //check if blocks are initialized
     updateBlocksTree(null);
-    if(BlocklyPanel.blocksInited(fullFormName)) {
-      blocksArea.showDifferentForm(fullFormName);
+    if(BlocklyPanel.blocksInited(fullName)) {
+      blocksArea.showDifferentForm(fullName);
       loadBlocksEditor();
       if (this instanceof YaFormPageEditor) {
         ((YaFormPageEditor) this).sendComponentData();  // Send Blockly the component information for generating Yail
@@ -349,7 +409,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   public void onClose() {
     // our partner YaFormEditor added us as a FormChangeListener, but we remove ourself.
     BlockSelectorBox.getBlockSelectorBox().removeBlockDrawerSelectionListener(this);
-    nameToCodePageEditor.remove(fullFormName);
+    nameToCodePageEditor.remove(fullName);
   }
 
   public static void toggleWarning() {
@@ -371,20 +431,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
     // Clear and hide the blocks selector tree
     sourceStructureExplorer.clearTree();
     hideComponentBlocks();
-  }
-
-  private static List<YaCodePageEditor> getParents(YaCodePageEditor editor) {
-    ArrayList<YaCodePageEditor> parents = new  ArrayList<YaCodePageEditor>();
-    if (!editor.fullFormName.contains("SharedPage")) {
-      return parents;
-    } else {
-      for (String s: nameToCodePageEditor.keySet()) {
-        if (!s.contains("SharedPage")) {
-          parents.add(nameToCodePageEditor.get(s));
-        }
-      }
-      return parents;
-    }
   }
 
   public static void onBlocksAreaChanged(String formName) {

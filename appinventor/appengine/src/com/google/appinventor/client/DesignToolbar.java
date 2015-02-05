@@ -10,6 +10,7 @@ import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.editor.youngandroid.BlocklyPanel;
 import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
 import com.google.appinventor.client.editor.youngandroid.YaFormEditor;
+import com.google.appinventor.client.editor.youngandroid.YaSharedPageEditor;
 import com.google.appinventor.client.explorer.commands.AddFormCommand;
 import com.google.appinventor.client.explorer.commands.AddSharedPageCommand;
 import com.google.appinventor.client.explorer.commands.ChainableCommand;
@@ -327,7 +328,7 @@ public class DesignToolbar extends Toolbar {
       openOverlay();
     }
 
-    private void newSharedPage() {
+    private void newSharedPage() { //called from javascript
       ProjectRootNode rootNode = Ode.getInstance().getCurrentYoungAndroidProjectRootNode();
       ChainableCommand cmd = new AddSharedPageCommand();
       cmd.startExecuteChain(Tracking.PROJECT_ACTION_ADD_SHARED_PAGE_YA, rootNode);
@@ -340,7 +341,8 @@ public class DesignToolbar extends Toolbar {
         name = name.substring(0, name.length() - YoungAndroidSourceAnalyzer.BLOCKLY_SOURCE_EXTENSION.length());
       }
       json.put("name", new JSONString(name));
-      json.put("project_id", new JSONNumber((double)editor.getProjectId()));
+      json.put("projectId", new JSONNumber((double)editor.getProjectId()));
+      json.put("fileId", new JSONString(editor.getFileId()));
 
       JSONArray componentArr = new JSONArray();
       for (String componentName: editor.getComponents().keySet()) {
@@ -352,10 +354,19 @@ public class DesignToolbar extends Toolbar {
         componentArr.set(componentArr.size(), jsonComponent);
       }
       json.put("components", componentArr);
+
+      JSONArray childrenArr = new JSONArray();
+      for (YaSharedPageEditor child : editor.getChildren()) {
+        JSONObject jsonComponent = new JSONObject();
+        jsonComponent.put("projectId", new JSONNumber(child.getProjectId()));
+        jsonComponent.put("fileId", new JSONString(child.getFileId()));
+        childrenArr.set(childrenArr.size(), jsonComponent);
+      }
+      json.put("children", childrenArr);
       return json;
     }
 
-    private JavaScriptObject getProjectPages() {
+    private JavaScriptObject getProjectPages() { //called from javascript
       JSONObject json = new JSONObject();
       YaCodePageEditor currentPage = currentProject.screens.get(currentProject.currentScreen).blocksEditor;
       json.put("currentPage",  pageDescriptor(currentPage));
@@ -375,11 +386,36 @@ public class DesignToolbar extends Toolbar {
       json.put("formPages", formPages);
       json.put("sharedPages", sharedPages);
 
-      //TODO (evan): make array of imports of the form [{from:pageDescriptor, to:pageDescriptor}]
-      JSONArray imports = new JSONArray();
-      json.put("imports", imports);
       return json.getJavaScriptObject();
     }
+
+    //returns whether the child can be imported
+    private boolean importNewPage(JavaScriptObject parentObj, JavaScriptObject childObj) { //called from javascript
+      JSONObject jsonParent = new JSONObject(parentObj);
+      JSONObject jsonChild = new JSONObject(childObj);
+
+      YaCodePageEditor parent = YaCodePageEditor.getCodePageEditor(
+              (long)jsonParent.get("projectId").isNumber().doubleValue(),
+              jsonParent.get("fileId").isString().stringValue());
+
+      YaCodePageEditor child = YaCodePageEditor.getCodePageEditor(
+              (long) jsonChild.get("projectId").isNumber().doubleValue(),
+              jsonChild.get("fileId").isString().stringValue());
+      Helper.println("DesignToolbar.importNewPage() parent == null " + (parent == null));
+      Helper.println("DesignToolbar.importNewPage() child == null " + (child == null));
+
+      if (!child.isFormPageEditor()) {
+        parent.addChild((YaSharedPageEditor)child); //TODO (evan): get rid of this cast
+        return true;
+      } else {
+        alert("child must be a shared page");
+        return false;
+      }
+    }
+
+    private native void alert(String msg) /*-{
+      $wnd.alert(msg);
+    }-*/;
 
     public native void exportMethods() /*-{
       var that = this;
@@ -388,6 +424,9 @@ public class DesignToolbar extends Toolbar {
        });
       $wnd.exported.getProjectPages = $entry(function() {
         return that.@com.google.appinventor.client.DesignToolbar$OpenSharedPagesOverlay::getProjectPages()();
+      });
+      $wnd.exported.importNewPage = $entry(function(parent, child) {
+        return that.@com.google.appinventor.client.DesignToolbar$OpenSharedPagesOverlay::importNewPage(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(parent, child);
       });
     }-*/;
 
