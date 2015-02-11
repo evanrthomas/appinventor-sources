@@ -66,12 +66,12 @@ var openSharedPagesOverlay =  function() {
 
   formPages.forEach(function(info) {
     var id = info.projectId + "_" + info.fileId;
-    nodes.add({id: id, 
+    nodes.add({id: id,
       shape: 'custom',
       info: info,
       customDraw:getPageDrawer(info.name,  //TODO (evan): change the name of customDraw to drawFunction
-        'green', 
-        info.components), 
+        'green',
+        info.components),
     });
     info.children.forEach(function(child)  {
       edges.add({
@@ -83,12 +83,12 @@ var openSharedPagesOverlay =  function() {
 
   sharedPages.forEach(function(info) {
     var id = info.projectId + "_" + info.fileId;
-    nodes.add({id: id, 
+    nodes.add({id: id,
       shape: 'custom',
       info: info,
-      customDraw:getPageDrawer("shared:" + info.name, 
+      customDraw:getPageDrawer("shared:" + info.name,
         'blue',
-        info.components), 
+        info.components),
     });
     info.children.forEach(function(child) {
       edges.add({
@@ -109,7 +109,10 @@ var openSharedPagesOverlay =  function() {
   var options = {
     dragNodes : false,
     stabilize : false,
-    dataManipulation : true,
+    dataManipulation : {
+      enabled: true,
+      initiallyVisible: true,
+    },
     //hierarchicalLayout: {
     //  levelSeperation: 200,
     //  direction: 'LR',
@@ -142,7 +145,7 @@ var openSharedPagesOverlay =  function() {
         connect(data);
       }
     }
-  }; 
+  };
   var network = new vis.Network(container, data, options);
   window.network = network;
 };

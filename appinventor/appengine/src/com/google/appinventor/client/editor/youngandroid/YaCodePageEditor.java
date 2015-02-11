@@ -114,6 +114,17 @@ public abstract class YaCodePageEditor extends SimpleEditor
     initChildren(children);
 
     fullName = blocksNode.getProjectId() + "_" + blocksNode.getFileName();
+
+    blocksNode.load(new OdeAsyncCallback<ChecksumedLoadFile>() {
+      @Override
+      public void onSuccess(ChecksumedLoadFile result) {
+        try {
+          Helper.println(fullName + " " + result.getContent());
+        } catch(ChecksumedFileException e) {
+          onFailure(e);
+        }
+      }
+    });
     nameToCodePageEditor.put(fullName, this);
     blocksArea = new BlocklyPanel(fullName);
     blocksArea.setWidth("100%");
