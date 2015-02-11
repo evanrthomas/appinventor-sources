@@ -323,7 +323,6 @@ public class DesignToolbar extends Toolbar {
   private class OpenSharedPagesOverlay implements Command {
     @Override
     public void execute() {
-      Helper.println("OpenSharedPagesOverlay.execute() " + OpenSharedPagesOverlay.class );
       exportMethods();
       openOverlay();
     }
@@ -401,8 +400,6 @@ public class DesignToolbar extends Toolbar {
       YaCodePageEditor child = YaCodePageEditor.getCodePageEditor(
               (long) jsonChild.get("projectId").isNumber().doubleValue(),
               jsonChild.get("fileId").isString().stringValue());
-      Helper.println("DesignToolbar.importNewPage() parent == null " + (parent == null));
-      Helper.println("DesignToolbar.importNewPage() child == null " + (child == null));
 
       if (!child.isFormPageEditor()) {
         parent.addChild((YaSharedPageEditor)child); //TODO (evan): get rid of this cast
@@ -476,7 +473,6 @@ public class DesignToolbar extends Toolbar {
       clearDropDownMenu(WIDGET_NAME_SCREENS_DROPDOWN);
       OdeLog.log("DesignToolbar: switching to existing project " + projectName + " with id "
           + projectId);
-      Helper.println("DesignToolbar.switchToProject " + projectMap.get(projectId));
       currentProject = projectMap.get(projectId);
       // TODO(sharon): add screens to drop-down menu in the right order
       for (Screen screen : currentProject.screens.values()) {

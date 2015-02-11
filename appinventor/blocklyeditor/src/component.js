@@ -23,16 +23,13 @@ goog.require('Blockly.TranslationMethods');
 goog.require('Blockly.TranslationParams');
 
 Blockly.Component.add = function(name, uid) {
-  console.log("Blockly.Component.add " + name + " " + uid);
   if (Blockly.ComponentInstances.haveInstance(name, uid)) {
-    console.log("Blockly.Component.add haveInstance " + name + " " + uid);
     return;
   }
   Blockly.TypeBlock.needsReload.components = true;
   //get type name for instance
   var typeName = Blockly.Component.instanceNameToTypeName(name);
   Blockly.ComponentInstances.addInstance(name, uid, typeName);
-  console.log("Blockly.Component.add added " + name + " " + uid + " " + typeName);
 };
 
 /**
@@ -40,7 +37,7 @@ Blockly.Component.add = function(name, uid) {
  * @param oldname the Component's current name, e.g., Button1
  * @param newname the newname the component will be given, e.g., Button2
  * @param uid the component's unique id
- * 
+ *
  * Here are the various places that a component's name must be changed, using Button1
  *  as an example name.
  * Blockly.ComponentInstances -- an index containing an entry for each Component used by the app
@@ -224,7 +221,7 @@ Blockly.ComponentTypes.haveType = function(typeName) {
  *
  */
 Blockly.ComponentTypes.populateTypes = function() {
-  
+
   var componentInfoArray = JSON.parse(window.parent.BlocklyPanel_getComponentsJSONString());
   for(var i=0;i<componentInfoArray.length;i++) {
     var componentInfo = componentInfoArray[i];
@@ -291,7 +288,6 @@ Blockly.ComponentInstances.getInstanceNames = function() {
 }
 
 Blockly.Component.instanceNameToTypeName = function(instanceName) {
-  console.log("Blockly.Component.instanceNameToTypeName " + instanceName);
   return window.parent.BlocklyPanel_getComponentInstanceTypeName(Blockly.BlocklyEditor.formName,instanceName);
 }
 

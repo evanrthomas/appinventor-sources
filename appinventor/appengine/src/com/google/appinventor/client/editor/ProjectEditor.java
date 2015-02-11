@@ -122,10 +122,7 @@ public abstract class ProjectEditor extends Composite {
       s += deckPanel.getWidget(0).getTitle() + " ";
     }
 
-    Helper.println("ProjectEditor.insertFileEditor() count "
-            + deckPanel.getWidgetCount() + " index " + beforeIndex + " widget titles " + s);
     deckPanel.insert(fileEditor, beforeIndex);
-    Helper.println("ProjectEditor.insertFileEditor() success");
     OdeLog.log("Inserted file editor for " + fileEditor.getFileId() + " at pos " + beforeIndex);
 
   }

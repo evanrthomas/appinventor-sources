@@ -6,7 +6,6 @@
 package com.google.appinventor.client.explorer.commands;
 
 import com.google.appinventor.client.DesignToolbar;
-import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.editor.FileEditor;
@@ -142,7 +141,6 @@ public final class AddSharedPageCommand extends ChainableCommand {
       for (ProjectNode source : projectRootNode.getAllSourceNodes()) {
         if (source instanceof YoungAndroidBlocksNode) {
           String name = ((YoungAndroidBlocksNode) source).getName();
-          Helper.println(name);
           otherBlocksEditors.add(name);
         }
       }

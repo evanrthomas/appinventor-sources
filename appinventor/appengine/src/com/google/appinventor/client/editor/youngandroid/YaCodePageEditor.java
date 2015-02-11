@@ -119,7 +119,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
       @Override
       public void onSuccess(ChecksumedLoadFile result) {
         try {
-          Helper.println(fullName + " " + result.getContent());
+          Helper.println("YaCodePageEditor loading " + fullName + "\n" + result.getContent());
         } catch(ChecksumedFileException e) {
           onFailure(e);
         }
@@ -201,8 +201,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
       //TODO (evan): the instanceof here and the cast are messy, fix this
       return (YaCodePageEditor)editor;
     }
-    Helper.println("YaCodePageEditor.getCodePageEditor() returning null " + " projectId = " + projectId +
-    " fileId = " + fileId + " editor " + editor);
     return null;
   }
 
@@ -246,7 +244,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
                 @Override
                 public void onSuccess(ChecksumedLoadFile result) {
                   try {
-                    Helper.println("YaCodePageEditor.loadXmlAndMerge() " + result.getContent());
                     if (!result.getContent().equals("")) {
                       JavaScriptObject fileContentsAsXml = textToDom(result.getContent());
                       JsArray<JavaScriptObject> blocks = getTopLevelBlocks(fileContentsAsXml);

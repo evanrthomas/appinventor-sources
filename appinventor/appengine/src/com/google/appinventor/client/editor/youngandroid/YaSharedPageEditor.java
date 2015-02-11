@@ -1,7 +1,6 @@
 package com.google.appinventor.client.editor.youngandroid;
 
 import com.google.appinventor.client.ComponentList;
-import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.YACachedBlocksNode;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
@@ -86,7 +85,6 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
     JavaScriptObject newcontents = setDemandedComponentsHeader(textToDom(super.getRawFileContent()),
             componentsXmlArr);
     String s = domToText(newcontents);
-    Helper.println("YaSharedPageEditor.getRawFileContent() " +  s);
     return s;
   }
 

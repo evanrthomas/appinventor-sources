@@ -7,7 +7,6 @@ package com.google.appinventor.client.editor.youngandroid;
 
 import com.google.appinventor.client.DesignToolbar;
 import com.google.appinventor.client.ErrorReporter;
-import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.boxes.AssetListBox;
 import com.google.appinventor.client.editor.FileEditor;
@@ -314,7 +313,6 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
         if (pos < 0) {
           pos = -pos - 1;
         }
-        Helper.println("YaProjectEditor.addFormEditor()");
         insertFileEditor(newFormEditor, pos);
         if (isScreen1(formName)) {
           screen1FormLoaded = true;
@@ -357,7 +355,6 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
           if (pos < 0) {
             pos = -pos - 1;
           }
-          Helper.println("YaProjectEditor.loadBlocksEditor()");
           insertFileEditor(newBlocksEditor, pos);
           if (isScreen1(formName)) {
             screen1BlocksLoaded = true;
