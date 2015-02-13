@@ -335,13 +335,13 @@ public class DesignToolbar extends Toolbar {
 
     private JSONObject pageDescriptor(YaCodePageEditor editor) {
       JSONObject json = new JSONObject();
-      String name = editor.getName();
+      String name = editor.getFileName();
       if (name.endsWith(YoungAndroidSourceAnalyzer.BLOCKLY_SOURCE_EXTENSION)) {
         name = name.substring(0, name.length() - YoungAndroidSourceAnalyzer.BLOCKLY_SOURCE_EXTENSION.length());
       }
       json.put("name", new JSONString(name));
       json.put("projectId", new JSONNumber((double)editor.getProjectId()));
-      json.put("fileId", new JSONString(editor.getFileId()));
+      json.put("fileName", new JSONString(editor.getFileName()));
 
       JSONArray componentArr = new JSONArray();
       for (String componentName: editor.getComponents().keySet()) {
@@ -352,13 +352,14 @@ public class DesignToolbar extends Toolbar {
         jsonComponent.put("iconUrl", new JSONString(component.getIconImage().getUrl()));
         componentArr.set(componentArr.size(), jsonComponent);
       }
+
       json.put("components", componentArr);
 
       JSONArray childrenArr = new JSONArray();
       for (YaSharedPageEditor child : editor.getChildren()) {
         JSONObject jsonComponent = new JSONObject();
         jsonComponent.put("projectId", new JSONNumber(child.getProjectId()));
-        jsonComponent.put("fileId", new JSONString(child.getFileId()));
+        jsonComponent.put("fileName", new JSONString(child.getFileName()));
         childrenArr.set(childrenArr.size(), jsonComponent);
       }
       json.put("children", childrenArr);
@@ -395,14 +396,15 @@ public class DesignToolbar extends Toolbar {
 
       YaCodePageEditor parent = YaCodePageEditor.getCodePageEditor(
               (long)jsonParent.get("projectId").isNumber().doubleValue(),
-              jsonParent.get("fileId").isString().stringValue());
+              jsonParent.get("fileName").isString().stringValue());
 
       YaCodePageEditor child = YaCodePageEditor.getCodePageEditor(
               (long) jsonChild.get("projectId").isNumber().doubleValue(),
-              jsonChild.get("fileId").isString().stringValue());
+              jsonChild.get("fileName").isString().stringValue());
 
       if (!child.isFormPageEditor()) {
         parent.addChild((YaSharedPageEditor)child); //TODO (evan): get rid of this cast
+        Ode.getInstance().getEditorManager().scheduleAutoSave(parent);
         return true;
       } else {
         alert("child must be a shared page");

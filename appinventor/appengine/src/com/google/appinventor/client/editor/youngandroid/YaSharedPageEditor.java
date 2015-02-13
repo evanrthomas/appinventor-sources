@@ -12,6 +12,7 @@ import com.google.appinventor.shared.rpc.project.ChecksumedLoadFile;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -78,11 +79,11 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
 
   @Override
   public String getRawFileContent() {
-    JsArray<JavaScriptObject> componentsXmlArr = JavaScriptObject.createArray().cast();
+    JsArray<Node> componentsXmlArr = JavaScriptObject.createArray().cast();
     for (MockComponent comp: components.getComponents()) {
       componentsXmlArr.push(comp.toXmlRepr());
     }
-    JavaScriptObject newcontents = setDemandedComponentsHeader(textToDom(super.getRawFileContent()),
+    Node newcontents = setDemandedComponentsHeader(textToDom(super.getRawFileContent()),
             componentsXmlArr);
     String s = domToText(newcontents);
     return s;
@@ -122,8 +123,8 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
     return tree;
   }
 
-  private native JavaScriptObject setDemandedComponentsHeader(
-          JavaScriptObject blocklyXml, JsArray<JavaScriptObject> arr) /*-{
+  private native Node setDemandedComponentsHeader(
+          Node blocklyXml, JsArray<Node> arr) /*-{
     return $wnd.exported.setDemandedComponentsHeader(blocklyXml, arr);
   }-*/;
 

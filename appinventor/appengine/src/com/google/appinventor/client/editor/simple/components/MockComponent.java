@@ -31,7 +31,7 @@ import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjec
 import com.google.appinventor.shared.settings.SettingsConstants;
 import com.google.appinventor.shared.simple.ComponentDatabaseInterface;
 import com.google.appinventor.shared.storage.StorageUtil;
-import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.*;
 import com.google.gwt.user.client.Random;
@@ -999,13 +999,13 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
 
   }
 
-  public JavaScriptObject toXmlRepr() {
+  public Node toXmlRepr() {
     return componentInfoToXml(getName(), type);
 
   }
 
 
-  private static native JavaScriptObject componentInfoToXml(String name, String type) /*-{
+  private static native Node componentInfoToXml(String name, String type) /*-{
     return $wnd.exported.componentInfoToXml(name, type);
   }-*/;
   // Layout

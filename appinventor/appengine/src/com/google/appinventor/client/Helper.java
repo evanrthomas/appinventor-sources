@@ -39,6 +39,7 @@ public class Helper {
     println(s);
   }
 
+
   public static native void consolePrint(String s) /*-{
      $wnd.console.log(s);
     }-*/;

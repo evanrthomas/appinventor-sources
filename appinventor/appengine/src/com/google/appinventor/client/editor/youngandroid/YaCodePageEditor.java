@@ -8,9 +8,6 @@ import com.google.appinventor.client.*;
 import com.google.appinventor.client.boxes.AssetListBox;
 import com.google.appinventor.client.boxes.BlockSelectorBox;
 import com.google.appinventor.client.boxes.PaletteBox;
-import com.google.appinventor.client.editor.EditorManager;
-import com.google.appinventor.client.editor.FileEditor;
-import com.google.appinventor.client.editor.ProjectEditor;
 import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
 import com.google.appinventor.client.editor.simple.SimpleEditor;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
@@ -19,13 +16,13 @@ import com.google.appinventor.client.explorer.SourceStructureExplorerItem;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.shared.rpc.project.ChecksumedFileException;
 import com.google.appinventor.shared.rpc.project.ChecksumedLoadFile;
-import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
 import com.google.common.collect.Maps;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.json.client.JSONObject;
@@ -111,20 +108,10 @@ public abstract class YaCodePageEditor extends SimpleEditor
     //TODO (evan): make abstract method initComponents(components) and override in children
 
     children = new TreeSet<YaSharedPageEditor>();
-    initChildren(children);
+    addChildrenFromHeader();
 
     fullName = blocksNode.getProjectId() + "_" + blocksNode.getFileName();
 
-    blocksNode.load(new OdeAsyncCallback<ChecksumedLoadFile>() {
-      @Override
-      public void onSuccess(ChecksumedLoadFile result) {
-        try {
-          Helper.println("YaCodePageEditor loading " + fullName + "\n" + result.getContent());
-        } catch(ChecksumedFileException e) {
-          onFailure(e);
-        }
-      }
-    });
     nameToCodePageEditor.put(fullName, this);
     blocksArea = new BlocklyPanel(fullName);
     blocksArea.setWidth("100%");
@@ -159,20 +146,33 @@ public abstract class YaCodePageEditor extends SimpleEditor
     }
   }
 
-  public void initChildren(final Set<YaSharedPageEditor> children) {
+  private void addChildrenFromHeader() {
     blocksNode.load(new OdeAsyncCallback<ChecksumedLoadFile>() {
       @Override
       public void onSuccess(ChecksumedLoadFile result) {
         try {
-          JsArray<Element> childrenXml = getChildrenFromHeader(textToDom(result.getContent()));
-          Element childXml;
-          for (int i = 0; i < childrenXml.length(); i++) {
-            childXml = childrenXml.get(i);
-            long projectId = Long.parseLong(childXml.getAttribute("projectId"));
-            String fileId = childXml.getAttribute("fileId");
-            String fullName = projectId + "_" + fileId;
-            YaCodePageEditor child = getCodePageEditor(projectId, fileId);
-            addChild((YaSharedPageEditor)child); //TODO (evan): get rid of this cast
+          if (result.getContent() != "") {
+            JsArray<Element> childrenXml = getChildrenFromHeader(textToDom(result.getContent()));
+            Element childXml;
+            for (int i = 0; i < childrenXml.length(); i++) {
+              childXml = childrenXml.get(i);
+              String projectIdString = childXml.getAttribute("projectId");
+              if (projectIdString.length() == 0) { //TODO (evan): fix this. Silly hack because gwt for some reason makes the I in projectId lowercase
+                projectIdString = childXml.getAttribute("projectid");
+              }
+              long projectId = Long.parseLong(projectIdString);
+              String fileName = childXml.getAttribute("fileName");
+              if (fileName.length() == 0) { //TODO (evan): fix this. Silly hack because gwt for some reason makes the I in projectId lowercase
+                fileName = childXml.getAttribute("filename");
+              }
+              YaCodePageEditor child = getCodePageEditor(projectId, fileName);
+              //this child is null
+              if (child == null) {
+                Helper.println("addChildrenFromHeader() child is null \n\tprojectIdString " + projectIdString
+                        + "\n\tprojetId " + projectId + "\n\fileName " + fileName);
+              }
+              addChild((YaSharedPageEditor) child); //TODO (evan): get rid of this cast
+            }
           }
         } catch(ChecksumedFileException e) {
           onFailure(e);
@@ -182,6 +182,13 @@ public abstract class YaCodePageEditor extends SimpleEditor
   }
 
   public void addChild(YaSharedPageEditor child) {
+    if (child == null ) {
+      Helper.println("child == null"); //DING DING DING
+    } else if (child.blocksNode == null) {
+      Helper.println("child.blocksNode == null");
+    } else if (child.blocksNode.getRealNode() == null) {
+      Helper.println("child.blocksNode.getRealNode() == null");
+    }
     children.add(child);
   }
 
@@ -189,19 +196,11 @@ public abstract class YaCodePageEditor extends SimpleEditor
     return children;
   }
 
-  public static YaCodePageEditor getCodePageEditor(long projectId, String fileId) {
-    EditorManager editorManager = Ode.getInstance().getEditorManager();
-    ProjectEditor projectEditor = editorManager.getOpenProjectEditor(projectId);
-    if (projectEditor == null) {
-      ProjectRootNode rootNode = Ode.getInstance().getProjectManager().getProject(projectId).getRootNode();
-      projectEditor = editorManager.openProject(rootNode);
-    }
-    FileEditor editor = projectEditor.getFileEditor(fileId);
-    if (editor instanceof YaCodePageEditor) {
-      //TODO (evan): the instanceof here and the cast are messy, fix this
-      return (YaCodePageEditor)editor;
-    }
-    return null;
+  public static YaCodePageEditor getCodePageEditor(long projectId, String fileName) {
+    String fullName = projectId + "_" + fileName;
+    Helper.println("getCodePageEditor() you gave " + fullName);
+    Helper.println("\tcorrect example is " + nameToCodePageEditor.keySet().iterator().next());
+    return nameToCodePageEditor.get(fullName);
   }
 
 
@@ -234,10 +233,10 @@ public abstract class YaCodePageEditor extends SimpleEditor
     return list;
   }
 
-  private void loadXmlAndMerge(final List<YACachedBlocksNode> nodesToLoad, final Function<JavaScriptObject> onComplete) {
+  private void loadXmlAndMerge(final List<YACachedBlocksNode> nodesToLoad, final Function<Node> onComplete) {
     final AtomicInteger numLoaded = new AtomicInteger(0); //not sure if I need AtomicInteger, since it's being compiled to javascript which is single threaded
     final AtomicInteger gotCheckSumedFileException = new AtomicInteger(-1); //use atomicInteger instead of atomicboolean because gwt can't find atomic boolean (I hate gwt so much)
-    final JavaScriptObject finalContents = blocklyXmlContainer();
+    final Node finalContents = blocklyXmlContainer();
     for (final YACachedBlocksNode node: nodesToLoad) {
       //TODO (evan): loadFromCache instead of load2, find where load2 is being used and invalidate cache where necessary
       node.load(new OdeAsyncCallback<ChecksumedLoadFile>(MESSAGES.loadError()) {
@@ -246,7 +245,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
                   try {
                     if (!result.getContent().equals("")) {
                       JavaScriptObject fileContentsAsXml = textToDom(result.getContent());
-                      JsArray<JavaScriptObject> blocks = getTopLevelBlocks(fileContentsAsXml);
+                      JsArray<Node> blocks = getTopLevelBlocks(fileContentsAsXml);
                       attachAttributes(blocks, makeJSON(
                               new JSONPair(IS_IMPORTED, (blocksNode.getFileId() != node.getFileId()) + "")
                       ));
@@ -279,9 +278,9 @@ public abstract class YaCodePageEditor extends SimpleEditor
     List<YACachedBlocksNode> backendNodes = new ArrayList<YACachedBlocksNode>();
     backendNodes.add(blocksNode);
     backendNodes.addAll(sharedPageDependenciesFor(blocksNode));
-    loadXmlAndMerge(backendNodes, new Function<JavaScriptObject>() {
+    loadXmlAndMerge(backendNodes, new Function<Node>() {
       @Override
-      public void call(JavaScriptObject mergedXml) {
+      public void call(Node mergedXml) {
         blocksArea.setBlocksContent(domToText(mergedXml));
         loadComplete = true;
         selectedDrawer = null;
@@ -292,40 +291,40 @@ public abstract class YaCodePageEditor extends SimpleEditor
     });
   }
 
-  private JavaScriptObject makeJSON(JSONPair ... pairs) {
+  private JSONObject makeJSON(JSONPair ... pairs) {
     JSONObject obj = new JSONObject();
     for (JSONPair pair: pairs) {
       obj.put(pair.key, new JSONString(pair.value));
     }
-    return obj.getJavaScriptObject();
+    return obj;
   }
 
 
-  private native String filterOutImportedBlocks(String s) /*-{
+  private native JavaScriptObject filterOutImportedBlocks(String s) /*-{
     return $wnd.exported.filterOutImportedBlocks(s);
   }-*/;
 
-  private native JsArray<JavaScriptObject> attachAttributes(JsArray<JavaScriptObject> blocks, JavaScriptObject attributes) /*-{
+  private native JsArray<JavaScriptObject> attachAttributes(JsArray<Node> blocks, JSONObject attributes) /*-{
     return $wnd.exported.attachAttributes(blocks, attributes);
   }-*/;
 
-  protected native JavaScriptObject textToDom(String s) /*-{
+  protected native Node textToDom(String s) /*-{
     return $wnd.exported.textToDom(s);
   }-*/;
 
-  protected native String domToText(JavaScriptObject xml) /*-{
+  protected native String domToText(Node xml) /*-{
     return $wnd.exported.domToText(xml);
   }-*/;
 
-  private native JsArray<JavaScriptObject> getTopLevelBlocks(JavaScriptObject root) /*-{
+  private native JsArray<Node> getTopLevelBlocks(JavaScriptObject root) /*-{
     return $wnd.exported.getTopLevelBlocks(root);
   }-*/;
 
-  private native JavaScriptObject blocklyXmlContainer() /*-{
+  private native Node blocklyXmlContainer() /*-{
     return $wnd.exported.blocklyXmlContainer();
   }-*/;
 
-  private native void appendChildrenToParent(JsArray<JavaScriptObject> children, JavaScriptObject parent) /*-{
+  private native void appendChildrenToParent(JsArray<Node> children, Node parent) /*-{
     return $wnd.exported.appendChildrenToParent(children, parent);
   }-*/;
 
@@ -479,9 +478,28 @@ public abstract class YaCodePageEditor extends SimpleEditor
   @Override
   public String getRawFileContent() {
     String content = blocksArea.getBlocksContent();
-    return content.equals("") ? "" : filterOutImportedBlocks(content);
+    return content.equals("") ? "" : domToText(setChildrenHeader(
+            filterOutImportedBlocks(content), makeChildrenXmlArray(children)));
   }
 
+
+  private JsArray<Node> makeChildrenXmlArray(Set<YaSharedPageEditor> children) {
+    JsArray<Node> childrenXmlArr = JavaScriptObject.createArray().cast();
+    for (YaSharedPageEditor child: children) {
+      Element xmlchild = createElement("child"); //hack because I can't figure out to make an Element
+      xmlchild.setAttribute("projectId", child.getProjectId()+"");
+      xmlchild.setAttribute("fileName", child.getFileName());
+      childrenXmlArr.push(xmlchild);
+    }
+    return childrenXmlArr;
+  }
+
+  private native Element createElement(String name) /*-{
+    return document.createElement(name);
+  }-*/;
+  private native Node setChildrenHeader(JavaScriptObject xml, JsArray<Node> children) /*-{
+    return $wnd.exported.setChildrenHeader(xml, children);
+  }-*/;
   @Override
   public void onSave() {
     // Nothing to do after blocks are saved.
@@ -622,6 +640,10 @@ public abstract class YaCodePageEditor extends SimpleEditor
     if (editor != null) {
       editor.setDamaged(true);
     }
+  }
+
+  public String getFileName() {
+    return blocksNode.getFileName();
   }
 
   public String getName() {

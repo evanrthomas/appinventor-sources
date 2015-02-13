@@ -50,7 +50,7 @@ var attachAttributes = function(blocks, json) {
 
 var appendChildrenToParent = function(children, parent) {
   //iterate in reverse order because appending a child to the parent removes the child from the array, changing the size of the array
-  for (var i=children.length - 1; i>=0; i--) { 
+  for (var i=children.length - 1; i>=0; i--) {
     parent.appendChild(children[i]);
   }
 }
@@ -61,9 +61,9 @@ var filterOutImportedBlocks = function(text) {
     var child = xml.children[i];
     if (child.getAttribute('isimported') && child.getAttribute('isimported').toLowerCase() == 'true') {
       xml.removeChild(child);
-    } 
+    }
   }
-  
+
   //the function wipe wipes the attribute isimported from all blocks recursivley.
   //it shouldn't be necessary after you've already removed all top-level blocks that have isimported=true
   //there shouldn't be anything else that has isimported set, but just in case
@@ -73,9 +73,30 @@ var filterOutImportedBlocks = function(text) {
       wipe(xml.children[i]);
     }
   })(xml);
-  return domToText(xml);
+  return xml;
 }
 
+var setChildrenHeader = function(dom, children) {
+  var container = (function getChildrenContainer() {
+    var container, header;
+    if (!(header = dom.querySelector('header'))) {
+      header = document.createElement('header');
+      dom.appendChild(header);
+    }
+    container = header.querySelector('children');
+    if (container) {
+      header.removeChild(container);
+    }
+    container = document.createElement('children');
+    header.appendChild(container);
+    return container;
+  })();
+
+  for (var i = 0; i < children.length ; i++) {
+    container.appendChild(children[i]);
+  }
+  return dom;
+}
 
 window.exported = window.exported || {};
 window.exported.textToDom = textToDom;
@@ -85,3 +106,4 @@ window.exported.getTopLevelBlocks = getTopLevelBlocks;
 window.exported.attachAttributes = attachAttributes;
 window.exported.appendChildrenToParent = appendChildrenToParent;
 window.exported.filterOutImportedBlocks = filterOutImportedBlocks;
+window.exported.setChildrenHeader = setChildrenHeader;

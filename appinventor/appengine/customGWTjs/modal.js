@@ -65,7 +65,7 @@ var openSharedPagesOverlay =  function() {
   var sharedPages = pages.sharedPages;
 
   formPages.forEach(function(info) {
-    var id = info.projectId + "_" + info.fileId;
+    var id = info.projectId + "_" + info.fileName;
     nodes.add({id: id,
       shape: 'custom',
       info: info,
@@ -76,13 +76,13 @@ var openSharedPagesOverlay =  function() {
     info.children.forEach(function(child)  {
       edges.add({
         from:id,
-        to:child.projectId + "_" + child.fileId,
+        to:child.projectId + "_" + child.fileName,
       });
     });
   });
 
   sharedPages.forEach(function(info) {
-    var id = info.projectId + "_" + info.fileId;
+    var id = info.projectId + "_" + info.fileName;
     nodes.add({id: id,
       shape: 'custom',
       info: info,
@@ -93,7 +93,7 @@ var openSharedPagesOverlay =  function() {
     info.children.forEach(function(child) {
       edges.add({
         from:id,
-        to:child.projectId + "_" + child.fileId,
+        to:child.projectId + "_" + child.fileName,
       });
     });
   });
@@ -135,11 +135,11 @@ var openSharedPagesOverlay =  function() {
       var child = nodes.get(data.to).info;
       child = {
         projectId: child["projectId"],
-        fileId: child["fileId"],
+        fileName: child["fileName"],
       }
       parent = {
         projectId: parent["projectId"],
-        fileId: parent["fileId"],
+        fileName: parent["fileName"],
       }
       if (window.exported.importNewPage(parent, child)) {
         connect(data);
