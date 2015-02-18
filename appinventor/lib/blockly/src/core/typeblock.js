@@ -326,7 +326,7 @@ Blockly.TypeBlock.loadProcedures_ = function(){
    */
   function createTypeBlockForProcedures_(withReturn) {
     var options = [];
-    var procNames = Blockly.AIProcedure.getProcedureNames(withReturn);
+    var procNames = Blockly.AIProcedure.getProcedureNames(withReturn, true);
     goog.array.forEach(procNames, function(proc){
       options.push(
           {

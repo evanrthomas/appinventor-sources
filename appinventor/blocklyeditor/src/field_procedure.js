@@ -43,10 +43,19 @@ Blockly.FieldProcedure.onChange = function(text) {
   }
 };
 
-Blockly.AIProcedure.getProcedureNames = function(returnValue) {
+/*
+ * Gets the names of all procedures in the main workspace. If returnValue is true, only returns
+ * procedures that return a value, otherwise only returns procedures that don't return a value.
+ * If regardDepth is set to true, will only return procedure names for blocks whose depth
+ * is <= 1, otherwise it does not pay attention to depth.
+ */
+Blockly.AIProcedure.getProcedureNames = function(returnValue, regardDepth) {
   var topBlocks = Blockly.mainWorkspace.getTopBlocks();
   var procNameArray = [Blockly.FieldProcedure.defaultValue];
   for(var i=0;i<topBlocks.length;i++){
+    if (regardDepth && topBlocks[i].getDepth() > 1) {
+      continue;
+    }
     var procName = topBlocks[i].getFieldValue('NAME')
     if(topBlocks[i].type == "procedures_defnoreturn" && !returnValue) {
       procNameArray.push([procName,procName]);
