@@ -280,7 +280,9 @@ Blockly.Drawer.procedureCallersXMLString = function(returnsValue) {
   var decls = Blockly.AIProcedure.getProcedureDeclarationBlocks(returnsValue);
   decls.sort(Blockly.Drawer.compareDeclarationsByName); // sort decls lexicographically by procedure name
   for (var i = 0; i < decls.length; i++) {
-    xmlString += Blockly.Drawer.procedureCallerBlockString(decls[i]);
+    if (decls[i].getDepth() <= 1) {
+      xmlString += Blockly.Drawer.procedureCallerBlockString(decls[i]);
+    }
   }
   xmlString += '</xml>';
   return xmlString;
