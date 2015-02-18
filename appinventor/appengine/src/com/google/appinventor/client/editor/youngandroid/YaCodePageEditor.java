@@ -101,7 +101,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
     components = new ComponentList();
     //TODO (evan): make abstract method initComponents(components) and override in children
 
-    children = new TreeSet<YaSharedPageEditor>();
+    children = new HashSet<YaSharedPageEditor>();
     addChildrenFromHeader();
 
     fullName = blocksNode.getProjectId() + "_" + blocksNode.getFileName();
@@ -165,7 +165,12 @@ public abstract class YaCodePageEditor extends SimpleEditor
                 Helper.println("addChildrenFromHeader() child is null \n\tprojectIdString " + projectIdString
                         + "\n\tprojetId " + projectId + "\n\fileName " + fileName);
               }
-              addChild((YaSharedPageEditor) child); //TODO (evan): get rid of this cast
+
+              if (child instanceof  YaSharedPageEditor) {
+                addChild((YaSharedPageEditor) child); //TODO (evan): get rid of this cast and instanceof
+              } else {
+                throw new RuntimeException("header child is not a shared page");
+              }
             }
           }
         } catch(ChecksumedFileException e) {
@@ -176,14 +181,10 @@ public abstract class YaCodePageEditor extends SimpleEditor
   }
 
   public void addChild(YaSharedPageEditor child) {
-    if (child == null ) {
-      Helper.println("child == null"); //DING DING DING
-    } else if (child.blocksNode == null) {
-      Helper.println("child.blocksNode == null");
-    } else if (child.blocksNode.getRealNode() == null) {
-      Helper.println("child.blocksNode.getRealNode() == null");
-    }
+    Helper.println("addChild() child " + child);
+    Helper.println("addChild() child.getClass() " + ((Object)child).getClass());
     children.add(child);
+    Helper.println("addChild() success" );
   }
 
   public Set<YaSharedPageEditor> getChildren() {

@@ -402,7 +402,7 @@ public class DesignToolbar extends Toolbar {
               (long) jsonChild.get("projectId").isNumber().doubleValue(),
               jsonChild.get("fileName").isString().stringValue());
 
-      if (!child.isFormPageEditor()) {
+      if (child instanceof YaSharedPageEditor) {
         parent.addChild((YaSharedPageEditor)child); //TODO (evan): get rid of this cast
         Ode.getInstance().getEditorManager().scheduleAutoSave(parent);
         return true;
