@@ -57,7 +57,6 @@ var openSharedPagesOverlay =  function() {
 
 
   var pages = window.exported.getProjectPages();
-  console.log(window.projectPages = pages);
 
   var nodes = new vis.DataSet();
   var edges = new vis.DataSet();
@@ -86,7 +85,7 @@ var openSharedPagesOverlay =  function() {
     nodes.add({id: id,
       shape: 'custom',
       info: info,
-      customDraw:getPageDrawer("shared:" + info.name,
+      customDraw:getPageDrawer(info.name,
         'blue',
         info.components),
     });

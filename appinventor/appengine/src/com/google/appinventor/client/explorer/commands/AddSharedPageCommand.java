@@ -81,15 +81,6 @@ public final class AddSharedPageCommand extends ChainableCommand {
         final Project project = ode.getProjectManager().getProject(projectRootNode);
         project.addNode(packageNode, new YoungAndroidBlocksNode(blocksFileId));
 
-        // Add the screen to the DesignToolbar and select the new form editor.
-        // We need to do this once the form editor and blocks editor have been
-        // added to the project editor (after the files are completely loaded).
-        //
-        // TODO(sharon): if we create YaProjectEditor.addScreen() and merge
-        // that with the current work done in YaProjectEditor.addFormEditor,
-        // consider moving this deferred work to the explicit command for
-        // after the form file is loaded.
-
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
           @Override
           public void execute() {
@@ -102,6 +93,7 @@ public final class AddSharedPageCommand extends ChainableCommand {
               long projectId = blocksEditor.getProjectId();
               designToolbar.addScreen(projectId, new DesignToolbar.Screen(name, (YaCodePageEditor)blocksEditor));
               executeNextCommand(projectRootNode);
+              reloadOverlay();
             } else {
               // The form editor and/or blocks editor is still not there. Try again later.
               Scheduler.get().scheduleDeferred(this);
@@ -121,6 +113,9 @@ public final class AddSharedPageCommand extends ChainableCommand {
     ode.getProjectService().addFile(projectRootNode.getProjectId(), blocksFileId, callback);
   }
 
+  public native void reloadOverlay() /*-{
+     $wnd.exported.openSharedPagesOverlay();
+    }-*/;
   private class NewSharedPageDialog extends DialogBox {
     // UI elements
     private final LabeledTextBox textBox;
@@ -197,6 +192,7 @@ public final class AddSharedPageCommand extends ChainableCommand {
         textBox.setFocus(true);
       }
     }
+
 
     private boolean validate(String name) {
       // Check that it meets the formatting requirements.
