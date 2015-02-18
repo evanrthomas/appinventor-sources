@@ -309,9 +309,6 @@ Blockly.Xml.domToBlockInner = function(workspace, xmlBlock, opt_reuseBlock) {
   } else {
     block = Blockly.Block.obtain(workspace, prototypeName);
   }
-  if (!block.svg_) {
-    block.initSvg();
-  }
 
   var inline = xmlBlock.getAttribute('inline');
   if (inline) {
@@ -337,6 +334,10 @@ Blockly.Xml.domToBlockInner = function(workspace, xmlBlock, opt_reuseBlock) {
   var depth = xmlBlock.getAttribute("depth");
   if (depth || (depth == 0)) {
     block.setDepth(depth);
+  }
+
+  if (!block.svg_) {
+    block.initSvg();
   }
 
   var blockChild = null;

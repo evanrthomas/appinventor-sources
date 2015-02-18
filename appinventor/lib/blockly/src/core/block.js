@@ -251,7 +251,11 @@ Blockly.Block.prototype.initSvg = function() {
     Blockly.bindEvent_(this.svg_.getRootElement(), 'mousedown', this,
                        this.onMouseDown_);
   }
-  this.workspace.getCanvas().appendChild(this.svg_.getRootElement());
+  var mws = Blockly.mainWorkspace == this.workspace;
+  var dontRender =  (mws && this.getDepth() > 0) || (!mws && this.getDepth() > 1);
+  if (!dontRender) {
+    this.workspace.getCanvas().appendChild(this.svg_.getRootElement());
+  }
 };
 
 /**
