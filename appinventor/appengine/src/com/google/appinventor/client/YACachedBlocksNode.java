@@ -7,8 +7,6 @@ import com.google.common.collect.Maps;
 
 import java.util.Map;
 
-import static com.google.appinventor.client.Ode.MESSAGES;
-
 public class YACachedBlocksNode {
   private static final Map<YoungAndroidBlocksNode, YACachedBlocksNode> blocksNodeToCachedNode =
           Maps.newHashMap();
@@ -37,20 +35,6 @@ public class YACachedBlocksNode {
 
   public YoungAndroidBlocksNode getRealNode() {
     return realNode;
-  }
-
-  public void init() {
-    Ode.getInstance().getProjectService().load2(realNode.getProjectId(), realNode.getFileId(),
-            new OdeAsyncCallback<ChecksumedLoadFile>(MESSAGES.loadError()) {
-              @Override
-              public void onSuccess(ChecksumedLoadFile result) {
-                try {
-                  content = result.getContent();
-                } catch (ChecksumedFileException e) {
-                  onFailure(e);
-                }
-              }
-            });
   }
 
   public void save(String s, boolean force, OdeAsyncCallback<Long> callback) {

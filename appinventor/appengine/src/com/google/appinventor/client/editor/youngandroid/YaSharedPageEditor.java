@@ -83,7 +83,7 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
     for (MockComponent comp: components.getComponents()) {
       componentsXmlArr.push(comp.toXmlRepr());
     }
-    Node newcontents = setDemandedComponentsHeader(textToDom(super.getRawFileContent()),
+    Element newcontents = setDemandedComponentsHeader(textToDom(super.getRawFileContent()),
             componentsXmlArr);
     String s = domToText(newcontents);
     return s;
@@ -123,7 +123,7 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
     return tree;
   }
 
-  private native Node setDemandedComponentsHeader(
+  private native Element setDemandedComponentsHeader(
           Node blocklyXml, JsArray<Node> arr) /*-{
     return $wnd.exported.setDemandedComponentsHeader(blocklyXml, arr);
   }-*/;

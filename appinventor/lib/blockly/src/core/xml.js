@@ -136,9 +136,7 @@ Blockly.Xml.blockToDom_ = function(block) {
   if (!block.isEditable()) {
     element.setAttribute('editable', false);
   }
-  if (block.isImported()) {
-    element.setAttribute('isImported', true);
-  }
+  element.setAttribute('depth', block.getDepth());
 
   var nextBlock = block.getNextBlock();
   if (nextBlock) {
@@ -335,9 +333,10 @@ Blockly.Xml.domToBlockInner = function(workspace, xmlBlock, opt_reuseBlock) {
   if (editable) {
     block.setEditable(editable == 'true');
   }
-  var isImported = xmlBlock.getAttribute("isImported");
-  if (isImported) {
-    block.setIsImported(isImported == 'true');
+
+  var depth = xmlBlock.getAttribute("depth");
+  if (depth || (depth == 0)) {
+    block.setDepth(depth);
   }
 
   var blockChild = null;

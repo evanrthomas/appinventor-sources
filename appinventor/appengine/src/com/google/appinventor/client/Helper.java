@@ -47,4 +47,12 @@ public class Helper {
   public static native void eval(String s) /*-{
      $wnd.eval(s);
     }-*/;
+
+  public static native void set(Object o) /*-{
+    $wnd.obj = o;
+  }-*/;
+
+  public static native void debugger() /*-{
+    debugger;
+  }-*/;
 }

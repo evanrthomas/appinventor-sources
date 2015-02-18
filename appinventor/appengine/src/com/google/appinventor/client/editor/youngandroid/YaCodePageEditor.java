@@ -22,18 +22,14 @@ import com.google.common.collect.Maps;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Element;
-import com.google.gwt.dom.client.Node;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
-import com.google.gwt.json.client.JSONObject;
-import com.google.gwt.json.client.JSONString;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.TreeItem;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.appinventor.client.Ode.MESSAGES;
 
@@ -73,8 +69,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
   protected final ComponentList components;
   private final Set<YaSharedPageEditor> children;
 
-  //blocks will contain this property if they were imported form another shared page
-  private final String IS_IMPORTED = "isImported";
 
   // Blocks area. Note that the blocks area is a part of the "document" in the
   // browser (via the deckPanel in the ProjectEditor). So if the document changes (which happens
@@ -198,8 +192,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   public static YaCodePageEditor getCodePageEditor(long projectId, String fileName) {
     String fullName = projectId + "_" + fileName;
-    Helper.println("getCodePageEditor() you gave " + fullName);
-    Helper.println("\tcorrect example is " + nameToCodePageEditor.keySet().iterator().next());
     return nameToCodePageEditor.get(fullName);
   }
 
@@ -233,55 +225,13 @@ public abstract class YaCodePageEditor extends SimpleEditor
     return list;
   }
 
-  private void loadXmlAndMerge(final List<YACachedBlocksNode> nodesToLoad, final Function<Node> onComplete) {
-    final AtomicInteger numLoaded = new AtomicInteger(0); //not sure if I need AtomicInteger, since it's being compiled to javascript which is single threaded
-    final AtomicInteger gotCheckSumedFileException = new AtomicInteger(-1); //use atomicInteger instead of atomicboolean because gwt can't find atomic boolean (I hate gwt so much)
-    final Node finalContents = blocklyXmlContainer();
-    for (final YACachedBlocksNode node: nodesToLoad) {
-      //TODO (evan): loadFromCache instead of load2, find where load2 is being used and invalidate cache where necessary
-      node.load(new OdeAsyncCallback<ChecksumedLoadFile>(MESSAGES.loadError()) {
-                @Override
-                public void onSuccess(ChecksumedLoadFile result) {
-                  try {
-                    if (!result.getContent().equals("")) {
-                      JavaScriptObject fileContentsAsXml = textToDom(result.getContent());
-                      JsArray<Node> blocks = getTopLevelBlocks(fileContentsAsXml);
-                      attachAttributes(blocks, makeJSON(
-                              new JSONPair(IS_IMPORTED, (blocksNode.getFileId() != node.getFileId()) + "")
-                      ));
-                      appendChildrenToParent(blocks, finalContents);
-                    }
-                  } catch (ChecksumedFileException e) {
-                    onFailure(e);
-                  } finally {
-                    if (numLoaded.incrementAndGet() == nodesToLoad.size() && gotCheckSumedFileException.intValue() < 0) {
-                      onComplete.call(finalContents);
-                    }
-                  }
-                }
-
-                @Override
-                public void onFailure(Throwable e) {
-                  //TODO (evan): test that this works as expected by throwing a checksumedException in the try{}
-                  gotCheckSumedFileException.set(1);
-                  Ode.getInstance().recordCorruptProject(node.getProjectId(), node.getFileId(), e.getMessage());
-                  onFailure(e);
-                }
-              });
-    }
-  }
-
-  // FileEditor methods
   @Override
   public void loadFile(final Command afterFileLoaded) {
-    //entry
-    List<YACachedBlocksNode> backendNodes = new ArrayList<YACachedBlocksNode>();
-    backendNodes.add(blocksNode);
-    backendNodes.addAll(sharedPageDependenciesFor(blocksNode));
-    loadXmlAndMerge(backendNodes, new Function<Node>() {
+    Element dom = blocklyXmlContainer();
+    this.linkAndCompile(dom, new HashSet<YaCodePageEditor>(), 0, new Callback<Element>() {
       @Override
-      public void call(Node mergedXml) {
-        blocksArea.setBlocksContent(domToText(mergedXml));
+      public void call(Element dom) {
+        blocksArea.setBlocksContent(domToText(dom));
         loadComplete = true;
         selectedDrawer = null;
         if (afterFileLoaded != null) {
@@ -291,40 +241,79 @@ public abstract class YaCodePageEditor extends SimpleEditor
     });
   }
 
-  private JSONObject makeJSON(JSONPair ... pairs) {
-    JSONObject obj = new JSONObject();
-    for (JSONPair pair: pairs) {
-      obj.put(pair.key, new JSONString(pair.value));
+  protected void linkAndCompile(Element dom, Set<YaCodePageEditor> visited, int depth, Callback<Element> onComplete) {
+    //TODO (evan): make this function only available for sharedpageeditors
+    if (visited.contains(this)) {
+      return;
     }
-    return obj;
+    visited.add(this);
+    CountDownCallback callback = new CountDownCallback(children.size() + 1, onComplete); //TODO (evan): this callback spagettii is messy. Re design
+    addAndLabelAllBlocks(dom, depth, callback);
+    for (YaSharedPageEditor child: children) {
+      child.linkAndCompile(dom, visited, depth + 1, callback);
+    }
+
   }
 
+  private void addAndLabelAllBlocks(final Element dom, final int depth, final Callback<Element> onComplete) {
+    this.blocksNode.load(new OdeAsyncCallback<ChecksumedLoadFile>() {
+      @Override
+      public void onSuccess(ChecksumedLoadFile result) {
+        try {
+          String content = result.getContent();
+          JsArray<Element> blocks;
+          if (content.equals("")) {
+            blocks = JavaScriptObject.createArray().cast();
+          } else {
+            blocks = getTopLevelBlocks(textToDom(content));
+          }
 
-  private native JavaScriptObject filterOutImportedBlocks(String s) /*-{
-    return $wnd.exported.filterOutImportedBlocks(s);
+          labelBlocks(blocks, depth);
+          addAllBlocks(dom, blocks);
+          onComplete.call(dom);
+        } catch (ChecksumedFileException e) {
+          onFailure(e);
+        }
+      }
+    });
+  }
+
+  private void labelBlocks(JsArray<Element> blocks, int depth) {
+    //TODO (evan): when you add components, label each function with the version of it (ie what components it's using)
+    for (int i = 0; i<blocks.length(); i++) {
+      blocks.get(i).setAttribute("depth", depth +"");
+    }
+  }
+
+  private void addAllBlocks(Element dom, JsArray<Element> blocks) {
+    //traverse in reverse order because the size of the array elements delete themselves as you add them to dom
+    for (int i = blocks.length() - 1; i>=0; i--) {
+      Element block = blocks.get(i);
+      dom.appendChild(block);
+    }
+  }
+
+  private native JavaScriptObject filterOutImportedBlocks(Element e) /*-{
+    return $wnd.exported.filterOutImportedBlocks(e);
   }-*/;
 
-  private native JsArray<JavaScriptObject> attachAttributes(JsArray<Node> blocks, JSONObject attributes) /*-{
-    return $wnd.exported.attachAttributes(blocks, attributes);
-  }-*/;
-
-  protected native Node textToDom(String s) /*-{
+  protected native Element textToDom(String s) /*-{
     return $wnd.exported.textToDom(s);
   }-*/;
 
-  protected native String domToText(Node xml) /*-{
+  protected native String domToText(Element xml) /*-{
     return $wnd.exported.domToText(xml);
   }-*/;
 
-  private native JsArray<Node> getTopLevelBlocks(JavaScriptObject root) /*-{
+  private native JsArray<Element> getTopLevelBlocks(JavaScriptObject root) /*-{
     return $wnd.exported.getTopLevelBlocks(root);
   }-*/;
 
-  private native Node blocklyXmlContainer() /*-{
+  private native Element blocklyXmlContainer() /*-{
     return $wnd.exported.blocklyXmlContainer();
   }-*/;
 
-  private native void appendChildrenToParent(JsArray<Node> children, Node parent) /*-{
+  private native void appendChildrenToParent(JsArray<Element> children, Element parent) /*-{
     return $wnd.exported.appendChildrenToParent(children, parent);
   }-*/;
 
@@ -479,12 +468,12 @@ public abstract class YaCodePageEditor extends SimpleEditor
   public String getRawFileContent() {
     String content = blocksArea.getBlocksContent();
     return content.equals("") ? "" : domToText(setChildrenHeader(
-            filterOutImportedBlocks(content), makeChildrenXmlArray(children)));
+            filterOutImportedBlocks(textToDom(content)), makeChildrenXmlArray(children)));
   }
 
 
-  private JsArray<Node> makeChildrenXmlArray(Set<YaSharedPageEditor> children) {
-    JsArray<Node> childrenXmlArr = JavaScriptObject.createArray().cast();
+  private JsArray<Element> makeChildrenXmlArray(Set<YaSharedPageEditor> children) {
+    JsArray<Element> childrenXmlArr = JavaScriptObject.createArray().cast();
     for (YaSharedPageEditor child: children) {
       Element xmlchild = createElement("child"); //hack because I can't figure out to make an Element
       xmlchild.setAttribute("projectId", child.getProjectId()+"");
@@ -497,7 +486,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   private native Element createElement(String name) /*-{
     return document.createElement(name);
   }-*/;
-  private native Node setChildrenHeader(JavaScriptObject xml, JsArray<Node> children) /*-{
+  private native Element setChildrenHeader(JavaScriptObject xml, JsArray<Element> children) /*-{
     return $wnd.exported.setChildrenHeader(xml, children);
   }-*/;
   @Override
@@ -658,15 +647,29 @@ public abstract class YaCodePageEditor extends SimpleEditor
     blocksArea.switchLanguage(newLanguage);
   }
 
-  interface Function<E> {
+  interface Callback<E> {
     public void call(E e);
   }
 
-  private class JSONPair {
-    String key,value;
-    public JSONPair(String key, String value) {
-      this.key = key;
-      this.value = value;
+  /*
+   * A callback that waits until it's called n times before it runs (runs on the nth time)
+   */
+  private static class CountDownCallback<E> implements Callback<E> {
+    private int n;
+    private Callback<E> callback;
+    public CountDownCallback(int n, Callback<E> callback) {
+      this.n = n;
+      this.callback = callback;
+    }
+
+    @Override
+    public void call(E param) {
+      n -=1;
+      if (n == 0) {
+        callback.call(param);
+      } else if (n < 0) {
+        throw new RuntimeException("CountDownCallback called more times than expected");
+      }
     }
   }
 }

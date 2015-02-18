@@ -149,8 +149,7 @@ Blockly.Block.prototype.fill = function(workspace, prototypeName) {
   this.movable_ = true;
   this.editable_ = true;
   this.collapsed_ = false;
-
-  this.isImported_ = false;
+  this.depth_ = 0;
 
   this.workspace = workspace;
   this.isInFlyout = workspace.isFlyout;
@@ -1247,12 +1246,16 @@ Blockly.Block.prototype.setMovable = function(movable) {
 };
 
 
-Blockly.Block.prototype.isImported = function() {
-  return this.isImported_;
+/**
+ * Set whether this block belongs to the current page, or is from a SharedPage child, or a SharedPage grandchild etc.
+ * 0 means current page, 1 means immediate child etc. Defaults to 0.
+ */
+Blockly.Block.prototype.setDepth = function(depth) {
+  this.depth_ = depth;
 }
 
-Blockly.Block.prototype.setIsImported = function(imported) {
-  this.isImported_ = imported; 
+Blockly.Block.prototype.getDepth = function() {
+  return this.depth_;
 }
 
 /**

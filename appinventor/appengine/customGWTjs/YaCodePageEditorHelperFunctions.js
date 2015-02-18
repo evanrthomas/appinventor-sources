@@ -40,14 +40,6 @@ var getTopLevelBlocks = function(root) {
   }
 }
 
-var attachAttributes = function(blocks, json) {
-  for (var i=0; i<blocks.length; i++) {
-    for (key in json) {
-      blocks[i].setAttribute(key, json[key]);
-    }
-  }
-}
-
 var appendChildrenToParent = function(children, parent) {
   //iterate in reverse order because appending a child to the parent removes the child from the array, changing the size of the array
   for (var i=children.length - 1; i>=0; i--) {
@@ -55,20 +47,19 @@ var appendChildrenToParent = function(children, parent) {
   }
 }
 
-var filterOutImportedBlocks = function(text) {
-  var xml = textToDom(text);
+var filterOutImportedBlocks = function(xml) {
   for (var i=xml.children.length -1; i>=0; i--) {
     var child = xml.children[i];
-    if (child.getAttribute('isimported') && child.getAttribute('isimported').toLowerCase() == 'true') {
+    if (child.getAttribute('depth') != 0) {
       xml.removeChild(child);
     }
   }
 
-  //the function wipe wipes the attribute isimported from all blocks recursivley.
-  //it shouldn't be necessary after you've already removed all top-level blocks that have isimported=true
-  //there shouldn't be anything else that has isimported set, but just in case
+  //the function wipe wipes the attribute depth from all blocks recursivley.
+  //it shouldn't be necessary after you've already removed all top-level blocks that have depth != 0
+  //there shouldn't be anything else that has depth set, but just in case
   (function wipe(xml) {
-    xml.removeAttribute('isimported');
+    xml.removeAttribute('depth');
     for (var i=0; i<xml.children.length; i++) {
       wipe(xml.children[i]);
     }
@@ -103,7 +94,6 @@ window.exported.textToDom = textToDom;
 window.exported.domToText = domToText;
 window.exported.blocklyXmlContainer = blocklyXmlContainer;
 window.exported.getTopLevelBlocks = getTopLevelBlocks;
-window.exported.attachAttributes = attachAttributes;
 window.exported.appendChildrenToParent = appendChildrenToParent;
 window.exported.filterOutImportedBlocks = filterOutImportedBlocks;
 window.exported.setChildrenHeader = setChildrenHeader;
