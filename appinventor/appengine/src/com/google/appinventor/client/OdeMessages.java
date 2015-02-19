@@ -467,6 +467,11 @@ public interface OdeMessages extends Messages {
   @Description("Caption for project list box.")
   String projectListBoxCaption();
 
+
+  @DefaultMessage("My Library")
+  @Description("Caption for library list box.")
+  String libraryListBoxCaption();
+
   // Used in boxes/PropertiesBox.java
 
   @DefaultMessage("Properties")
