@@ -16,6 +16,7 @@ import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.explorer.project.ProjectChangeAdapter;
 import com.google.appinventor.client.explorer.project.ProjectManager;
 import com.google.appinventor.client.explorer.project.ProjectManagerEventAdapter;
+import com.google.appinventor.client.explorer.youngandroid.LibraryToolbar;
 import com.google.appinventor.client.explorer.youngandroid.ProjectToolbar;
 import com.google.appinventor.client.jsonp.JsonpConnection;
 import com.google.appinventor.client.output.OdeLog;
@@ -590,6 +591,8 @@ public class Ode implements EntryPoint {
     projectToolbar = new ProjectToolbar();
     pVertPanel.add(projectToolbar);
     pVertPanel.add(projectListPanel);
+    LibraryToolbar libraryToolbar =  new LibraryToolbar();
+    pVertPanel.add(libraryToolbar);
     pVertPanel.add(LibraryListBox.getLibraryListBox());
     projectsTabIndex = deckPanel.getWidgetCount();
     deckPanel.add(pVertPanel);
