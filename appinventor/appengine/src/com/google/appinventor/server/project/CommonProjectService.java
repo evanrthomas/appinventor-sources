@@ -53,7 +53,7 @@ public abstract class CommonProjectService {
    *
    * @return new project ID
    */
-  public abstract long newProject(String userId, String projectName, NewProjectParameters params);
+  public abstract long newProject(String userId, String projectType, String projectName, NewProjectParameters params);
 
   /**
    * Copies a project with a new name.

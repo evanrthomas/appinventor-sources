@@ -21,6 +21,8 @@ public final class YoungAndroidProjectNode extends ProjectRootNode
    */
   public static final String YOUNG_ANDROID_PROJECT_TYPE = "YoungAndroid";
 
+  public static final String YOUNG_ANDROID_BOOK_PROJECT_TYPE = "YoungAndroid-Book";
+
   /**
    * Project target types for YoungAndroid projects.
    */

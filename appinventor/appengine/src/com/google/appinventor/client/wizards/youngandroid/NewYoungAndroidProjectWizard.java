@@ -6,7 +6,6 @@
 package com.google.appinventor.client.wizards.youngandroid;
 
 import com.google.appinventor.client.Ode;
-import static com.google.appinventor.client.Ode.MESSAGES;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.tracking.Tracking;
 import com.google.appinventor.client.widgets.LabeledTextBox;
@@ -23,6 +22,8 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.DeferredCommand;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
+import static com.google.appinventor.client.Ode.MESSAGES;
+
 
 /**
  * Wizard for creating new Young Android projects.
@@ -33,10 +34,13 @@ public final class NewYoungAndroidProjectWizard extends NewProjectWizard {
   // UI element for project name
   private LabeledTextBox projectNameTextBox;
 
+  public NewYoungAndroidProjectWizard() {
+    this(YoungAndroidProjectNode.YOUNG_ANDROID_PROJECT_TYPE);
+  }
   /**
    * Creates a new YoungAndroid project wizard.
    */
-  public NewYoungAndroidProjectWizard() {
+  public NewYoungAndroidProjectWizard(final String projectType) {
     super(MESSAGES.newYoungAndroidProjectWizardCaption());
 
     // Initialize the UI
@@ -87,7 +91,7 @@ public final class NewYoungAndroidProjectWizard extends NewProjectWizard {
               }
             };
 
-          createNewProject(YoungAndroidProjectNode.YOUNG_ANDROID_PROJECT_TYPE, projectName,
+          createNewProject(projectType, projectName,
               parameters, callbackCommand);
           Tracking.trackEvent(Tracking.PROJECT_EVENT, Tracking.PROJECT_ACTION_NEW_YA, projectName);
         } else {

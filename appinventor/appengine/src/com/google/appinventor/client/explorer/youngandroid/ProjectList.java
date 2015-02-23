@@ -5,8 +5,8 @@
 
 package com.google.appinventor.client.explorer.youngandroid;
 
+import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.Ode;
-import static com.google.appinventor.client.Ode.MESSAGES;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.explorer.project.ProjectComparators;
 import com.google.appinventor.client.explorer.project.ProjectManagerEventListener;
@@ -17,20 +17,11 @@ import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
-import com.google.gwt.user.client.ui.CheckBox;
-import com.google.gwt.user.client.ui.Composite;
-import com.google.gwt.user.client.ui.Grid;
-import com.google.gwt.user.client.ui.HorizontalPanel;
-import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static com.google.appinventor.client.Ode.MESSAGES;
 
 /**
  * The project list shows all projects in a table.
@@ -61,10 +52,19 @@ public class ProjectList extends Composite implements ProjectManagerEventListene
   private final Label dateCreatedSortIndicator;
   private final Label dateModifiedSortIndicator;
 
+  private final ProjectFilter filter;
+
   /**
    * Creates a new ProjectList
    */
   public ProjectList() {
+    this(null);
+  }
+
+  public ProjectList(ProjectFilter filter) {
+    Helper.println("Project list made with filter " + filter);
+    this.filter = filter;
+
     projects = new ArrayList<Project>();
     selectedProjects = new ArrayList<Project>();
     projectWidgets = new HashMap<Project, ProjectWidgets>();
@@ -91,8 +91,8 @@ public class ProjectList extends Composite implements ProjectManagerEventListene
 
     // It is important to listen to project manager events as soon as possible.
     Ode.getInstance().getProjectManager().addProjectManagerEventListener(this);
-  }
 
+  }
   /**
    * Adds the header row to the table.
    *
@@ -310,9 +310,12 @@ public class ProjectList extends Composite implements ProjectManagerEventListene
 
   @Override
   public void onProjectAdded(Project project) {
-    projects.add(project);
-    projectWidgets.put(project, new ProjectWidgets(project));
-    refreshTable(true);
+    Helper.println("adding project " + project.getProjectName());
+    if (filter == null || filter.filter(project)) {
+      projects.add(project);
+      projectWidgets.put(project, new ProjectWidgets(project));
+      refreshTable(true);
+    }
   }
 
   @Override
@@ -324,5 +327,9 @@ public class ProjectList extends Composite implements ProjectManagerEventListene
 
     selectedProjects.remove(project);
     Ode.getInstance().getProjectToolbar().updateButtons();
+  }
+
+  public interface ProjectFilter {
+    public boolean filter(Project project);
   }
 }

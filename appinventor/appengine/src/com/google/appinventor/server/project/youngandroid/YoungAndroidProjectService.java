@@ -259,7 +259,7 @@ public final class YoungAndroidProjectService extends CommonProjectService {
    * {@link NewYoungAndroidProjectParameters}.
    */
   @Override
-  public long newProject(String userId, String projectName, NewProjectParameters params) {
+  public long newProject(String userId, String projectType, String projectName, NewProjectParameters params) {
     NewYoungAndroidProjectParameters youngAndroidParams = (NewYoungAndroidProjectParameters) params;
     String qualifiedFormName = youngAndroidParams.getQualifiedFormName();
 
@@ -277,7 +277,7 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     String yailFileContents = "";
 
     Project project = new Project(projectName);
-    project.setProjectType(YoungAndroidProjectNode.YOUNG_ANDROID_PROJECT_TYPE);
+    project.setProjectType(projectType);
     // Project history not supported in legacy ode new project wizard
     project.addTextFile(new TextFile(propertiesFileName, propertiesFileContents));
     project.addTextFile(new TextFile(formFileName, formFileContents));

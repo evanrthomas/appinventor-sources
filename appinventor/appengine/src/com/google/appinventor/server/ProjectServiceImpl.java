@@ -15,6 +15,7 @@ import com.google.appinventor.shared.rpc.InvalidSessionException;
 import com.google.appinventor.shared.rpc.RpcResult;
 import com.google.appinventor.shared.rpc.project.*;
 import com.google.appinventor.shared.rpc.project.FileDescriptor;
+import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
 import com.google.appinventor.shared.util.Base64Util;
 import com.google.common.collect.Lists;
@@ -56,7 +57,7 @@ public class ProjectServiceImpl extends OdeRemoteServiceServlet implements Proje
                                 NewProjectParameters params) {
     final String userId = userInfoProvider.getUserId();
     long projectId = getProjectRpcImpl(userId, projectType).
-        newProject(userId, projectName, params);
+        newProject(userId, projectType, projectName, params);
     return makeUserProject(userId, projectId);
   }
 
@@ -516,7 +517,8 @@ public class ProjectServiceImpl extends OdeRemoteServiceServlet implements Proje
   }
 
   private CommonProjectService getProjectRpcImpl(final String userId, String projectType) {
-    if (projectType.equals(YoungAndroidProjectNode.YOUNG_ANDROID_PROJECT_TYPE)) {
+    if (projectType.equals(YoungAndroidProjectNode.YOUNG_ANDROID_PROJECT_TYPE) ||
+            projectType.equals(YoungAndroidProjectNode.YOUNG_ANDROID_BOOK_PROJECT_TYPE)) {
       return youngAndroidProject;
     } else {
       throw CrashReport.createAndLogError(LOG, getThreadLocalRequest(), null,

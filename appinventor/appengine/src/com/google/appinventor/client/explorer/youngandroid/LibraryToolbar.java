@@ -9,6 +9,7 @@ import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.tracking.Tracking;
 import com.google.appinventor.client.widgets.Toolbar;
 import com.google.appinventor.client.wizards.youngandroid.NewYoungAndroidProjectWizard;
+import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 
@@ -41,7 +42,8 @@ public class LibraryToolbar extends Toolbar {
       if (Ode.getInstance().screensLocked()) {
         return;                 // Refuse to switch if locked (save file happening)
       }
-      new NewYoungAndroidProjectWizard().center();
+      new NewYoungAndroidProjectWizard(
+              YoungAndroidProjectNode.YOUNG_ANDROID_BOOK_PROJECT_TYPE).center();
       // The wizard will switch to the design view when the new
       // project is created.
     }
