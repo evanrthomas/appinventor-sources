@@ -6,7 +6,6 @@
 package com.google.appinventor.client.settings.project;
 
 import com.google.appinventor.client.Ode;
-import static com.google.appinventor.client.Ode.MESSAGES;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.output.OdeLog;
@@ -15,6 +14,8 @@ import com.google.appinventor.client.settings.SettingsAccessProvider;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
 import com.google.appinventor.shared.settings.SettingsConstants;
 import com.google.gwt.user.client.Command;
+
+import static com.google.appinventor.client.Ode.MESSAGES;
 
 /**
  * Collection of project settings.
@@ -32,7 +33,8 @@ public final class ProjectSettings extends CommonSettings implements SettingsAcc
     this.project = project;
     String projectType = project.getProjectType();
 
-    if (projectType.equals(YoungAndroidProjectNode.YOUNG_ANDROID_PROJECT_TYPE)) {
+    if (projectType.equals(YoungAndroidProjectNode.YOUNG_ANDROID_PROJECT_TYPE)
+            || projectType.equals(YoungAndroidProjectNode.YOUNG_ANDROID_BOOK_PROJECT_TYPE)) {
       addSettings(SettingsConstants.PROJECT_YOUNG_ANDROID_SETTINGS,
           new YoungAndroidSettings(project));
     }

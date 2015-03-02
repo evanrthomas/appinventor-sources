@@ -5,7 +5,6 @@
 
 package com.google.appinventor.client.boxes;
 
-import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.explorer.youngandroid.ProjectList;
 import com.google.appinventor.client.widgets.boxes.Box;
@@ -47,9 +46,6 @@ public final class LibraryListBox extends Box {
     plist = new ProjectList(new ProjectList.ProjectFilter() {
       @Override
       public boolean filter(Project project) {
-        Helper.println("filter on project " + project.getProjectName() +
-                " with project type " + project.getProjectType() +
-                " returns " + project.getProjectType().equals(YoungAndroidProjectNode.YOUNG_ANDROID_BOOK_PROJECT_TYPE));
         return project.getProjectType().equals(YoungAndroidProjectNode.YOUNG_ANDROID_BOOK_PROJECT_TYPE);
       }
     });

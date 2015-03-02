@@ -62,7 +62,6 @@ public class ProjectList extends Composite implements ProjectManagerEventListene
   }
 
   public ProjectList(ProjectFilter filter) {
-    Helper.println("Project list made with filter " + filter);
     this.filter = filter;
 
     projects = new ArrayList<Project>();
@@ -310,7 +309,6 @@ public class ProjectList extends Composite implements ProjectManagerEventListene
 
   @Override
   public void onProjectAdded(Project project) {
-    Helper.println("adding project " + project.getProjectName());
     if (filter == null || filter.filter(project)) {
       projects.add(project);
       projectWidgets.put(project, new ProjectWidgets(project));

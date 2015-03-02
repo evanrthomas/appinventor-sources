@@ -24,9 +24,9 @@ import java.util.*;
  * Abstract superclass for all project editors.
  * Each ProjectEditor is associated with a single project and may have multiple
  * FileEditors open in a DeckPanel.
- * 
+ *
  * TODO(sharon): consider merging this into YaProjectEditor, since we now
- * only have one type of project editor. 
+ * only have one type of project editor.
  *
  * @author lizlooney@google.com (Liz Looney)
  */
@@ -39,10 +39,10 @@ public abstract class ProjectEditor extends Composite {
   // Invariants: openFileEditors, fileIds, and deckPanel contain corresponding
   // elements, i.e., if a FileEditor is in openFileEditors, its fileid should be
   // in fileIds and the FileEditor should be in deckPanel. If selectedFileEditor
-  // is non-null, it is one of the file editors in openFileEditors and the 
-  // one currently showing in deckPanel. 
+  // is non-null, it is one of the file editors in openFileEditors and the
+  // one currently showing in deckPanel.
   private final Map<String, FileEditor> openFileEditors;
-  protected final List<String> fileIds; 
+  protected final List<String> fileIds;
   private final HashMap<String,String> locationHashMap = new HashMap<String,String>();
   private final DeckPanel deckPanel;
   private FileEditor selectedFileEditor;
@@ -76,19 +76,19 @@ public abstract class ProjectEditor extends Composite {
    * This may result in multiple FileEditors being added.
    */
   public abstract void loadProject();
-  
+
   /**
-   * Called when the ProjectEditor widget is loaded after having been hidden. 
-   * Subclasses must implement this method, taking responsiblity for causing 
-   * the onShow method of the selected file editor to be called and for updating 
+   * Called when the ProjectEditor widget is loaded after having been hidden.
+   * Subclasses must implement this method, taking responsiblity for causing
+   * the onShow method of the selected file editor to be called and for updating
    * any other UI elements related to showing the project editor.
    */
   protected abstract void onShow();
-  
+
   /**
    * Called when the ProjectEditor widget is about to be unloaded. Subclasses
-   * must implement this method, taking responsiblity for causing the onHide 
-   * method of the selected file editor to be called and for updating any 
+   * must implement this method, taking responsiblity for causing the onHide
+   * method of the selected file editor to be called and for updating any
    * other UI elements related to hiding the project editor.
    */
   protected abstract void onHide();
@@ -102,7 +102,7 @@ public abstract class ProjectEditor extends Composite {
     String fileId = fileEditor.getFileId();
     openFileEditors.put(fileId, fileEditor);
     fileIds.add(fileId);
-    
+
     deckPanel.add(fileEditor);
   }
 
@@ -129,12 +129,12 @@ public abstract class ProjectEditor extends Composite {
 
   /**
    * Selects the given file editor in the deck panel and calls its onShow()
-   * method. Calls onHide() for a previously selected file editor if there was 
+   * method. Calls onHide() for a previously selected file editor if there was
    * one (and it wasn't the same one).
-   * 
+   *
    * Note: all actions that cause the selected file editor to change should
    * be going through DesignToolbar.SwitchScreenAction.execute(), which calls
-   * this method. If you're thinking about calling this method directly from 
+   * this method. If you're thinking about calling this method directly from
    * somewhere else, please reconsider!
    *
    * @param fileEditor  file editor to select
@@ -148,14 +148,14 @@ public abstract class ProjectEditor extends Composite {
         OdeLog.wlog("Not expecting selectFileEditor(null)");
       }
     }
-    OdeLog.log("ProjectEditor: got selectFileEditor for " 
+    OdeLog.log("ProjectEditor: got selectFileEditor for "
         + ((fileEditor == null) ? null : fileEditor.getFileId())
-        +  " selectedFileEditor is " 
+        +  " selectedFileEditor is "
         + ((selectedFileEditor == null) ? null : selectedFileEditor.getFileId()));
     if (selectedFileEditor != null && selectedFileEditor != fileEditor) {
       selectedFileEditor.onHide();
     }
-    // Note that we still want to do the following statements even if 
+    // Note that we still want to do the following statements even if
     // selectedFileEdtior == fileEditor already. This handles the case of switching back
     // to a previously opened project from another project.
     selectedFileEditor = fileEditor;
@@ -171,14 +171,14 @@ public abstract class ProjectEditor extends Composite {
   public final FileEditor getFileEditor(String fileId) {
     return openFileEditors.get(fileId);
   }
-  
+
   /**
    * Returns the set of open file editors
    */
   public final Iterable<FileEditor> getOpenFileEditors() {
     return Collections.unmodifiableCollection(openFileEditors.values());
   }
-  
+
   /**
    * Returns the currently selected file editor
    */
@@ -188,7 +188,7 @@ public abstract class ProjectEditor extends Composite {
 
   /**
    * Closes the file editors for the given file IDs, without saving.
-   * This is used when the files are about to be deleted. If  
+   * This is used when the files are about to be deleted. If
    * selectedFileEditor is closed, sets selectedFileEditor to null.
    *
    * @param closeFileIds  file IDs of the files to be closed
@@ -209,7 +209,7 @@ public abstract class ProjectEditor extends Composite {
       fileEditor.onClose();
     }
   }
-  
+
   /**
    * Returns the value of a project settings property.
    *

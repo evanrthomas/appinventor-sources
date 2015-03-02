@@ -160,11 +160,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
                 fileName = childXml.getAttribute("filename");
               }
               YaCodePageEditor child = getCodePageEditor(projectId, fileName);
-              //this child is null
-              if (child == null) {
-                Helper.println("addChildrenFromHeader() child is null \n\tprojectIdString " + projectIdString
-                        + "\n\tprojetId " + projectId + "\n\fileName " + fileName);
-              }
 
               if (child instanceof  YaSharedPageEditor) {
                 addChild((YaSharedPageEditor) child); //TODO (evan): get rid of this cast and instanceof
@@ -181,10 +176,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   }
 
   public void addChild(YaSharedPageEditor child) {
-    Helper.println("addChild() child " + child);
-    Helper.println("addChild() child.getClass() " + ((Object)child).getClass());
     children.add(child);
-    Helper.println("addChild() success" );
   }
 
   public Set<YaSharedPageEditor> getChildren() {
