@@ -136,7 +136,6 @@ public class ProjectToolbar extends Toolbar {
    */
   public void updateButtons() {
     ProjectList projectList = ProjectListBox.getProjectListBox().getProjectList();
-    int numProjects = projectList.getNumProjects();
     int numSelectedProjects = projectList.getNumSelectedProjects();
     setButtonEnabled(WIDGET_NAME_DELETE, numSelectedProjects > 0);
     Ode.getInstance().getTopToolbar().fileDropDown.setItemEnabled(MESSAGES.deleteProjectMenuItem(),

@@ -5,7 +5,6 @@
 
 package com.google.appinventor.client.explorer.youngandroid;
 
-import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.explorer.project.ProjectComparators;
@@ -203,6 +202,7 @@ public class ProjectList extends Composite implements ProjectManagerEventListene
             selectedProjects.remove(project);
           }
           Ode.getInstance().getProjectToolbar().updateButtons();
+          Ode.getInstance().getLibraryToolbar().updateButtons();
         }
       });
 
@@ -276,6 +276,7 @@ public class ProjectList extends Composite implements ProjectManagerEventListene
     }
 
     Ode.getInstance().getProjectToolbar().updateButtons();
+    Ode.getInstance().getLibraryToolbar().updateButtons();
   }
 
   /**
@@ -325,6 +326,7 @@ public class ProjectList extends Composite implements ProjectManagerEventListene
 
     selectedProjects.remove(project);
     Ode.getInstance().getProjectToolbar().updateButtons();
+    Ode.getInstance().getLibraryToolbar().updateButtons();
   }
 
   public interface ProjectFilter {

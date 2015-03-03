@@ -3,7 +3,7 @@ package com.google.appinventor.client.explorer.youngandroid;
 import com.google.appinventor.client.ErrorReporter;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
-import com.google.appinventor.client.boxes.ProjectListBox;
+import com.google.appinventor.client.boxes.LibraryListBox;
 import com.google.appinventor.client.boxes.ViewerBox;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.tracking.Tracking;
@@ -53,7 +53,7 @@ public class LibraryToolbar extends Toolbar {
     @Override
     public void execute() {
       List<Project> selectedProjects =
-        ProjectListBox.getProjectListBox().getProjectList().getSelectedProjects();
+        LibraryListBox.getLibraryListBox().getProjectList().getSelectedProjects();
       if (selectedProjects.size() > 0) {
         // Show one confirmation window for selected projects.
         if (deleteConfirmation(selectedProjects)) {
@@ -128,15 +128,12 @@ public class LibraryToolbar extends Toolbar {
    * of "Delete" and "Download Source").
    */
   public void updateButtons() {
-    ProjectList projectList = ProjectListBox.getProjectListBox().getProjectList();
-    int numProjects = projectList.getNumProjects();
+    ProjectList projectList = LibraryListBox.getLibraryListBox().getProjectList();
     int numSelectedProjects = projectList.getNumSelectedProjects();
     setButtonEnabled(WIDGET_NAME_DELETE, numSelectedProjects > 0);
-    Ode.getInstance().getTopToolbar().fileDropDown.setItemEnabled(MESSAGES.deleteProjectMenuItem(),
-        numSelectedProjects > 0);
     Ode.getInstance().getTopToolbar().fileDropDown.setItemEnabled(MESSAGES.exportProjectMenuItem(),
         numSelectedProjects > 0);
     Ode.getInstance().getTopToolbar().fileDropDown.setItemEnabled(MESSAGES.exportAllProjectsMenuItem(),
-        numSelectedProjects > 0);
+            numSelectedProjects > 0);
   }
 }
