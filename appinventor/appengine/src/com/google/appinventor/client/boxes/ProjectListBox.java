@@ -5,9 +5,12 @@
 
 package com.google.appinventor.client.boxes;
 
-import static com.google.appinventor.client.Ode.MESSAGES;
+import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.explorer.youngandroid.ProjectList;
 import com.google.appinventor.client.widgets.boxes.Box;
+import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
+
+import static com.google.appinventor.client.Ode.MESSAGES;
 
 
 /**
@@ -40,7 +43,12 @@ public final class ProjectListBox extends Box {
         false,  // minimizable
         false); // removable
 
-    plist = new ProjectList();
+    plist = new ProjectList(new ProjectList.ProjectFilter() {
+      @Override
+      public boolean filter(Project project) {
+        return project.getProjectType().equals(YoungAndroidProjectNode.YOUNG_ANDROID_PROJECT_TYPE);
+      }
+    });
     setContent(plist);
   }
 

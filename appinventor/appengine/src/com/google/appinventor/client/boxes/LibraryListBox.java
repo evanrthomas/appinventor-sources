@@ -34,6 +34,9 @@ public final class LibraryListBox extends Box {
     return INSTANCE;
   }
 
+  public ProjectList getProjectList() {
+    return plist;
+  }
   /**
    * Creates new library list box.
    */

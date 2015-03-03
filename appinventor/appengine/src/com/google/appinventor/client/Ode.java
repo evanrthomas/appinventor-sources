@@ -150,6 +150,7 @@ public class Ode implements EntryPoint {
   private HorizontalPanel workColumns;
   private VerticalPanel structureAndAssets;
   private ProjectToolbar projectToolbar;
+  private LibraryToolbar libraryToolbar;
   private DesignToolbar designToolbar;
   private TopToolbar topToolbar;
   // Popup that indicates that an asynchronous request is pending. It is visible
@@ -591,7 +592,7 @@ public class Ode implements EntryPoint {
     projectToolbar = new ProjectToolbar();
     pVertPanel.add(projectToolbar);
     pVertPanel.add(projectListPanel);
-    LibraryToolbar libraryToolbar =  new LibraryToolbar();
+    libraryToolbar =  new LibraryToolbar();
     pVertPanel.add(libraryToolbar);
     pVertPanel.add(LibraryListBox.getLibraryListBox());
     projectsTabIndex = deckPanel.getWidgetCount();
@@ -783,6 +784,10 @@ public class Ode implements EntryPoint {
     return projectToolbar;
   }
 
+
+  public LibraryToolbar getLibraryToolbar() {
+    return libraryToolbar;
+  }
   /**
    * Returns the structureAndAssets panel.
    *
