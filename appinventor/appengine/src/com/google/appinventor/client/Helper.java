@@ -52,6 +52,11 @@ public class Helper {
     $wnd.obj = o;
   }-*/;
 
+  public static void debugger(String msg) {
+    println(msg);
+    debugger();
+  }
+
   public static native void debugger() /*-{
     debugger;
   }-*/;

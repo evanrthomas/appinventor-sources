@@ -339,6 +339,7 @@ public class Ode implements EntryPoint {
   }
 
   public void openYoungAndroidProjectInDesigner(final Project project) {
+    //TODO (evan): rename this to openYoungAndroidProject (not necessesarily in designer)
     ProjectRootNode projectRootNode = project.getRootNode();
     if (projectRootNode == null) {
       // The project nodes haven't been loaded yet.

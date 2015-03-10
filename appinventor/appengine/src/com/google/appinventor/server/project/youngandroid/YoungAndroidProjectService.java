@@ -279,8 +279,11 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     Project project = new Project(projectName);
     project.setProjectType(projectType);
     // Project history not supported in legacy ode new project wizard
+
+    if (!projectType.equals(YoungAndroidProjectNode.YOUNG_ANDROID_BOOK_PROJECT_TYPE)) {
+      project.addTextFile(new TextFile(formFileName, formFileContents));
+    }
     project.addTextFile(new TextFile(propertiesFileName, propertiesFileContents));
-    project.addTextFile(new TextFile(formFileName, formFileContents));
     project.addTextFile(new TextFile(blocklyFileName, blocklyFileContents));
     project.addTextFile(new TextFile(yailFileName, yailFileContents));
 
