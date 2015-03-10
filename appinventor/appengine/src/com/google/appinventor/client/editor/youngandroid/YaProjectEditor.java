@@ -19,6 +19,7 @@ import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidFormNode;
+import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
 import com.google.appinventor.shared.storage.StorageUtil;
 import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
@@ -31,17 +32,17 @@ import java.util.HashMap;
 
 /**
  * Project editor for Young Android projects. Each instance corresponds to
- * one project that has been opened in this App Inventor session. 
- * Also responsible for managing screens list for this project in 
+ * one project that has been opened in this App Inventor session.
+ * Also responsible for managing screens list for this project in
  * the DesignToolbar.
  *
  * @author lizlooney@google.com (Liz Looney)
- * @author sharon@google.com (Sharon Perl) - added logic for screens in  
+ * @author sharon@google.com (Sharon Perl) - added logic for screens in
  *   DesignToolbar
  */
 public final class YaProjectEditor extends ProjectEditor implements ProjectChangeListener {
-  
-  // FileEditors in a YA project come in sets. Every form in the project has 
+
+  // FileEditors in a YA project come in sets. Every form in the project has
   // a blocksEditor for editing the code, some also have a formEditor (if the blocks editor is a formpage).
   // Some day it may also have an editor for the textual representation of the program logic.
   private class EditorSet {
@@ -51,17 +52,17 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
 
   // Maps form name -> editors for this form
   private final HashMap<String, EditorSet> editorMap = Maps.newHashMap();
-  
-  // State variables to help determine whether we are ready to show Screen1  
+
+  // State variables to help determine whether we are ready to show Screen1
   // Automatically select the Screen1 form editor when we have finished loading
-  // both the form and blocks editors for Screen1 and we have added the 
+  // both the form and blocks editors for Screen1 and we have added the
   // screen to the DesignToolbar. Since the loading happens asynchronously,
   // there are multiple points when we may be ready to show the screen, and
   // we shouldn't try to show it before everything is ready.
   private boolean screen1FormLoaded = false;
   private boolean screen1BlocksLoaded = false;
   private boolean screen1Added = false;
-  
+
   /**
    * Returns a project editor factory for {@code YaProjectEditor}s.
    *
@@ -119,9 +120,9 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
         if (isScreen1(formName)) {
           screen1Added = true;
           if (readyToShowScreen1()) {  // probably not yet but who knows?
-            OdeLog.log("YaProjectEditor.loadProject: switching to screen " + formName 
+            OdeLog.log("YaProjectEditor.loadProject: switching to screen " + formName
                 + " for project " + projectRootNode.getProjectId());
-            Ode.getInstance().getDesignToolbar().switchToScreen(projectRootNode.getProjectId(), 
+            Ode.getInstance().getDesignToolbar().switchToScreen(projectRootNode.getProjectId(),
                 formName, DesignToolbar.View.FORM);
           }
         }
@@ -130,13 +131,13 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
       }
     }
   }
-  
+
   @Override
   protected void onShow() {
     OdeLog.log("YaProjectEditor got onShow() for project " + projectId);
-    
+
     AssetListBox.getAssetListBox().getAssetList().refreshAssetList(projectId);
-    
+
     DesignToolbar designToolbar = Ode.getInstance().getDesignToolbar();
     FileEditor selectedFileEditor = getSelectedFileEditor();
     if (selectedFileEditor != null) {
@@ -150,7 +151,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
             DesignToolbar.View.BLOCKS);
       } else {
         // shouldn't happen!
-        OdeLog.elog("YaProjectEditor got onShow when selectedFileEditor" 
+        OdeLog.elog("YaProjectEditor got onShow when selectedFileEditor"
             + " is not a form editor or a blocks editor!");
         ErrorReporter.reportError("Internal error: can't switch file editors.");
       }
@@ -167,7 +168,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
       selectedFileEditor.onHide();
     }
   }
-  
+
   @Override
   protected void onUnload() {
     OdeLog.log("YaProjectEditor: got onUnload");
@@ -209,10 +210,10 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
 
   @Override
   public void onProjectNodeRemoved(Project project, ProjectNode node) {
-    // remove blocks and/or form editor if applicable. Remove screen from 
-    // DesignToolbar. If the partner node to this one (blocks or form) was already 
+    // remove blocks and/or form editor if applicable. Remove screen from
+    // DesignToolbar. If the partner node to this one (blocks or form) was already
     // removed, calling DesignToolbar.removeScreen a second time will be a no-op.
-    OdeLog.log("YaProjectEditor: got onProjectNodeRemoved for project " 
+    OdeLog.log("YaProjectEditor: got onProjectNodeRemoved for project "
         + project.getProjectId() + ", node " + node.getFileId());
     String formName = null;
     if (node instanceof YoungAndroidFormNode) {
@@ -223,7 +224,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
       removeBlocksEditor(formName);
     }
   }
-  
+
   /*
    * Returns the YaBlocksEditor for the given form name in this project
    */
@@ -235,7 +236,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
     }
   }
 
-  /* 
+  /*
    * Returns the YaFormEditor for the given form name in this project
    */
   public YaFormEditor getFormFileEditor(String formName) {
@@ -292,7 +293,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
       }
     };
   }
-  
+
   private void addFormEditor(final YoungAndroidFormNode formNode) {
     final YaFormEditor newFormEditor = new YaFormEditor(this, formNode);
     final String formName = formNode.getFormName();
@@ -317,7 +318,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
         if (isScreen1(formName)) {
           screen1FormLoaded = true;
           if (readyToShowScreen1()) {
-            OdeLog.log("YaProjectEditor.addFormEditor.loadFile.execute: switching to screen " 
+            OdeLog.log("YaProjectEditor.addFormEditor.loadFile.execute: switching to screen "
                 + formName + " for project " + newFormEditor.getProjectId());
             Ode.getInstance().getDesignToolbar().switchToScreen(newFormEditor.getProjectId(),
                 formName, DesignToolbar.View.FORM);
@@ -327,9 +328,14 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
       }
     });
   }
-    
+
   private boolean readyToShowScreen1() {
-    return screen1FormLoaded && screen1BlocksLoaded && screen1Added;
+    return (screen1FormLoaded || isBook()) && screen1BlocksLoaded && screen1Added;
+  }
+
+  private boolean isBook() {
+    return project.getProjectType().equals(YoungAndroidProjectNode.YOUNG_ANDROID_BOOK_PROJECT_TYPE);
+
   }
 
   private void addBlocksEditor(final YoungAndroidBlocksNode blocksNode) {
@@ -368,7 +374,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
         }
       });
   }
-  
+
   private void removeFormEditor(String formName) {
     if (editorMap.containsKey(formName)) {
       EditorSet editors = editorMap.get(formName);
@@ -379,7 +385,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
       }
     }
   }
-  
+
   private void removeBlocksEditor(String formName) {
     if (editorMap.containsKey(formName)) {
       EditorSet editors = editorMap.get(formName);
@@ -388,9 +394,9 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
       } else {
         editors.blocksEditor = null;
       }
-    }    
+    }
   }
-  
+
   private static boolean isScreen1(String formName) {
     return formName.equals(YoungAndroidSourceNode.SCREEN1_FORM_NAME);
   }
