@@ -19,7 +19,6 @@ import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidFormNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
 import com.google.appinventor.shared.storage.StorageUtil;
 import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
@@ -330,12 +329,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
   }
 
   private boolean readyToShowScreen1() {
-    return (screen1FormLoaded || isBook()) && screen1BlocksLoaded && screen1Added;
-  }
-
-  private boolean isBook() {
-    return project.getProjectType().equals(YoungAndroidProjectNode.YOUNG_ANDROID_BOOK_PROJECT_TYPE);
-
+    return (screen1FormLoaded || project.isBook()) && screen1BlocksLoaded && screen1Added;
   }
 
   private void addBlocksEditor(final YoungAndroidBlocksNode blocksNode) {

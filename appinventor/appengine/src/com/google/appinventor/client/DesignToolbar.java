@@ -175,9 +175,9 @@ public class DesignToolbar extends Toolbar {
     }
 
     addButton(new ToolbarItem(WIDGET_NAME_SWITCH_TO_FORM_EDITOR,
-        MESSAGES.switchToFormEditorButton(), new SwitchToFormEditorAction()), true);
+            MESSAGES.switchToFormEditorButton(), new SwitchToFormEditorAction()), true);
     addButton(new ToolbarItem(WIDGET_NAME_SWITCH_TO_BLOCKS_EDITOR,
-        MESSAGES.switchToBlocksEditorButton(), new SwitchToBlocksEditorAction()), true);
+            MESSAGES.switchToBlocksEditorButton(), new SwitchToBlocksEditorAction()), true);
     addButton(new ToolbarItem(WIDGET_NAME_OPEN_SHARED_PAGES_OVERLAY,
             MESSAGES.openSharedPagesOverlay(), new OpenSharedPagesOverlay()), true);
 
@@ -290,7 +290,12 @@ public class DesignToolbar extends Toolbar {
     currentProject.setCurrentScreen(newScreenName);
     setDropDownButtonCaption(WIDGET_NAME_SCREENS_DROPDOWN, newScreenName);
     OdeLog.log("Setting currentScreen to " + newScreenName);
-    if (currentView == View.FORM && screen.formEditor != null) {
+    if (isBook(projectId)) {
+      projectEditor.selectFileEditor(screen.blocksEditor);
+      setButtonEnabled(WIDGET_NAME_SWITCH_TO_BLOCKS_EDITOR, false);
+      setButtonEnabled(WIDGET_NAME_SWITCH_TO_FORM_EDITOR, false);
+      Ode.getInstance().getTopToolbar().updateFileMenuButtons(1);
+    } else if (currentView == View.FORM && screen.formEditor != null) {
       projectEditor.selectFileEditor(screen.formEditor);
       toggleEditor(false);
       Ode.getInstance().getTopToolbar().updateFileMenuButtons(1);
@@ -490,6 +495,10 @@ public class DesignToolbar extends Toolbar {
       return false;
     }
     return true;
+  }
+
+  private boolean isBook(long projectId) {
+    return Ode.getInstance().getProjectManager().getProject(projectId).isBook();
   }
 
   /*

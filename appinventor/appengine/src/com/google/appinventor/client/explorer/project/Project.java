@@ -6,15 +6,17 @@
 package com.google.appinventor.client.explorer.project;
 
 import com.google.appinventor.client.Ode;
-import static com.google.appinventor.client.Ode.MESSAGES;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.settings.project.ProjectSettings;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.project.UserProject;
+import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.google.appinventor.client.Ode.MESSAGES;
 
 /**
  * This class represents a project.
@@ -105,6 +107,10 @@ public final class Project {
    */
   public String getProjectType() {
     return projectInfo.getProjectType();
+  }
+
+  public boolean isBook() {
+    return getProjectType().equals(YoungAndroidProjectNode.YOUNG_ANDROID_BOOK_PROJECT_TYPE);
   }
 
   /**
