@@ -19759,7 +19759,7 @@ return /******/ (function(modules) { // webpackBootstrap
       case 'triangle':      this.draw = this._drawTriangle; this.resize = this._resizeShape; break;
       case 'triangleDown':  this.draw = this._drawTriangleDown; this.resize = this._resizeShape; break;
       case 'star':          this.draw = this._drawStar; this.resize = this._resizeShape; break;
-      case 'custom':        this.draw = this._makeDrawCustom(properties.customDraw); 
+      case 'custom':        this.draw = this._makeDrawCustom(properties.customDraw);
                             this.resize = properties.customResize || this._resizeShape; break;
       default:              this.draw = this._drawEllipse; this.resize = this._resizeEllipse; break;
     }
@@ -22682,7 +22682,7 @@ return /******/ (function(modules) { // webpackBootstrap
     edit: 'Edit',
     del: 'Delete selected',
     back: 'Back',
-    addNode: 'Add Node',
+    addNode: 'New Shared Page',
     addEdge: 'Add Edge',
     editNode: 'Edit Node',
     editEdge: 'Edit Edge',
@@ -23816,7 +23816,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 56 */
 /***/ function(module, exports, __webpack_require__) {
 
-  
+
   /**
    * Expose `Emitter`.
    */
@@ -27228,7 +27228,7 @@ return /******/ (function(modules) { // webpackBootstrap
           makeGlobal();
       }
   }).call(this);
-  
+
   /* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }()), __webpack_require__(71)(module)))
 
 /***/ },
@@ -31933,9 +31933,30 @@ return /******/ (function(modules) { // webpackBootstrap
       this.manipulationDOM['addEdgeLabelSpan'].innerHTML = locale['addEdge'];
       this.manipulationDOM['addEdgeSpan'].appendChild(this.manipulationDOM['addEdgeLabelSpan']);
 
+
       this.manipulationDiv.appendChild(this.manipulationDOM['addNodeSpan']);
       this.manipulationDiv.appendChild(this.manipulationDOM['seperatorLineDiv1']);
       this.manipulationDiv.appendChild(this.manipulationDOM['addEdgeSpan']);
+
+      var extraButtons;
+      if (this.constants.dataManipulation && (extraButtons = this.constants.dataManipulation.extraButtons)) {
+        extraButtons.forEach(function (button) {
+          this.manipulationDOM[button.name + 'Span'] = document.createElement('span');
+          this.manipulationDOM[button.name + 'Span'].className = 'network-manipulationUI';
+          this.manipulationDOM[button.name + 'LabelSpan'] = document.createElement('span');
+          this.manipulationDOM[button.name + 'LabelSpan'].className = 'network-manipulationLabel';
+          this.manipulationDOM[button.name + 'LabelSpan'].innerHTML = button.name;
+          this.manipulationDOM[button.name + 'Span'].appendChild(this.manipulationDOM[button.name + 'LabelSpan']);
+          button.initialize(this.manipulationDOM[button.name + 'Span']);
+
+          var seperator = document.createElement('div');
+          seperator.className = 'network-seperatorLine';
+
+          this.manipulationDiv.appendChild(seperator);
+          this.manipulationDiv.appendChild(this.manipulationDOM[button.name + 'Span']);
+        }, this);
+
+      }
 
       if (this._getSelectedNodeCount() == 1 && this.triggerFunctions.edit) {
         this.manipulationDOM['seperatorLineDiv2'] = document.createElement('div');

@@ -31,3 +31,14 @@
   width : 100%;
   height : 100%;
 }
+
+
+ul.libraries-dropdown li  {
+  background: #e0e0e0;
+  list-style-type:none;
+  padding: 7 5 7 5;
+}
+
+ul.libraries-dropdown li:hover {
+  -webkit-filter: invert(100%);
+}

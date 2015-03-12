@@ -21,7 +21,7 @@ var getPageDrawer = function(title, color, components) {
       img.src = comp.iconUrl;
       img.setAttribute('width', '12px');
       img.setAttribute('height', '12px');
-      ctx.font="15px Georgia";
+      ctx.font='15px Georgia';
       ctx.drawImage(img, x+ 10, y + (i+2)*20 -5);
       ctx.beginPath();
       ctx.fillText(comp.name, x + 30, y + (i+2)*20 + 10);
@@ -33,10 +33,27 @@ var getPageDrawer = function(title, color, components) {
   }
 }
 
-
 var clearOverlay = function() {
   document.getElementById('fade').style.display = 'none';
   document.getElementById('overlay').style.display = 'none';
+}
+
+var initializeLibrariesDropDown = function(elm) {
+  var ul = document.createElement("ul");
+
+  for (var i = 0; i < 5; i++) {
+    var li = document.createElement("li");
+    li.innerHTML = "test " + i;
+    ul.appendChild(li)
+  }
+  ul.classList.add('libraries-dropdown');
+
+  var drop = new Drop({
+    target: elm,
+      content:ul,
+      position:'bottom right',
+      openOn: 'click',
+  });
 }
 
 var openSharedPagesOverlay =  function() {
@@ -111,6 +128,8 @@ var openSharedPagesOverlay =  function() {
     dataManipulation : {
       enabled: true,
       initiallyVisible: true,
+      extraButtons : [{name:"Import From Library", initialize:initializeLibrariesDropDown}] ,
+
     },
     //hierarchicalLayout: {
     //  levelSeperation: 200,
@@ -146,7 +165,6 @@ var openSharedPagesOverlay =  function() {
     }
   };
   var network = new vis.Network(container, data, options);
-  window.network = network;
 };
 
 window.exported = window.exported || {};
