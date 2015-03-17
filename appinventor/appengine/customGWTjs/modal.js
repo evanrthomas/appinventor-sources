@@ -38,12 +38,9 @@ var clearOverlay = function() {
   document.getElementById('overlay').style.display = 'none';
 }
 
-var initializeLibrariesDropDown = function(target, books) {
+var initializeLibrariesDropDown = function(target) {
 
-  var books = [{name:"option 1", pages:[{name:"page1"}, {name:"page2"}]},
-      {name:"option 2", pages:[{name:"page2"},]},
-      {name:"option 3", pages:[]},
-      {name:"option 4", pages:[{name:"page3"}, {name:"page4"}, {name:"page5"}]},  ]
+  var books = window.exported.libraryDescriptor();
 
   var mainUl = document.createElement('ul');
   mainUl.classList.add('libraries-dropdown');

@@ -338,6 +338,33 @@ public class DesignToolbar extends Toolbar {
       cmd.startExecuteChain(Tracking.PROJECT_ACTION_ADD_SHARED_PAGE_YA, rootNode);
     }
 
+    private JavaScriptObject libraryDescriptor() { //called from javascript
+      JSONArray arr = new JSONArray();
+      for (int i = 0; i< 4; i++) {
+        JSONObject book = new JSONObject();
+        book.put("name", new JSONString("bookName" + i));
+
+        JSONArray pages =  new JSONArray();
+        JSONObject json = new JSONObject();
+        json.put("name", new JSONString("page1"));
+        pages.set(pages.size(), json);
+
+        json = new JSONObject();
+        json.put("name", new JSONString("page2"));
+        pages.set(pages.size(), json);
+
+        json = new JSONObject();
+        json.put("name", new JSONString("page3"));
+        pages.set(pages.size(), json);
+
+        book.put("pages", pages);
+
+        arr.set(arr.size(), book);
+
+      }
+      return arr.getJavaScriptObject();
+    }
+
     private JSONObject pageDescriptor(YaCodePageEditor editor) {
       JSONObject json = new JSONObject();
       String name = editor.getFileName();
@@ -426,6 +453,11 @@ public class DesignToolbar extends Toolbar {
       $wnd.exported.newSharedPage = $entry(function() {
         return that.@com.google.appinventor.client.DesignToolbar$OpenSharedPagesOverlay::newSharedPage()();
        });
+
+      $wnd.exported.libraryDescriptor = $entry(function() {
+        return that.@com.google.appinventor.client.DesignToolbar$OpenSharedPagesOverlay::libraryDescriptor()();
+       });
+
       $wnd.exported.getProjectPages = $entry(function() {
         return that.@com.google.appinventor.client.DesignToolbar$OpenSharedPagesOverlay::getProjectPages()();
       });
