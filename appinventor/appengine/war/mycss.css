@@ -42,3 +42,7 @@ ul.libraries-dropdown li  {
 ul.libraries-dropdown li:hover {
   -webkit-filter: invert(100%);
 }
+
+.drop {
+  z-index:101;
+}
