@@ -38,19 +38,39 @@ var clearOverlay = function() {
   document.getElementById('overlay').style.display = 'none';
 }
 
-var initializeLibrariesDropDown = function(elm) {
-  var ul = document.createElement("ul");
+var initializeLibrariesDropDown = function(target, books) {
 
-  for (var i = 0; i < 5; i++) {
-    var li = document.createElement("li");
-    li.innerHTML = "test " + i;
-    ul.appendChild(li)
+  var books = [{name:"option 1", pages:[{name:"page1"}, {name:"page2"}]},
+      {name:"option 2", pages:[{name:"page2"},]},
+      {name:"option 3", pages:[]},
+      {name:"option 4", pages:[{name:"page3"}, {name:"page4"}, {name:"page5"}]},  ]
+
+  var mainUl = document.createElement('ul');
+  mainUl.classList.add('libraries-dropdown');
+  for (var i = 0; i<books.length; i++) {
+    var book = books[i];
+    var bookli = document.createElement('li');
+    var bookUl = document.createElement('ul');
+    bookUl.classList.add('libraries-dropdown');
+    bookli.innerHTML = book.name;
+    mainUl.appendChild(bookli);
+    for (var j = 0; j<book.pages.length; j++) {
+      var page = book.pages[j];
+      var pageli = document.createElement('li');
+      bookUl.appendChild(pageli);
+      pageli.innerHTML = page.name;
+    }
+    new Drop({
+        target: bookli,
+        content:bookUl,
+        position:'right middle',
+        openOn: 'hover',
+    });
   }
-  ul.classList.add('libraries-dropdown');
 
-  var drop = new Drop({
-    target: elm,
-      content:ul,
+  new Drop({
+      target: target,
+      content:mainUl,
       position:'bottom right',
       openOn: 'click',
   });
@@ -169,3 +189,35 @@ var openSharedPagesOverlay =  function() {
 
 window.exported = window.exported || {};
 window.exported.openSharedPagesOverlay = openSharedPagesOverlay;
+
+
+
+  //var makeMenu = function(arr) {
+  //  var ul = document.createElement("ul");
+  //  arr.forEach(function(elm) {
+  //    var li = document.createElement("li");
+  //    li.innerHTML = elm.name,
+  //    ul.appendChild(li)
+  //  });
+  //  ul.classList.add('libraries-dropdown');
+  //  return ul;
+  //};
+
+  //var books = [{name:"option 1", pages:[{name:"page1"}, {name:"page2"}]},
+  //    {name:"option 2", pages:[{name:"page2"},]},
+  //    {name:"option 3", pages:[]},
+  //    {name:"option 4", pages:[{name:"page3"}, {name:"page4"}, {name:"page5"}]},]
+
+  //var mainMenu = makeMenu(books);
+  //books.forEach(function (book) {
+  //  var subMenu = makeMenu(book);
+  //  new Drop({
+  //    target:
+  //    makeMenu(book.pages);
+  //});
+  //var drop = new Drop({
+  //  target: target,
+  //    content:makeMenu(books),
+  //    position:'bottom right',
+  //    openOn: 'click',
+  //});
