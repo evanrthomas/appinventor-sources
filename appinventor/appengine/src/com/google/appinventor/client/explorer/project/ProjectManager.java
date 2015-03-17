@@ -6,15 +6,13 @@
 package com.google.appinventor.client.explorer.project;
 
 import com.google.appinventor.client.Ode;
-import static com.google.appinventor.client.Ode.MESSAGES;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.UserProject;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static com.google.appinventor.client.Ode.MESSAGES;
 
 /**
  * This class manages projects.
@@ -24,6 +22,7 @@ import java.util.Map;
 public final class ProjectManager {
   // Map to find the project from a project ID.
   private final Map<Long, Project> projectsMap;
+  private final Collection<Project> library;
 
   // List of listeners for any project manager events.
   private final List<ProjectManagerEventListener> projectManagerEventListeners;
@@ -33,6 +32,7 @@ public final class ProjectManager {
    */
   public ProjectManager() {
     projectsMap = new HashMap<Long, Project>();
+    library = new ArrayList<Project>();
     projectManagerEventListeners = new ArrayList<ProjectManagerEventListener>();
     Ode.getInstance().getProjectService().getProjectInfos(
         new OdeAsyncCallback<List<UserProject>>(
@@ -127,8 +127,15 @@ public final class ProjectManager {
   public Project addProject(UserProject projectInfo) {
     Project project = new Project(projectInfo);
     projectsMap.put(projectInfo.getProjectId(), project);
+    if (project.isBook()) {
+      library.add(project);
+    }
     fireProjectAdded(project);
     return project;
+  }
+
+  public Collection<Project> getLibrary() {
+    return library;
   }
 
   /**

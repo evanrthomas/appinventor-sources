@@ -15,11 +15,14 @@ import com.google.appinventor.client.explorer.commands.AddFormCommand;
 import com.google.appinventor.client.explorer.commands.AddSharedPageCommand;
 import com.google.appinventor.client.explorer.commands.ChainableCommand;
 import com.google.appinventor.client.explorer.commands.DeleteFileCommand;
+import com.google.appinventor.client.explorer.project.Project;
+import com.google.appinventor.client.explorer.project.ProjectChangeAdapter;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.tracking.Tracking;
 import com.google.appinventor.client.widgets.DropDownButton.DropDownItem;
 import com.google.appinventor.client.widgets.Toolbar;
 import com.google.appinventor.common.version.AppInventorFeatures;
+import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
 import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
@@ -36,6 +39,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -338,31 +342,48 @@ public class DesignToolbar extends Toolbar {
       cmd.startExecuteChain(Tracking.PROJECT_ACTION_ADD_SHARED_PAGE_YA, rootNode);
     }
 
-    private JavaScriptObject libraryDescriptor() { //called from javascript
-      JSONArray arr = new JSONArray();
-      for (int i = 0; i< 4; i++) {
-        JSONObject book = new JSONObject();
-        book.put("name", new JSONString("bookName" + i));
-
-        JSONArray pages =  new JSONArray();
-        JSONObject json = new JSONObject();
-        json.put("name", new JSONString("page1"));
-        pages.set(pages.size(), json);
-
-        json = new JSONObject();
-        json.put("name", new JSONString("page2"));
-        pages.set(pages.size(), json);
-
-        json = new JSONObject();
-        json.put("name", new JSONString("page3"));
-        pages.set(pages.size(), json);
-
-        book.put("pages", pages);
-
-        arr.set(arr.size(), book);
-
+    private void getEachBookWhenLoaded(JavaScriptObject callback) { //called from javascript
+      Collection<Project> books = Ode.getInstance().getProjectManager().getLibrary();
+      for (final Project book: books) {
+        getBookWhenLoaded(book, callback);
       }
-      return arr.getJavaScriptObject();
+    }
+
+    private void getBookWhenLoaded(final Project book, final JavaScriptObject callback) {
+      JSONObject bookjson = new JSONObject();
+      bookjson.put("name", new JSONString(book.getProjectName()));
+      JSONArray pages =  new JSONArray();
+
+      ProjectRootNode root = book.getRootNode();
+      if (root == null) {
+
+        book.addProjectChangeListener(new ProjectChangeAdapter() {
+          @Override
+          public void onProjectLoaded(Project projectLoaded) {
+            book.removeProjectChangeListener(this);
+            getBookWhenLoaded(book, callback);
+          }
+        });
+        book.loadProjectNodes();
+
+      } else {
+
+        for (ProjectNode page : book.getRootNode().getAllSourceNodes()) {
+          if (!page.getName().endsWith(".bky")) {
+            continue;
+          }
+
+          JSONObject pagejson = new JSONObject();
+          pagejson.put("fileid", new JSONString(page.getFileId()));
+          pagejson.put("projectid", new JSONString(page.getProjectId() + ""));
+          String name = page.getName();
+          name = name.substring(0, name.length() - 4); //get rid of .bky
+          pagejson.put("name", new JSONString(name));
+          pages.set(pages.size(), pagejson);
+        }
+        bookjson.put("pages", pages);
+        callJSFunc(callback, bookjson.getJavaScriptObject());
+      }
     }
 
     private JSONObject pageDescriptor(YaCodePageEditor editor) {
@@ -448,14 +469,19 @@ public class DesignToolbar extends Toolbar {
       $wnd.alert(msg);
     }-*/;
 
+
+    private native JavaScriptObject callJSFunc(JavaScriptObject callback, JavaScriptObject arg) /*-{
+      return callback(arg);
+    }-*/;
+
     public native void exportMethods() /*-{
       var that = this;
       $wnd.exported.newSharedPage = $entry(function() {
         return that.@com.google.appinventor.client.DesignToolbar$OpenSharedPagesOverlay::newSharedPage()();
        });
 
-      $wnd.exported.libraryDescriptor = $entry(function() {
-        return that.@com.google.appinventor.client.DesignToolbar$OpenSharedPagesOverlay::libraryDescriptor()();
+      $wnd.exported.getEachBookWhenLoaded = $entry(function(callback) {
+        return that.@com.google.appinventor.client.DesignToolbar$OpenSharedPagesOverlay::getEachBookWhenLoaded(Lcom/google/gwt/core/client/JavaScriptObject;)(callback);
        });
 
       $wnd.exported.getProjectPages = $entry(function() {
@@ -639,4 +665,6 @@ public class DesignToolbar extends Toolbar {
   public DesignProject getCurrentProject() {
     return currentProject;
   }
+
+
 }
