@@ -1,6 +1,7 @@
-package com.google.appinventor.client;
+package com.google.appinventor.client.helper;
 
 import com.google.appinventor.client.output.OdeLog;
+import com.google.gwt.core.client.JavaScriptObject;
 
 import java.util.Collection;
 
@@ -59,5 +60,9 @@ public class Helper {
 
   public static native void debugger() /*-{
     debugger;
+  }-*/;
+
+  public static native String jsonToString(JavaScriptObject obj) /*-{
+    return JSON.stringify(obj);
   }-*/;
 }

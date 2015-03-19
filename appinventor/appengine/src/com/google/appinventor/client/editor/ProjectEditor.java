@@ -5,7 +5,6 @@
 
 package com.google.appinventor.client.editor;
 
-import com.google.appinventor.client.Helper;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.output.OdeLog;
