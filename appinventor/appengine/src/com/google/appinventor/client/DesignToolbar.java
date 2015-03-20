@@ -6,7 +6,6 @@
 package com.google.appinventor.client;
 
 import com.google.appinventor.client.editor.ProjectEditor;
-import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.editor.youngandroid.BlocklyPanel;
 import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
 import com.google.appinventor.client.editor.youngandroid.YaFormEditor;
@@ -17,6 +16,9 @@ import com.google.appinventor.client.explorer.commands.ChainableCommand;
 import com.google.appinventor.client.explorer.commands.DeleteFileCommand;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.explorer.project.ProjectChangeAdapter;
+import com.google.appinventor.client.helper.Callback;
+import com.google.appinventor.client.helper.CountDownCallback;
+import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.tracking.Tracking;
 import com.google.appinventor.client.widgets.DropDownButton.DropDownItem;
@@ -25,6 +27,7 @@ import com.google.appinventor.common.version.AppInventorFeatures;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
+import com.google.appinventor.shared.storage.StorageUtil;
 import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -39,10 +42,7 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.google.appinventor.client.Ode.MESSAGES;
 
@@ -342,47 +342,61 @@ public class DesignToolbar extends Toolbar {
       cmd.startExecuteChain(Tracking.PROJECT_ACTION_ADD_SHARED_PAGE_YA, rootNode);
     }
 
-    private void getEachBookWhenLoaded(JavaScriptObject callback) { //called from javascript
+    private void getEachBookWhenLoaded(final JavaScriptObject callback) { //called from javascript
       Collection<Project> books = Ode.getInstance().getProjectManager().getLibrary();
       for (final Project book: books) {
-        getBookWhenLoaded(book, callback);
-      }
-    }
-
-    private void getBookWhenLoaded(final Project book, final JavaScriptObject callback) {
-      JSONObject bookjson = new JSONObject();
-      bookjson.put("name", new JSONString(book.getProjectName()));
-      JSONArray pages =  new JSONArray();
-
-      ProjectRootNode root = book.getRootNode();
-      if (root == null) {
-
-        book.addProjectChangeListener(new ProjectChangeAdapter() {
+        onLoadProjectNodes(book, new Callback<Project>() {
           @Override
-          public void onProjectLoaded(Project projectLoaded) {
-            book.removeProjectChangeListener(this);
-            getBookWhenLoaded(book, callback);
+          public void call(Project book) {
+            JSONObject bookjson = new JSONObject();
+            bookjson.put("name", new JSONString(book.getProjectName()));
+            JSONArray pages = new JSONArray();
+
+            for (ProjectNode page : book.getRootNode().getAllSourceNodes()) {
+              if (!page.getName().endsWith(".bky")) {
+                continue;
+              }
+
+              JSONObject pagejson = new JSONObject();
+
+              pagejson.put("projectId", new JSONNumber((double) page.getProjectId()));
+              String filename = StorageUtil.trimOffExtension(StorageUtil.basename(page.getFileId()));
+              pagejson.put("fileName", new JSONString(filename));
+              pagejson.put("fileId", new JSONString(page.getFileId()));
+              String name = page.getName();
+              name = name.substring(0, name.length() - 4); //get rid of .bky
+              pagejson.put("name", new JSONString(name));
+              pages.set(pages.size(), pagejson);
+            }
+            bookjson.put("pages", pages);
+            callJSFunc(callback, bookjson.getJavaScriptObject());
+
           }
         });
-        book.loadProjectNodes();
+
+      }
+
+
+
+    }
+
+    private void onLoadProjectNodes(final Project project, final Callback<Project> callback) {
+
+      ProjectRootNode root = project.getRootNode();
+      if (root == null) {
+
+        project.addProjectChangeListener(new ProjectChangeAdapter() {
+          @Override
+          public void onProjectLoaded(Project projectLoaded) {
+            project.removeProjectChangeListener(this);
+            onLoadProjectNodes(project, callback);
+          }
+        });
+        project.loadProjectNodes();
 
       } else {
+        callback.call(project);
 
-        for (ProjectNode page : book.getRootNode().getAllSourceNodes()) {
-          if (!page.getName().endsWith(".bky")) {
-            continue;
-          }
-
-          JSONObject pagejson = new JSONObject();
-          pagejson.put("fileid", new JSONString(page.getFileId()));
-          pagejson.put("projectid", new JSONString(page.getProjectId() + ""));
-          String name = page.getName();
-          name = name.substring(0, name.length() - 4); //get rid of .bky
-          pagejson.put("name", new JSONString(name));
-          pages.set(pages.size(), pagejson);
-        }
-        bookjson.put("pages", pages);
-        callJSFunc(callback, bookjson.getJavaScriptObject());
       }
     }
 
@@ -395,16 +409,17 @@ public class DesignToolbar extends Toolbar {
       json.put("name", new JSONString(name));
       json.put("projectId", new JSONNumber((double)editor.getProjectId()));
       json.put("fileName", new JSONString(editor.getFileName()));
+      json.put("fileId", new JSONString(editor.getFileId()));
 
       JSONArray componentArr = new JSONArray();
-      for (String componentName: editor.getComponents().keySet()) {
-        MockComponent component = editor.getComponents().get(componentName);
-        JSONObject jsonComponent = new JSONObject();
-        jsonComponent.put("name", new JSONString(component.getName()));
-        jsonComponent.put("type", new JSONString(component.getType()));
-        jsonComponent.put("iconUrl", new JSONString(component.getIconImage().getUrl()));
-        componentArr.set(componentArr.size(), jsonComponent);
-      }
+      //for (String componentName: editor.getComponents().keySet()) {
+      //  MockComponent component = editor.getComponents().get(componentName);
+      //  JSONObject jsonComponent = new JSONObject();
+      //  jsonComponent.put("name", new JSONString(component.getName()));
+      //  jsonComponent.put("type", new JSONString(component.getType()));
+      //  jsonComponent.put("iconUrl", new JSONString(component.getIconImage().getUrl()));
+      //  componentArr.set(componentArr.size(), jsonComponent);
+      //}
 
       json.put("components", componentArr);
 
@@ -413,6 +428,7 @@ public class DesignToolbar extends Toolbar {
         JSONObject jsonComponent = new JSONObject();
         jsonComponent.put("projectId", new JSONNumber(child.getProjectId()));
         jsonComponent.put("fileName", new JSONString(child.getFileName()));
+        jsonComponent.put("fileId", new JSONString(child.getFileId()));
         childrenArr.set(childrenArr.size(), jsonComponent);
       }
       json.put("children", childrenArr);
@@ -426,13 +442,21 @@ public class DesignToolbar extends Toolbar {
 
       JSONArray formPages = new JSONArray();
       JSONArray sharedPages = new JSONArray();
+      Set<YaCodePageEditor> added = new HashSet<YaCodePageEditor>();
       YaCodePageEditor page;
       for (String name: currentProject.screens.keySet()) {
         page = currentProject.screens.get(name).blocksEditor;
+        added.add(page);
         if (page.isFormPageEditor()) {
           formPages.set(formPages.size(), pageDescriptor(page));
         } else {
           sharedPages.set(sharedPages.size(), pageDescriptor(page));
+        }
+      }
+      Set<YaSharedPageEditor> children = currentPage.getChildren();
+      for (YaSharedPageEditor child: children) {
+        if (!added.contains(child)) { //add all things from library
+          sharedPages.set(sharedPages.size(), pageDescriptor(child));
         }
       }
 
@@ -443,26 +467,48 @@ public class DesignToolbar extends Toolbar {
     }
 
     //returns whether the child can be imported
-    private boolean importNewPage(JavaScriptObject parentObj, JavaScriptObject childObj) { //called from javascript
-      JSONObject jsonParent = new JSONObject(parentObj);
-      JSONObject jsonChild = new JSONObject(childObj);
+    private void importNewPage(final JavaScriptObject parentObj, final JavaScriptObject childObj, final JavaScriptObject callback) { //called from javascript
+      Helper.println("importNewPage()");
+      final JSONObject jsonParent = new JSONObject(parentObj);
+      final JSONObject jsonChild = new JSONObject(childObj);
 
-      YaCodePageEditor parent = YaCodePageEditor.getCodePageEditor(
-              (long)jsonParent.get("projectId").isNumber().doubleValue(),
-              jsonParent.get("fileName").isString().stringValue());
 
-      YaCodePageEditor child = YaCodePageEditor.getCodePageEditor(
-              (long) jsonChild.get("projectId").isNumber().doubleValue(),
-              jsonChild.get("fileName").isString().stringValue());
+      CountDownCallback<Project> addChildToParent =
+              new CountDownCallback<Project>(2, new Callback<Project>() {
+        @Override
+        public void call(Project proj) {
 
-      if (child instanceof YaSharedPageEditor) {
-        parent.addChild((YaSharedPageEditor)child); //TODO (evan): get rid of this cast
-        Ode.getInstance().getEditorManager().scheduleAutoSave(parent);
-        return true;
-      } else {
-        alert("child must be a shared page");
-        return false;
-      }
+          Helper.println("importNewPage(), addingChildToParent");
+
+          YaCodePageEditor parent = YaCodePageEditor.getCodePageEditorByFileId(
+                  (long) jsonParent.get("projectId").isNumber().doubleValue(),
+                  jsonParent.get("fileId").isString().stringValue());
+
+          YaCodePageEditor child = YaCodePageEditor.getCodePageEditorByFileId(
+                  (long) jsonChild.get("projectId").isNumber().doubleValue(),
+                  jsonChild.get("fileId").isString().stringValue());
+
+
+          if (child instanceof YaSharedPageEditor) {
+
+            Helper.println("importNewPage(), addingChildToParent");
+            parent.addChild((YaSharedPageEditor) child); //TODO (evan): get rid of this cast
+            Ode.getInstance().getEditorManager().scheduleAutoSave(parent);
+            callJSFunc(callback, null);
+          } else {
+            alert("child must be a shared page " + child.isFormPageEditor());
+          }
+        }
+
+      });
+
+      long parentProjectId = Long.parseLong(jsonParent.get("projectId").toString());
+      Project parentproj = Ode.getInstance().getProjectManager().getProject(parentProjectId);
+      onLoadProjectNodes(parentproj, addChildToParent);
+
+      long childProjectId = Long.parseLong(jsonChild.get("projectId").toString());
+      Project childproj = Ode.getInstance().getProjectManager().getProject(childProjectId);
+      onLoadProjectNodes(childproj, addChildToParent);
     }
 
     private native void alert(String msg) /*-{
@@ -487,8 +533,8 @@ public class DesignToolbar extends Toolbar {
       $wnd.exported.getProjectPages = $entry(function() {
         return that.@com.google.appinventor.client.DesignToolbar$OpenSharedPagesOverlay::getProjectPages()();
       });
-      $wnd.exported.importNewPage = $entry(function(parent, child) {
-        return that.@com.google.appinventor.client.DesignToolbar$OpenSharedPagesOverlay::importNewPage(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(parent, child);
+      $wnd.exported.importNewPage = $entry(function(parent, child, callback) {
+        return that.@com.google.appinventor.client.DesignToolbar$OpenSharedPagesOverlay::importNewPage(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(parent, child, callback);
       });
     }-*/;
 

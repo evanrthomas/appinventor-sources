@@ -165,16 +165,18 @@ public abstract class YaCodePageEditor extends SimpleEditor
                 projectIdString = childXml.getAttribute("projectid");
               }
               long projectId = Long.parseLong(projectIdString);
-              String fileName = childXml.getAttribute("fileName");
-              if (fileName.length() == 0) { //TODO (evan): fix this. Silly hack because gwt for some reason makes the I in projectId lowercase
-                fileName = childXml.getAttribute("filename");
+              String fileId = childXml.getAttribute("fileId");
+              if (fileId.length() == 0) { //TODO (evan): fix this. Silly hack because gwt for some reason makes the I in projectId lowercase
+                fileId = childXml.getAttribute("fileid");
               }
-              YaCodePageEditor child = getCodePageEditor(projectId, fileName);
+              YaCodePageEditor child = getCodePageEditorByFileId(projectId, fileId);
 
               if (child instanceof  YaSharedPageEditor) {
                 addChild((YaSharedPageEditor) child); //TODO (evan): get rid of this cast and instanceof
               } else {
-                throw new RuntimeException("header child is not a shared page");
+                String message = "header child is not a shared page " +
+                        "\n\t result.getContent() " + result.getContent();
+                throw new RuntimeException(message);
               }
             }
           }
@@ -193,9 +195,29 @@ public abstract class YaCodePageEditor extends SimpleEditor
     return children;
   }
 
-  public static YaCodePageEditor getCodePageEditor(long projectId, String fileName) {
+  public static YaCodePageEditor getCodePageEditorByFileName(long projectId, String fileName) {
+    //Ode.getInstance().getProjectManager()
     String fullName = projectId + "_" + fileName;
-    return nameToCodePageEditor.get(fullName);
+    YaCodePageEditor editor;
+     if ((editor = nameToCodePageEditor.get(fullName)) != null) {
+       return editor;
+     }
+    return null;
+  }
+
+  public static YaCodePageEditor getCodePageEditorByFileId(long projectId, String fileId) {
+    Project project = Ode.getInstance().getProjectManager().getProject(projectId);
+    ProjectRootNode root = project.getRootNode();
+    if (root == null) {
+      return null;
+    }
+    ProjectNode node = root.getSourceNode(fileId);
+    if (node instanceof YoungAndroidBlocksNode) {
+      ProjectEditor projeditor = Ode.getInstance().getEditorManager().openProject(root);
+      return YaCodePageEditor.newEditor((YaProjectEditor)projeditor,
+              (YoungAndroidBlocksNode)node) ;
+    }
+    return null;
   }
 
 
@@ -231,7 +253,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   @Override
   public void loadFile(final Command afterFileLoaded) {
     Element dom = blocklyXmlContainer();
-    this.linkAndCompile(dom, new HashSet<YaCodePageEditor>(), 0, new Callback<Element>() {
+    linkAndCompile(dom, new HashSet<YaCodePageEditor>(), 0, new Callback<Element>() {
       @Override
       public void call(Element dom) {
         blocksArea.setBlocksContent(domToText(dom));
@@ -259,7 +281,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   }
 
   private void addAndLabelAllBlocks(final Element dom, final int depth, final Callback<Element> onComplete) {
-    this.blocksNode.load(new OdeAsyncCallback<ChecksumedLoadFile>() {
+    blocksNode.load(new OdeAsyncCallback<ChecksumedLoadFile>() {
       @Override
       public void onSuccess(ChecksumedLoadFile result) {
         try {
@@ -340,8 +362,8 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   public void showWhenInitialized() {
     //check if blocks are initialized
-    updateBlocksTree(null);
     if(BlocklyPanel.blocksInited(fullName)) {
+      updateBlocksTree(null);
       blocksArea.showDifferentForm(fullName);
       loadBlocksEditor();
       if (this instanceof YaFormPageEditor) {
@@ -469,7 +491,14 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   @Override
   public String getRawFileContent() {
+    Helper.println("getRawFileContent()");
     String content = blocksArea.getBlocksContent();
+    //if (!content.equals("")) {
+    //  Helper.println("getRawFileContent() content " + content);
+    //  Helper.println("YaCodePageEditor.getRawFileContent() " +
+    //          domToText(setChildrenHeader(
+    //                  filterOutImportedBlocks(textToDom(content)), makeChildrenXmlArray(children))));
+//    }
     return content.equals("") ? "" : domToText(setChildrenHeader(
             filterOutImportedBlocks(textToDom(content)), makeChildrenXmlArray(children)));
   }
@@ -480,7 +509,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
     for (YaSharedPageEditor child: children) {
       Element xmlchild = createElement("child"); //hack because I can't figure out to make an Element
       xmlchild.setAttribute("projectId", child.getProjectId()+"");
-      xmlchild.setAttribute("fileName", child.getFileName());
+      xmlchild.setAttribute("fileId", child.getFileId());
       childrenXmlArr.push(xmlchild);
     }
     return childrenXmlArr;

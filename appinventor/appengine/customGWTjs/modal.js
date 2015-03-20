@@ -1,5 +1,5 @@
 (function() {
-  var network;
+  var network, nodes, edges;
   var getPageDrawer = function(title, color, components) {
     return function drawPage(ctx, x, y, node) {
       var pageWidth = 100;
@@ -15,22 +15,22 @@
       ctx.fillText(title,x + 10,y + 20);
       ctx.stroke();
 
-      for (var i=0; i<components.length; i++) {
-        var comp = components[i];
-        ctx.save();
+      //for (var i=0; i<components.length; i++) {
+      //  var comp = components[i];
+      //  ctx.save();
 
-        var img = new Image();
-        img.src = comp.iconUrl;
-        img.setAttribute('width', '12px');
-        img.setAttribute('height', '12px');
-        ctx.font='15px Georgia';
-        ctx.drawImage(img, x+ 10, y + (i+2)*20 -5);
-        ctx.beginPath();
-        ctx.fillText(comp.name, x + 30, y + (i+2)*20 + 10);
-        ctx.stroke();
-        ctx.restore();
+      //  var img = new Image();
+      //  img.src = comp.iconUrl;
+      //  img.setAttribute('width', '12px');
+      //  img.setAttribute('height', '12px');
+      //  ctx.font='15px Georgia';
+      //  ctx.drawImage(img, x+ 10, y + (i+2)*20 -5);
+      //  ctx.beginPath();
+      //  ctx.fillText(comp.name, x + 30, y + (i+2)*20 + 10);
+      //  ctx.stroke();
+      //  ctx.restore();
 
-      }
+      //}
       return {top:y, bottom:y + pageHeight, left:x, right:x + pageWidth};
     }
   }
@@ -60,6 +60,14 @@
       for (var j = 0; j<book.pages.length; j++) {
         var page = book.pages[j];
         var pageli = document.createElement('li');
+        pageli.onclick = function() {
+          var id = book.projectId + "_" + book.fileName;
+          nodes.add({id: id,
+            shape: 'custom',
+            info: page,
+            customDraw:getPageDrawer(book.name + ":" + page.name, 'blue', []),
+          });
+        }
         submenu.appendChild(pageli);
         pageli.innerHTML = page.name;
       }
@@ -92,20 +100,25 @@
 
 
     var pages = window.exported.getProjectPages();
+    console.log("pages  " + JSON.stringify(pages, undefined, 2));
 
-    var nodes = new vis.DataSet();
-    var edges = new vis.DataSet();
+    nodes = new vis.DataSet();
+    edges = new vis.DataSet();
     var formPages = pages.formPages;
     var sharedPages = pages.sharedPages;
 
+    var getName = function(info) {
+      if (pages.currentPage.projectId == info.projectId) {
+        return info.name;
+      }
+      return "lib:" + info.name;
+    }
     formPages.forEach(function(info) {
       var id = info.projectId + "_" + info.fileName;
       nodes.add({id: id,
         shape: 'custom',
         info: info,
-        customDraw:getPageDrawer(info.name,  //TODO (evan): change the name of customDraw to drawFunction
-          'green',
-          info.components),
+        customDraw:getPageDrawer(getName(info),  'green', info.components),
       });
       info.children.forEach(function(child)  {
         edges.add({
@@ -120,9 +133,7 @@
       nodes.add({id: id,
         shape: 'custom',
         info: info,
-        customDraw:getPageDrawer(info.name,
-          'blue',
-          info.components),
+        customDraw:getPageDrawer(getName(info), 'blue', info.components),
       });
       info.children.forEach(function(child) {
         edges.add({
@@ -169,17 +180,10 @@
       onConnect: function(data, connect) {
         var parent = nodes.get(data.from).info;
         var child = nodes.get(data.to).info;
-        child = {
-          projectId: child["projectId"],
-          fileName: child["fileName"],
-        }
-        parent = {
-          projectId: parent["projectId"],
-          fileName: parent["fileName"],
-        }
-        if (window.exported.importNewPage(parent, child)) {
+        window.exported.importNewPage(parent, child, function() {
           connect(data);
-        }
+        });
+
       }
     };
     network = new vis.Network(container, data, options);

@@ -318,4 +318,8 @@ public abstract class ProjectEditor extends Composite {
     super.onUnload();
     onHide();
   }
+
+  public long getProjectId() {
+    return projectId;
+  }
 }
