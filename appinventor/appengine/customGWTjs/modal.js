@@ -61,7 +61,7 @@
         var page = book.pages[j];
         var pageli = document.createElement('li');
         pageli.onclick = function() {
-          var id = book.projectId + "_" + book.fileName;
+          var id = page.projectId + "_" + page.fileName;
           nodes.add({id: id,
             shape: 'custom',
             info: page,

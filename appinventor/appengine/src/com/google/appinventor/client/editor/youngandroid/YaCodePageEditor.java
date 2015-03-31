@@ -20,6 +20,7 @@ import com.google.appinventor.client.explorer.SourceStructureExplorerItem;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.helper.Callback;
 import com.google.appinventor.client.helper.CountDownCallback;
+import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.shared.rpc.project.ChecksumedFileException;
 import com.google.appinventor.shared.rpc.project.ChecksumedLoadFile;
@@ -76,7 +77,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   private final SourceStructureExplorer sourceStructureExplorer;
 
   protected final ComponentList components;
-  private final Set<YaSharedPageEditor> children;
+  private final Collection<YaSharedPageEditor> children;
 
 
   // Blocks area. Note that the blocks area is a part of the "document" in the
@@ -111,11 +112,14 @@ public abstract class YaCodePageEditor extends SimpleEditor
     //TODO (evan): make abstract method initComponents(components) and override in children
 
     children = new HashSet<YaSharedPageEditor>();
+    Helper.indent("YaCodePageEditor() " + Helper.editorDescriptor(this));
     addChildrenFromHeader();
+    Helper.printChildrenDescriptor("YaCodePageEditor() " + Helper.editorDescriptor(this), children);
 
     fullName = blocksNode.getProjectId() + "_" + blocksNode.getFileName();
 
     nameToCodePageEditor.put(fullName, this);
+    Helper.println("created code pages ", nameToCodePageEditor.keySet());
     blocksArea = new BlocklyPanel(fullName);
     blocksArea.setWidth("100%");
     // This code seems to be using a rather old layout, so we cannot simply pass 100% for height.
@@ -138,6 +142,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
     // Listen for selection events for built-in drawers
     BlockSelectorBox.getBlockSelectorBox().addBlockDrawerSelectionListener(this);
 
+    Helper.unindent();
   }
 
   public static YaCodePageEditor newEditor(YaProjectEditor project, YoungAndroidBlocksNode sourceNode) {
@@ -156,6 +161,9 @@ public abstract class YaCodePageEditor extends SimpleEditor
         try {
           if (result.getContent() != "") {
             JsArray<Element> childrenXml = getChildrenFromHeader(textToDom(result.getContent()));
+            Helper.println("addChildrenFromHeader() is null ?? " + (YaCodePageEditor.this == null));
+            Helper.println("addChildrenFromHeader() " + Helper.editorDescriptor(YaCodePageEditor.this));
+            Helper.consolePrint(childrenXml);
             Element childXml;
             for (int i = 0; i < childrenXml.length(); i++) {
               childXml = childrenXml.get(i);
@@ -170,16 +178,20 @@ public abstract class YaCodePageEditor extends SimpleEditor
               }
               YaCodePageEditor child = getCodePageEditorByFileId(projectId, fileId);
 
-              if (child instanceof  YaSharedPageEditor) {
+              if (child == null) {
+                Helper.println("child was deleted but is still in header " + child.getProjectId() + " " + child.getName());
+                //TODO (evan): child was deleted but is still in header
+              } else if (child instanceof YaSharedPageEditor) {
                 addChild((YaSharedPageEditor) child); //TODO (evan): get rid of this cast and instanceof
               } else {
                 String message = "header child is not a shared page " +
+                        "\n\t child == null " + (child == null) +
                         "\n\t result.getContent() " + result.getContent();
                 throw new RuntimeException(message);
               }
             }
           }
-        } catch(ChecksumedFileException e) {
+        } catch (ChecksumedFileException e) {
           onFailure(e);
         }
       }
@@ -188,21 +200,23 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   public void addChild(YaSharedPageEditor child) {
     children.add(child);
+    Helper.printChildrenDescriptor("addChild() " + Helper.editorDescriptor(this), children);
   }
 
-  public Set<YaSharedPageEditor> getChildren() {
+  public Collection<YaSharedPageEditor> getChildren() {
+    Helper.printChildrenDescriptor("getChildren() " + Helper.editorDescriptor(this), children);
     return children;
   }
 
-  public static YaCodePageEditor getCodePageEditorByFileName(long projectId, String fileName) {
-    //Ode.getInstance().getProjectManager()
-    String fullName = projectId + "_" + fileName;
-    YaCodePageEditor editor;
-     if ((editor = nameToCodePageEditor.get(fullName)) != null) {
-       return editor;
-     }
-    return null;
-  }
+  //public static YaCodePageEditor getCodePageEditorByFileName(long projectId, String fileName) {
+  //  //Ode.getInstance().getProjectManager()
+  //  String fullName = projectId + "_" + fileName;
+  //  YaCodePageEditor editor;
+  //   if ((editor = nameToCodePageEditor.get(fullName)) != null) {
+  //     return editor;
+  //   }
+  //  return null;
+  //  }
 
   public static YaCodePageEditor getCodePageEditorByFileId(long projectId, String fileId) {
     Project project = Ode.getInstance().getProjectManager().getProject(projectId);
@@ -214,7 +228,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
     if (node instanceof YoungAndroidBlocksNode) {
       ProjectEditor projeditor = Ode.getInstance().getEditorManager().openProject(root);
       return YaCodePageEditor.newEditor((YaProjectEditor)projeditor,
-              (YoungAndroidBlocksNode)node) ;
+              (YoungAndroidBlocksNode)node);
     }
     return null;
   }
@@ -223,6 +237,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   private native JsArray<Element> getChildrenFromHeader(JavaScriptObject xml) /*-{
     return xml.querySelectorAll('header > children > child');
   }-*/;
+
   public boolean isFormPageEditor()  {
     return false;
   }
@@ -266,7 +281,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   }
 
   protected void linkAndCompile(Element dom, Set<YaCodePageEditor> visited, int depth, Callback<Element> onComplete) {
-    //TODO (evan): make this function only available for sharedpageeditors
+    Helper.println("linkAndCompile() " + Helper.editorDescriptor(this) + " num children:: " + children.size());
     if (visited.contains(this)) {
       return;
     }
@@ -491,12 +506,13 @@ public abstract class YaCodePageEditor extends SimpleEditor
   @Override
   public String getRawFileContent() {
     String content = blocksArea.getBlocksContent();
-    return content.equals("") ? "" : domToText(setChildrenHeader(
+    content = content.equals("") ? domToText(blocklyXmlContainer())  : content;
+    return domToText(setChildrenHeader(
             filterOutImportedBlocks(textToDom(content)), makeChildrenXmlArray(children)));
   }
 
 
-  private JsArray<Element> makeChildrenXmlArray(Set<YaSharedPageEditor> children) {
+  private JsArray<Element> makeChildrenXmlArray(Collection<YaSharedPageEditor> children) {
     JsArray<Element> childrenXmlArr = JavaScriptObject.createArray().cast();
     for (YaSharedPageEditor child: children) {
       Element xmlchild = createElement("child"); //hack because I can't figure out to make an Element

@@ -18,6 +18,7 @@ import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.explorer.project.ProjectChangeAdapter;
 import com.google.appinventor.client.helper.Callback;
 import com.google.appinventor.client.helper.CountDownCallback;
+import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.tracking.Tracking;
 import com.google.appinventor.client.widgets.DropDownButton.DropDownItem;
@@ -452,7 +453,7 @@ public class DesignToolbar extends Toolbar {
           sharedPages.set(sharedPages.size(), pageDescriptor(page));
         }
       }
-      Set<YaSharedPageEditor> children = currentPage.getChildren();
+      Collection<YaSharedPageEditor> children = currentPage.getChildren();
       for (YaSharedPageEditor child: children) {
         if (!added.contains(child)) { //add all things from library
           sharedPages.set(sharedPages.size(), pageDescriptor(child));
@@ -475,8 +476,6 @@ public class DesignToolbar extends Toolbar {
               new CountDownCallback<Project>(2, new Callback<Project>() {
         @Override
         public void call(Project proj) {
-
-
           YaCodePageEditor parent = YaCodePageEditor.getCodePageEditorByFileId(
                   (long) jsonParent.get("projectId").isNumber().doubleValue(),
                   jsonParent.get("fileId").isString().stringValue());
