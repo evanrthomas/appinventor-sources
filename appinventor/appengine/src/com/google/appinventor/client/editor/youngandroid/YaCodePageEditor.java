@@ -20,7 +20,6 @@ import com.google.appinventor.client.explorer.SourceStructureExplorerItem;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.helper.Callback;
 import com.google.appinventor.client.helper.CountDownCallback;
-import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.shared.rpc.project.ChecksumedFileException;
 import com.google.appinventor.shared.rpc.project.ChecksumedLoadFile;
@@ -491,14 +490,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   @Override
   public String getRawFileContent() {
-    Helper.println("getRawFileContent()");
     String content = blocksArea.getBlocksContent();
-    //if (!content.equals("")) {
-    //  Helper.println("getRawFileContent() content " + content);
-    //  Helper.println("YaCodePageEditor.getRawFileContent() " +
-    //          domToText(setChildrenHeader(
-    //                  filterOutImportedBlocks(textToDom(content)), makeChildrenXmlArray(children))));
-//    }
     return content.equals("") ? "" : domToText(setChildrenHeader(
             filterOutImportedBlocks(textToDom(content)), makeChildrenXmlArray(children)));
   }

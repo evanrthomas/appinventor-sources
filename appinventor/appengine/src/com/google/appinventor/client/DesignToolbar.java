@@ -18,7 +18,6 @@ import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.explorer.project.ProjectChangeAdapter;
 import com.google.appinventor.client.helper.Callback;
 import com.google.appinventor.client.helper.CountDownCallback;
-import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.tracking.Tracking;
 import com.google.appinventor.client.widgets.DropDownButton.DropDownItem;
@@ -468,7 +467,6 @@ public class DesignToolbar extends Toolbar {
 
     //returns whether the child can be imported
     private void importNewPage(final JavaScriptObject parentObj, final JavaScriptObject childObj, final JavaScriptObject callback) { //called from javascript
-      Helper.println("importNewPage()");
       final JSONObject jsonParent = new JSONObject(parentObj);
       final JSONObject jsonChild = new JSONObject(childObj);
 
@@ -478,7 +476,6 @@ public class DesignToolbar extends Toolbar {
         @Override
         public void call(Project proj) {
 
-          Helper.println("importNewPage(), addingChildToParent");
 
           YaCodePageEditor parent = YaCodePageEditor.getCodePageEditorByFileId(
                   (long) jsonParent.get("projectId").isNumber().doubleValue(),
@@ -491,7 +488,6 @@ public class DesignToolbar extends Toolbar {
 
           if (child instanceof YaSharedPageEditor) {
 
-            Helper.println("importNewPage(), addingChildToParent");
             parent.addChild((YaSharedPageEditor) child); //TODO (evan): get rid of this cast
             Ode.getInstance().getEditorManager().scheduleAutoSave(parent);
             callJSFunc(callback, null);

@@ -100,7 +100,6 @@
 
 
     var pages = window.exported.getProjectPages();
-    console.log("pages  " + JSON.stringify(pages, undefined, 2));
 
     nodes = new vis.DataSet();
     edges = new vis.DataSet();

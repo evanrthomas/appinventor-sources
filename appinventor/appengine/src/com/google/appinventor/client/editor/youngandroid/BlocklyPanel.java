@@ -789,7 +789,6 @@ public class BlocklyPanel extends HTMLPanel {
 
   private static native void doAddComponent(String formName, String typeDescription,
                                             String instanceName, String uid) /*-{
-    console.log("doAddComponent " + instanceName);
     $wnd.Blocklies[formName].Component.add(instanceName, uid);
   }-*/;
 
