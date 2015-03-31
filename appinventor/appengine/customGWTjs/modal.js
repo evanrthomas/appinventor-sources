@@ -60,14 +60,16 @@
       for (var j = 0; j<book.pages.length; j++) {
         var page = book.pages[j];
         var pageli = document.createElement('li');
-        pageli.onclick = function() {
-          var id = page.projectId + "_" + page.fileName;
-          nodes.add({id: id,
-            shape: 'custom',
-            info: page,
-            customDraw:getPageDrawer(book.name + ":" + page.name, 'blue', []),
-          });
-        }
+        pageli.onclick = (function(page) {
+          return function() {
+            var id = page.projectId + "_" + page.fileName;
+            nodes.add({id: id,
+              shape: 'custom',
+              info: page,
+              customDraw:getPageDrawer(book.name + ":" + page.name, 'blue', []),
+            });
+          }
+        })(page);
         submenu.appendChild(pageli);
         pageli.innerHTML = page.name;
       }

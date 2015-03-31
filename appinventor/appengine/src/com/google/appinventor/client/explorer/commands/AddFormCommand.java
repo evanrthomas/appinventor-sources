@@ -190,7 +190,7 @@ public final class AddFormCommand extends ChainableCommand {
      *
      * @param formName the new form name
      */
-    protected void addFormAction(final YoungAndroidProjectNode projectRootNode, 
+    protected void addFormAction(final YoungAndroidProjectNode projectRootNode,
         final String formName) {
       final Ode ode = Ode.getInstance();
       final YoungAndroidPackageNode packageNode = projectRootNode.getPackageNode();
@@ -208,10 +208,14 @@ public final class AddFormCommand extends ChainableCommand {
 
           // Add the new form and blocks nodes to the project
           final Project project = ode.getProjectManager().getProject(projectRootNode);
-          project.addNode(packageNode, new YoungAndroidFormNode(formFileId));
+
+          if (!projectRootNode.getProjectType()
+                  .equals(YoungAndroidProjectNode.YOUNG_ANDROID_BOOK_PROJECT_TYPE)) {
+            project.addNode(packageNode, new YoungAndroidFormNode(formFileId));
+          }
           project.addNode(packageNode, new YoungAndroidBlocksNode(blocksFileId));
 
-          // Add the screen to the DesignToolbar and select the new form editor. 
+          // Add the screen to the DesignToolbar and select the new form editor.
           // We need to do this once the form editor and blocks editor have been
           // added to the project editor (after the files are completely loaded).
           //
@@ -222,7 +226,7 @@ public final class AddFormCommand extends ChainableCommand {
           Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
-              ProjectEditor projectEditor = 
+              ProjectEditor projectEditor =
                   ode.getEditorManager().getOpenProjectEditor(project.getProjectId());
               YaFormEditor formEditor = (YaFormEditor)projectEditor.getFileEditor(formFileId);
               YaCodePageEditor blocksEditor = (YaCodePageEditor)projectEditor.getFileEditor(blocksFileId);

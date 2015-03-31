@@ -47,9 +47,10 @@ public final class YoungAndroidProjectNode extends ProjectRootNode
    *
    * @param name  project name
    * @param projectId  project ID
+   * @param type  YoungAndroid or Book
    */
-  public YoungAndroidProjectNode(String name, long projectId) {
-    super(name, projectId, YOUNG_ANDROID_PROJECT_TYPE);
+  public YoungAndroidProjectNode(String name, long projectId, String type) {
+    super(name, projectId, type);
   }
 
   /**

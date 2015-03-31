@@ -272,7 +272,7 @@ public final class YoungAndroidProjectService extends CommonProjectService {
 
     String blocklyFileName = YoungAndroidBlocksNode.getBlocklyFileId(qualifiedFormName);
     String blocklyFileContents = getInitialBlocklySourceFileContents(qualifiedFormName);
-    
+
     String yailFileName = YoungAndroidYailNode.getYailFileId(qualifiedFormName);
     String yailFileContents = "";
 
@@ -359,7 +359,7 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     // have to exist like this on the file system)
     ProjectRootNode rootNode =
         new YoungAndroidProjectNode(storageIo.getProjectName(userId, projectId),
-                                    projectId);
+                                    projectId, storageIo.getProjectType(userId, projectId));
     ProjectNode assetsNode = new YoungAndroidAssetsFolder(ASSETS_FOLDER);
     ProjectNode sourcesNode = new YoungAndroidSourceFolderNode(SRC_FOLDER);
 
@@ -384,8 +384,8 @@ public final class YoungAndroidProjectService extends CommonProjectService {
         } else if (fileId.endsWith(BLOCKLY_SOURCE_EXTENSION)) {
           sourceNode = new YoungAndroidBlocksNode(fileId);
         } else if (fileId.endsWith(CODEBLOCKS_SOURCE_EXTENSION)) {
-          String blocklyFileName = 
-              fileId.substring(0, fileId.lastIndexOf(CODEBLOCKS_SOURCE_EXTENSION)) 
+          String blocklyFileName =
+              fileId.substring(0, fileId.lastIndexOf(CODEBLOCKS_SOURCE_EXTENSION))
               + BLOCKLY_SOURCE_EXTENSION;
           if (!sourceFiles.contains(blocklyFileName)) {
             // This is an old project that hasn't been converted yet. Convert
@@ -415,12 +415,12 @@ public final class YoungAndroidProjectService extends CommonProjectService {
 
     return rootNode;
   }
-  
+
   /*
    * Convert the contents of the codeblocks file named codeblocksFileId
    * to blockly format and return the blockly contents.
    */
-  private String convertCodeblocksToBlockly(String userId, long projectId, 
+  private String convertCodeblocksToBlockly(String userId, long projectId,
       String codeblocksFileId) {
     // TODO(sharon): implement this!
     return "";

@@ -20,7 +20,6 @@ import com.google.appinventor.client.explorer.SourceStructureExplorerItem;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.helper.Callback;
 import com.google.appinventor.client.helper.CountDownCallback;
-import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.shared.rpc.project.ChecksumedFileException;
 import com.google.appinventor.shared.rpc.project.ChecksumedLoadFile;
@@ -112,14 +111,11 @@ public abstract class YaCodePageEditor extends SimpleEditor
     //TODO (evan): make abstract method initComponents(components) and override in children
 
     children = new HashSet<YaSharedPageEditor>();
-    Helper.indent("YaCodePageEditor() " + Helper.editorDescriptor(this));
     addChildrenFromHeader();
-    Helper.printChildrenDescriptor("YaCodePageEditor() " + Helper.editorDescriptor(this), children);
 
     fullName = blocksNode.getProjectId() + "_" + blocksNode.getFileName();
 
     nameToCodePageEditor.put(fullName, this);
-    Helper.println("created code pages ", nameToCodePageEditor.keySet());
     blocksArea = new BlocklyPanel(fullName);
     blocksArea.setWidth("100%");
     // This code seems to be using a rather old layout, so we cannot simply pass 100% for height.
@@ -142,7 +138,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
     // Listen for selection events for built-in drawers
     BlockSelectorBox.getBlockSelectorBox().addBlockDrawerSelectionListener(this);
 
-    Helper.unindent();
   }
 
   public static YaCodePageEditor newEditor(YaProjectEditor project, YoungAndroidBlocksNode sourceNode) {
@@ -161,9 +156,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
         try {
           if (result.getContent() != "") {
             JsArray<Element> childrenXml = getChildrenFromHeader(textToDom(result.getContent()));
-            Helper.println("addChildrenFromHeader() is null ?? " + (YaCodePageEditor.this == null));
-            Helper.println("addChildrenFromHeader() " + Helper.editorDescriptor(YaCodePageEditor.this));
-            Helper.consolePrint(childrenXml);
             Element childXml;
             for (int i = 0; i < childrenXml.length(); i++) {
               childXml = childrenXml.get(i);
@@ -179,7 +171,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
               YaCodePageEditor child = getCodePageEditorByFileId(projectId, fileId);
 
               if (child == null) {
-                Helper.println("child was deleted but is still in header " + child.getProjectId() + " " + child.getName());
                 //TODO (evan): child was deleted but is still in header
               } else if (child instanceof YaSharedPageEditor) {
                 addChild((YaSharedPageEditor) child); //TODO (evan): get rid of this cast and instanceof
@@ -200,11 +191,9 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   public void addChild(YaSharedPageEditor child) {
     children.add(child);
-    Helper.printChildrenDescriptor("addChild() " + Helper.editorDescriptor(this), children);
   }
 
   public Collection<YaSharedPageEditor> getChildren() {
-    Helper.printChildrenDescriptor("getChildren() " + Helper.editorDescriptor(this), children);
     return children;
   }
 
@@ -220,6 +209,9 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   public static YaCodePageEditor getCodePageEditorByFileId(long projectId, String fileId) {
     Project project = Ode.getInstance().getProjectManager().getProject(projectId);
+    if (project == null) {
+      return null;
+    }
     ProjectRootNode root = project.getRootNode();
     if (root == null) {
       return null;

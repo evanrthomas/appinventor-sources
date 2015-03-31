@@ -18,7 +18,6 @@ import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.explorer.project.ProjectChangeAdapter;
 import com.google.appinventor.client.helper.Callback;
 import com.google.appinventor.client.helper.CountDownCallback;
-import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.tracking.Tracking;
 import com.google.appinventor.client.widgets.DropDownButton.DropDownItem;
