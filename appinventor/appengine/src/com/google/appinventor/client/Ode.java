@@ -18,6 +18,7 @@ import com.google.appinventor.client.explorer.project.ProjectManager;
 import com.google.appinventor.client.explorer.project.ProjectManagerEventAdapter;
 import com.google.appinventor.client.explorer.youngandroid.LibraryToolbar;
 import com.google.appinventor.client.explorer.youngandroid.ProjectToolbar;
+import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.jsonp.JsonpConnection;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.settings.Settings;
@@ -396,6 +397,7 @@ public class Ode implements EntryPoint {
    */
   @Override
   public void onModuleLoad() {
+    Helper.exportHelperMethods();
     Tracking.trackPageview();
 
     // Handler for any otherwise unhandled exceptions
