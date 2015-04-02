@@ -15,10 +15,7 @@ import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.widgets.LabeledTextBox;
 import com.google.appinventor.client.youngandroid.TextValidators;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidFormNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidPackageNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
+import com.google.appinventor.shared.rpc.project.youngandroid.*;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Window;
@@ -196,7 +193,7 @@ public final class AddFormCommand extends ChainableCommand {
       final YoungAndroidPackageNode packageNode = projectRootNode.getPackageNode();
       String qualifiedFormName = packageNode.getPackageName() + '.' + formName;
       final String formFileId = YoungAndroidFormNode.getFormFileId(qualifiedFormName);
-      final String blocksFileId = YoungAndroidBlocksNode.getBlocklyFileId(qualifiedFormName);
+      final String blocksFileId = YAFormPageBlocksNode.getBlocklyFileId(qualifiedFormName);
 
       OdeAsyncCallback<Long> callback = new OdeAsyncCallback<Long>(
           // failure message
@@ -213,7 +210,7 @@ public final class AddFormCommand extends ChainableCommand {
                   .equals(YoungAndroidProjectNode.YOUNG_ANDROID_BOOK_PROJECT_TYPE)) {
             project.addNode(packageNode, new YoungAndroidFormNode(formFileId));
           }
-          project.addNode(packageNode, new YoungAndroidBlocksNode(blocksFileId));
+          project.addNode(packageNode, new YAFormPageBlocksNode(blocksFileId));
 
           // Add the screen to the DesignToolbar and select the new form editor.
           // We need to do this once the form editor and blocks editor have been

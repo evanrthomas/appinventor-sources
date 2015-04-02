@@ -30,16 +30,7 @@ import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.project.ProjectSourceZip;
 import com.google.appinventor.shared.rpc.project.RawFile;
 import com.google.appinventor.shared.rpc.project.TextFile;
-import com.google.appinventor.shared.rpc.project.youngandroid.NewYoungAndroidProjectParameters;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidAssetNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidAssetsFolder;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidFormNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidPackageNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceFolderNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidYailNode;
+import com.google.appinventor.shared.rpc.project.youngandroid.*;
 import com.google.appinventor.shared.rpc.user.User;
 import com.google.appinventor.shared.settings.Settings;
 import com.google.appinventor.shared.settings.SettingsConstants;
@@ -95,8 +86,10 @@ public final class YoungAndroidProjectService extends CommonProjectService {
       YoungAndroidSourceAnalyzer.FORM_PROPERTIES_EXTENSION;
   private static final String CODEBLOCKS_SOURCE_EXTENSION =
       YoungAndroidSourceAnalyzer.CODEBLOCKS_SOURCE_EXTENSION;
-  private static final String BLOCKLY_SOURCE_EXTENSION =
-      YoungAndroidSourceAnalyzer.BLOCKLY_SOURCE_EXTENSION;
+  private static final String FORM_PAGE_SOURCE_EXTENSION =
+      YoungAndroidSourceAnalyzer.FORM_PAGE_SOURCE_EXTENSION;
+  private static final String SHARED_PAGE_SOURCE_EXTENSION =
+          YoungAndroidSourceAnalyzer.SHARED_PAGE_SOURCE_EXTENSION;
   private static final String YAIL_FILE_EXTENSION =
       YoungAndroidSourceAnalyzer.YAIL_FILE_EXTENSION;
 
@@ -270,7 +263,8 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     String formFileName = YoungAndroidFormNode.getFormFileId(qualifiedFormName);
     String formFileContents = getInitialFormPropertiesFileContents(qualifiedFormName);
 
-    String blocklyFileName = YoungAndroidBlocksNode.getBlocklyFileId(qualifiedFormName);
+    String formPageFileName = YAFormPageBlocksNode.getBlocklyFileId(qualifiedFormName);
+    String sharedPageFileName = YASharedPageBlocksNode.getBlocklyFileId(qualifiedFormName);
     String blocklyFileContents = getInitialBlocklySourceFileContents(qualifiedFormName);
 
     String yailFileName = YoungAndroidYailNode.getYailFileId(qualifiedFormName);
@@ -280,11 +274,15 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     project.setProjectType(projectType);
     // Project history not supported in legacy ode new project wizard
 
-    if (!projectType.equals(YoungAndroidProjectNode.YOUNG_ANDROID_BOOK_PROJECT_TYPE)) {
+    if (projectType.equals(YoungAndroidProjectNode.YOUNG_ANDROID_PROJECT_TYPE)) {
       project.addTextFile(new TextFile(formFileName, formFileContents));
+      project.addTextFile(new TextFile(formPageFileName, blocklyFileContents));
+    } else if (projectType.equals(YoungAndroidProjectNode.YOUNG_ANDROID_BOOK_PROJECT_TYPE)) {
+      project.addTextFile(new TextFile(sharedPageFileName, blocklyFileContents));
+    } else {
+      throw new IllegalStateException("Project Type is of type " + projectType);
     }
     project.addTextFile(new TextFile(propertiesFileName, propertiesFileContents));
-    project.addTextFile(new TextFile(blocklyFileName, blocklyFileContents));
     project.addTextFile(new TextFile(yailFileName, yailFileContents));
 
     // Create new project
@@ -381,12 +379,14 @@ public final class YoungAndroidProjectService extends CommonProjectService {
         YoungAndroidSourceNode sourceNode = null;
         if (fileId.endsWith(FORM_PROPERTIES_EXTENSION)) {
           sourceNode = new YoungAndroidFormNode(fileId);
-        } else if (fileId.endsWith(BLOCKLY_SOURCE_EXTENSION)) {
-          sourceNode = new YoungAndroidBlocksNode(fileId);
+        } else if (fileId.endsWith(FORM_PAGE_SOURCE_EXTENSION)) {
+          sourceNode = new YAFormPageBlocksNode(fileId);
+        } else if (fileId.endsWith(SHARED_PAGE_SOURCE_EXTENSION)) {
+          sourceNode = new YASharedPageBlocksNode(fileId);
         } else if (fileId.endsWith(CODEBLOCKS_SOURCE_EXTENSION)) {
           String blocklyFileName =
               fileId.substring(0, fileId.lastIndexOf(CODEBLOCKS_SOURCE_EXTENSION))
-              + BLOCKLY_SOURCE_EXTENSION;
+              + FORM_PAGE_SOURCE_EXTENSION;
           if (!sourceFiles.contains(blocklyFileName)) {
             // This is an old project that hasn't been converted yet. Convert
             // the blocks file to Blockly format and name. Leave the old
@@ -395,7 +395,7 @@ public final class YoungAndroidProjectService extends CommonProjectService {
             storageIo.addSourceFilesToProject(userId, projectId, false, blocklyFileName);
             storageIo.uploadFileForce(projectId, blocklyFileName, userId, blocklyFileContents,
                 StorageUtil.DEFAULT_CHARSET);
-            sourceNode = new YoungAndroidBlocksNode(blocklyFileName);
+            sourceNode = new YAFormPageBlocksNode(blocklyFileName);
           }
         } else if (fileId.endsWith(YAIL_FILE_EXTENSION)) {
           sourceNode = new YoungAndroidYailNode(fileId);
@@ -428,27 +428,41 @@ public final class YoungAndroidProjectService extends CommonProjectService {
 
   @Override
   public long addFile(String userId, long projectId, String fileId) {
-    if (fileId.endsWith(FORM_PROPERTIES_EXTENSION) || fileId.endsWith(BLOCKLY_SOURCE_EXTENSION)) {
+    if (fileId.endsWith(FORM_PROPERTIES_EXTENSION) || YoungAndroidSourceAnalyzer.isBlocksNodeSourceFileId(fileId)) {
       String qualifiedFormName = YoungAndroidSourceNode.getQualifiedName(fileId);
       String yailFileName = YoungAndroidYailNode.getYailFileId(qualifiedFormName);
-      String blocklyFileName = YoungAndroidBlocksNode.getBlocklyFileId(qualifiedFormName);
+      String formPageFileName = YAFormPageBlocksNode.getBlocklyFileId(qualifiedFormName);
+      String sharedPageFileName = YASharedPageBlocksNode.getBlocklyFileId(qualifiedFormName);
       String formFileName = YoungAndroidFormNode.getFormFileId(qualifiedFormName);
 
       List<String> sourceFiles = storageIo.getProjectSourceFiles(userId, projectId);
-      if (!sourceFiles.contains(formFileName) && !sourceFiles.contains(blocklyFileName) && !sourceFiles.contains(yailFileName)) {
+      if (!sourceFiles.contains(formFileName) && !sourceFiles.contains(formPageFileName) &&
+              !sourceFiles.contains(sharedPageFileName) && !sourceFiles.contains(yailFileName)) {
 
         String yailFileContents = "";  // start empty
         String blocklyFileContents = getInitialBlocklySourceFileContents(qualifiedFormName);
 
-        if (fileId.endsWith(FORM_PROPERTIES_EXTENSION)) {
+        if (fileId.endsWith(FORM_PROPERTIES_EXTENSION) ) {
           String formFileContents = getInitialFormPropertiesFileContents(qualifiedFormName);
           storageIo.addSourceFilesToProject(userId, projectId, false, formFileName);
           storageIo.uploadFileForce(projectId, formFileName, userId, formFileContents,
                   StorageUtil.DEFAULT_CHARSET);
+
+          storageIo.addSourceFilesToProject(userId, projectId, false, formPageFileName);
+          storageIo.uploadFileForce(projectId, formPageFileName, userId, blocklyFileContents,
+                  StorageUtil.DEFAULT_CHARSET);
+        } else if (fileId.endsWith(FORM_PAGE_SOURCE_EXTENSION)) {
+          storageIo.addSourceFilesToProject(userId, projectId, false, formPageFileName);
+          storageIo.uploadFileForce(projectId, formPageFileName, userId, blocklyFileContents,
+                  StorageUtil.DEFAULT_CHARSET);
+        } else if (fileId.endsWith(SHARED_PAGE_SOURCE_EXTENSION)) {
+          storageIo.addSourceFilesToProject(userId, projectId, false, sharedPageFileName);
+          storageIo.uploadFileForce(projectId, sharedPageFileName, userId, blocklyFileContents,
+                  StorageUtil.DEFAULT_CHARSET);
+        } else {
+          throw new IllegalStateException("Somehow YoungAndroidProjectService is trying to handle adding a "
+                  + YoungAndroidSourceAnalyzer.getExtension(fileId));
         }
-        storageIo.addSourceFilesToProject(userId, projectId, false, blocklyFileName);
-        storageIo.uploadFileForce(projectId, blocklyFileName, userId, blocklyFileContents,
-                StorageUtil.DEFAULT_CHARSET);
 
         storageIo.addSourceFilesToProject(userId, projectId, false, yailFileName);
         return storageIo.uploadFileForce(projectId, yailFileName, userId, yailFileContents,
@@ -465,22 +479,24 @@ public final class YoungAndroidProjectService extends CommonProjectService {
   @Override
   public long deleteFile(String userId, long projectId, String fileId) {
     if (fileId.endsWith(FORM_PROPERTIES_EXTENSION) ||
-        fileId.endsWith(BLOCKLY_SOURCE_EXTENSION)) {
+        YoungAndroidSourceAnalyzer.isBlocksNodeSourceFileId(fileId)) {
       // If the file to be deleted is a form file or a blocks file, delete both the form file
       // and the blocks file. Also, if there was a codeblocks file laying around
       // for that same form, delete it too (if it doesn't exist the delete
       // for it will be a no-op).
       String qualifiedFormName = YoungAndroidSourceNode.getQualifiedName(fileId);
       String formFileName = YoungAndroidFormNode.getFormFileId(qualifiedFormName);
-      String blocklyFileName = YoungAndroidBlocksNode.getBlocklyFileId(qualifiedFormName);
+      String formPageFileName = YAFormPageBlocksNode.getBlocklyFileId(qualifiedFormName);
+      String sharedPageFileName = YASharedPageBlocksNode.getBlocklyFileId(qualifiedFormName);
       String codeblocksFileName = YoungAndroidBlocksNode.getCodeblocksFileId(qualifiedFormName);
       String yailFileName = YoungAndroidYailNode.getYailFileId(qualifiedFormName);
       storageIo.deleteFile(userId, projectId, formFileName);
-      storageIo.deleteFile(userId, projectId, blocklyFileName);
+      storageIo.deleteFile(userId, projectId, formPageFileName);
+      storageIo.deleteFile(userId, projectId, sharedPageFileName);
       storageIo.deleteFile(userId, projectId, codeblocksFileName);
       storageIo.deleteFile(userId, projectId, yailFileName);
       storageIo.removeSourceFilesFromProject(userId, projectId, true,
-          formFileName, blocklyFileName, codeblocksFileName, yailFileName);
+          formFileName, formPageFileName, sharedPageFileName, codeblocksFileName, yailFileName);
       return storageIo.getProjectDateModified(userId, projectId);
 
     } else {

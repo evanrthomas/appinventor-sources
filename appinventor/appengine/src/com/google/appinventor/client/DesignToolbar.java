@@ -402,8 +402,8 @@ public class DesignToolbar extends Toolbar {
     private JSONObject pageDescriptor(YaCodePageEditor editor) {
       JSONObject json = new JSONObject();
       String name = editor.getFileName();
-      if (name.endsWith(YoungAndroidSourceAnalyzer.BLOCKLY_SOURCE_EXTENSION)) {
-        name = name.substring(0, name.length() - YoungAndroidSourceAnalyzer.BLOCKLY_SOURCE_EXTENSION.length());
+      if (name.endsWith(YoungAndroidSourceAnalyzer.FORM_PAGE_SOURCE_EXTENSION)) {
+        name = name.substring(0, name.length() - YoungAndroidSourceAnalyzer.FORM_PAGE_SOURCE_EXTENSION.length());
       }
       json.put("name", new JSONString(name));
       json.put("projectId", new JSONNumber((double)editor.getProjectId()));

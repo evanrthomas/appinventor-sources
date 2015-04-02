@@ -16,6 +16,7 @@ import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.widgets.LabeledTextBox;
 import com.google.appinventor.client.youngandroid.TextValidators;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
+import com.google.appinventor.shared.rpc.project.youngandroid.YASharedPageBlocksNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidPackageNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
@@ -67,7 +68,7 @@ public final class AddSharedPageCommand extends ChainableCommand {
     final Ode ode = Ode.getInstance();
     final YoungAndroidPackageNode packageNode = projectRootNode.getPackageNode();
     String qualifiedName = packageNode.getPackageName() + '.' + name;
-    final String blocksFileId = YoungAndroidBlocksNode.getBlocklyFileId(qualifiedName);
+    final String blocksFileId = YASharedPageBlocksNode.getBlocklyFileId(qualifiedName);
 
     OdeAsyncCallback<Long> callback = new OdeAsyncCallback<Long>(
             // failure message
@@ -79,7 +80,7 @@ public final class AddSharedPageCommand extends ChainableCommand {
 
         // Add the new blocks node to the project
         final Project project = ode.getProjectManager().getProject(projectRootNode);
-        project.addNode(packageNode, new YoungAndroidBlocksNode(blocksFileId));
+        project.addNode(packageNode, new YASharedPageBlocksNode(blocksFileId));
 
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
           @Override
@@ -202,7 +203,7 @@ public final class AddSharedPageCommand extends ChainableCommand {
       }
 
       // Check that it's unique.
-      if (otherBlocksEditors.contains(name + YoungAndroidSourceAnalyzer.BLOCKLY_SOURCE_EXTENSION)) {
+      if (otherBlocksEditors.contains(name + YoungAndroidSourceAnalyzer.SHARED_PAGE_SOURCE_EXTENSION)) {
         Window.alert(MESSAGES.duplicateSharedPageError());
         return false;
       }

@@ -173,7 +173,7 @@ public final class YaFormPageEditor extends YaCodePageEditor implements FormChan
 
   private String yailFileName() {
     String fileId = getFileId();
-    return fileId.replace(YoungAndroidSourceAnalyzer.BLOCKLY_SOURCE_EXTENSION,
+    return fileId.replace(YoungAndroidSourceAnalyzer.FORM_PAGE_SOURCE_EXTENSION,
             YoungAndroidSourceAnalyzer.YAIL_FILE_EXTENSION);
   }
 

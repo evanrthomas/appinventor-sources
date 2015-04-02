@@ -9,7 +9,7 @@ import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
  *
  * @author lizlooney@google.com (Liz Looney)
  */
-public final class YoungAndroidBlocksNode extends YoungAndroidSourceNode {
+public abstract class YoungAndroidBlocksNode extends YoungAndroidSourceNode {
 
   /**
    * Default constructor (for serialization only).
@@ -28,11 +28,7 @@ public final class YoungAndroidBlocksNode extends YoungAndroidSourceNode {
 
   public static String getCodeblocksFileId(String qualifiedName) {
     return SRC_PREFIX + qualifiedName.replace('.', '/')
-        + YoungAndroidSourceAnalyzer.CODEBLOCKS_SOURCE_EXTENSION;
+            + YoungAndroidSourceAnalyzer.CODEBLOCKS_SOURCE_EXTENSION;
   }
 
-  public static String getBlocklyFileId(String qualifiedName) {
-    return SRC_PREFIX + qualifiedName.replace('.', '/')
-        + YoungAndroidSourceAnalyzer.BLOCKLY_SOURCE_EXTENSION;
-  }
 }
