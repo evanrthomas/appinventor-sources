@@ -352,10 +352,9 @@ public class DesignToolbar extends Toolbar {
             JSONArray pages = new JSONArray();
 
             for (ProjectNode page : book.getRootNode().getAllSourceNodes()) {
-              if (!page.getName().endsWith(".bky")) {
+              if (!YoungAndroidSourceAnalyzer.isBlocksNodeSourceFileId(page.getFileId())) {
                 continue;
               }
-
               JSONObject pagejson = new JSONObject();
 
               pagejson.put("projectId", new JSONNumber((double) page.getProjectId()));

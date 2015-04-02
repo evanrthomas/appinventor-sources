@@ -25,6 +25,7 @@ import com.google.appinventor.shared.rpc.project.ChecksumedFileException;
 import com.google.appinventor.shared.rpc.project.ChecksumedLoadFile;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.ProjectRootNode;
+import com.google.appinventor.shared.rpc.project.youngandroid.YAFormPageBlocksNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
 import com.google.common.collect.Maps;
@@ -142,7 +143,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   public static YaCodePageEditor newEditor(YaProjectEditor project, YoungAndroidBlocksNode sourceNode) {
     YACachedBlocksNode cachedNode =  YACachedBlocksNode.getOrCreateCachedNode(sourceNode);
-    if (YoungAndroidSourceNode.isFormPageSourceNode(sourceNode)) {
+    if (sourceNode instanceof YAFormPageBlocksNode) {
       return new YaFormPageEditor(project, cachedNode);
     } else {
       return new YaSharedPageEditor(project, cachedNode);

@@ -5,11 +5,10 @@
 
 package com.google.appinventor.shared.rpc.project.youngandroid;
 
-import com.google.appinventor.shared.rpc.project.ProjectNode;
-import com.google.common.base.Preconditions;
 import com.google.appinventor.shared.rpc.project.SourceNode;
 import com.google.appinventor.shared.storage.StorageUtil;
 import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
+import com.google.common.base.Preconditions;
 
 /**
  * Superclass for all Young Android source file nodes in the project tree.
@@ -34,19 +33,6 @@ public abstract class YoungAndroidSourceNode extends SourceNode {
    */
   public YoungAndroidSourceNode(String name, String fileId) {
     super(name, fileId);
-  }
-
-  public static boolean isFormPageSourceNode(YoungAndroidBlocksNode sourceNode) {
-    String formFileId = StorageUtil.trimOffExtension(sourceNode.getFileId()) +
-            YoungAndroidSourceAnalyzer.FORM_PROPERTIES_EXTENSION;
-    for (ProjectNode source : sourceNode.getProjectRoot().getAllSourceNodes()) { //TODO (evan): shouldn't have to do an O(n) loop here. YaProjectEditor has already looped over these once. Make YaProjectEditor store all of these and then look up from the project editor
-      if (source.getFileId().equals(formFileId)) {
-        return true;
-      }
-    }
-    return false;
-
-
   }
 
   /**
