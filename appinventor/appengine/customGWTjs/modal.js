@@ -1,5 +1,6 @@
 (function() {
-  var network, nodes, edges;
+  var network, nodes, edges,
+    firstTimeInitialized = true;
   var getPageDrawer = function(title, color, components) {
     return function drawPage(ctx, x, y, node) {
       var pageWidth = 100;
@@ -86,23 +87,34 @@
 
   var openSharedPagesOverlay =  function() {
     (function initializeOverlay() {
-      document.getElementById('fade').style.display = 'block';
-      document.getElementById('overlay').style.display = 'block';
-      document.getElementById('new_shared_page_btn').onclick = window.exported.newSharedPage;
-      document.getElementById('fade').addEventListener("click", clearOverlay);
+        document.getElementById('fade').style.display = 'block';
+        document.getElementById('overlay').style.display = 'block';
 
-      window.onkeyup = function(e) { //TODO (evan): I think this will overwrite any other onkeyup functions, make it add instead of replace
-        if (e.keyCode == 27) { //escape key code
-          clearOverlay();
+        if (firstTimeInitialized) {
+        document.getElementById('new_shared_page_btn').onclick = window.exported.newSharedPage;
+        document.getElementById('fade').addEventListener("click", clearOverlay);
+
+        window.onkeyup = function(e) { //TODO (evan): I think this will overwrite any other onkeyup functions, make it add instead of replace
+          if (e.keyCode == 27) { //escape key code
+            clearOverlay();
+          }
+          //TODO (evan): remove the event click listeners you just added so you don't get a million listeners
         }
-        //TODO (evan): remove the event click listeners you just added so you don't get a million listeners
+        firstTimeInitialized = false;
       }
     })();
 
 
 
-    var pages = window.exported.getProjectPages();
+    //destroy and reconstruct the network every time
+    (function clearNetwork() {
+      if (network) network.destroy();
+      if (nodes) nodes.clear();
+      if (edges) edges.clear();
+    })();
 
+
+    var pages = window.exported.getProjectPages();
     nodes = new vis.DataSet();
     edges = new vis.DataSet();
     var formPages = pages.formPages;

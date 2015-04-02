@@ -129,8 +129,8 @@ public class Helper {
     JSONArray allJsonProjects = new JSONArray();
     for (Project p: projects) {
       JSONObject thisjsonproject = new JSONObject();
-      thisjsonproject.put("projectId", new JSONNumber(p.getProjectId()));
       thisjsonproject.put("name", new JSONString(p.getProjectName()));
+      thisjsonproject.put("projectId", new JSONNumber(p.getProjectId()));
       thisjsonproject.put("type", new JSONString(p.getProjectType()));
       allJsonProjects.set(allJsonProjects.size(), thisjsonproject);
     }
