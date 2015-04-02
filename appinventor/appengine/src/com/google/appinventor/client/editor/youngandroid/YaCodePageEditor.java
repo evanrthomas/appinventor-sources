@@ -113,7 +113,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
     children = new HashSet<YaSharedPageEditor>();
     addChildrenFromHeader();
 
-    fullName = blocksNode.getProjectId() + "_" + blocksNode.getFileName();
+    fullName = blocksNode.getProjectId() + "_" + blocksNode.getFormName();
 
     nameToCodePageEditor.put(fullName, this);
     blocksArea = new BlocklyPanel(fullName);
@@ -140,13 +140,53 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   }
 
-  public static YaCodePageEditor newEditor(YaProjectEditor project, YoungAndroidBlocksNode sourceNode) {
+  public static YaCodePageEditor getOrCreateEditor(YaProjectEditor project, YoungAndroidBlocksNode sourceNode) {
+    String fullName = project.getProjectId() + "_"  + sourceNode.getFormName();
+    YaCodePageEditor editor;
+    if ((editor = nameToCodePageEditor.get(fullName)) != null) {
+      return editor;
+    }
+
     YACachedBlocksNode cachedNode =  YACachedBlocksNode.getOrCreateCachedNode(sourceNode);
     if (sourceNode instanceof YAFormPageBlocksNode) {
       return new YaFormPageEditor(project, cachedNode);
     } else {
       return new YaSharedPageEditor(project, cachedNode);
     }
+  }
+
+  public static YaCodePageEditor getCodePageEditorByFileName(long projectId, String fileName) {
+    //FOR DEBUGGING PURPOSES ONLY!!!
+    Project project = Ode.getInstance().getProjectManager().getProject(projectId);
+    if (project == null) return null; //invalid projectId, project does not exist
+    ProjectRootNode root = project.getRootNode();
+    if (root == null) return null; //have not called project.loadNodes() yet
+
+    YoungAndroidBlocksNode fileNode = null;
+    for (ProjectNode potentialNode : root.getAllSourceNodes()) {
+      if (potentialNode.getName().equals(fileName) && potentialNode instanceof YoungAndroidBlocksNode) {
+        fileNode = (YoungAndroidBlocksNode)potentialNode;
+      }
+    }
+    if (fileNode == null) return null; //either invalid projectName, or have not called project.loadNodes() yet
+    ProjectEditor projeditor = Ode.getInstance().getEditorManager().openProject(root);
+    return YaCodePageEditor.getOrCreateEditor((YaProjectEditor) projeditor, fileNode);
+
+  }
+
+  public static YaCodePageEditor getCodePageEditorByFileId(long projectId, String fileId) {
+    Project project = Ode.getInstance().getProjectManager().getProject(projectId);
+    if (project == null) return null; //invalid projectId, project does not exist
+    ProjectRootNode root = project.getRootNode();
+    if (root == null) return null; //have not called project.loadNodes() yet
+
+    ProjectNode node = root.getSourceNode(fileId);
+    if (node instanceof YoungAndroidBlocksNode) {
+      ProjectEditor projeditor = Ode.getInstance().getEditorManager().openProject(root);
+      return YaCodePageEditor.getOrCreateEditor((YaProjectEditor) projeditor,
+              (YoungAndroidBlocksNode) node);
+    }
+    return null;
   }
 
   private void addChildrenFromHeader() {
@@ -197,35 +237,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
     return children;
   }
 
-  //public static YaCodePageEditor getCodePageEditorByFileName(long projectId, String fileName) {
-  //  //Ode.getInstance().getProjectManager()
-  //  String fullName = projectId + "_" + fileName;
-  //  YaCodePageEditor editor;
-  //   if ((editor = nameToCodePageEditor.get(fullName)) != null) {
-  //     return editor;
-  //   }
-  //  return null;
-  //  }
-
-  public static YaCodePageEditor getCodePageEditorByFileId(long projectId, String fileId) {
-    Project project = Ode.getInstance().getProjectManager().getProject(projectId);
-    if (project == null) {
-      return null;
-    }
-    ProjectRootNode root = project.getRootNode();
-    if (root == null) {
-      return null;
-    }
-    ProjectNode node = root.getSourceNode(fileId);
-    if (node instanceof YoungAndroidBlocksNode) {
-      ProjectEditor projeditor = Ode.getInstance().getEditorManager().openProject(root);
-      return YaCodePageEditor.newEditor((YaProjectEditor)projeditor,
-              (YoungAndroidBlocksNode)node);
-    }
-    return null;
-  }
-
-
   private native JsArray<Element> getChildrenFromHeader(JavaScriptObject xml) /*-{
     return xml.querySelectorAll('header > children > child');
   }-*/;
@@ -238,22 +249,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
   @Override
   public boolean isLoadComplete() {
     return loadComplete;
-  }
-
-  private List<YACachedBlocksNode> sharedPageDependenciesFor(YACachedBlocksNode parent) {
-    //TODO (evan): consider making a YoungAndroidSharedBlocksNode and using that instead
-    //TODO (evan): give YABlocksNode a List<SharedPagesNode> field. Then instead of grabbing
-    //    the blocksnode from the project, grab them from this.blocksNode
-    //TODO (evan): recursivley get shared pages
-    //TODO (evan): move this method to YaBlocksNode, should not be a function of YaBlocksEditor
-    ArrayList<YACachedBlocksNode> list = new ArrayList<YACachedBlocksNode>();
-    for (String s: nameToCodePageEditor.keySet()) {
-      if (s.contains("SharedPage") && !parent.getName().contains("SharedPage")
-              && nameToCodePageEditor.get(s).getProjectId() == blocksNode.getProjectId()) {
-        list.add(nameToCodePageEditor.get(s).blocksNode);
-      }
-    }
-    return list;
   }
 
   @Override
@@ -356,7 +351,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   @Override
   public String getTabText() {
-    return MESSAGES.blocksEditorTabName(blocksNode.getFileName());
+    return MESSAGES.blocksEditorTabName(blocksNode.getFormName());
   }
 
   @Override
@@ -664,7 +659,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   }
 
   public String getFileName() {
-    return blocksNode.getFileName();
+    return blocksNode.getFormName();
   }
 
   public String getName() {
@@ -679,5 +674,9 @@ public abstract class YaCodePageEditor extends SimpleEditor
     blocksArea.switchLanguage(newLanguage);
   }
 
+  // --- FOR DEBUGGING PURPOSES ONLY ---
+  public String getCachedContent() {
+    return blocksNode.getContent();
+  }
 }
 

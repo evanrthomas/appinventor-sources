@@ -184,11 +184,33 @@ public class Helper {
     });
   }-*/;
 
+  public static JavaScriptObject inspectFile(String projectName, String fileName) {
+    Project project = Ode.getInstance().getProjectManager().getProject(projectName);
+    YaCodePageEditor editor = YaCodePageEditor.getCodePageEditorByFileName(project.getProjectId(), fileName);
+    if (editor == null) return null;
+
+    JSONObject editorblob = new JSONObject();
+    JSONArray children = new JSONArray();
+    editorblob.put("content", new JSONString(editor.getCachedContent()));
+    for (YaCodePageEditor child: editor.getChildren()) {
+      JSONObject childblob = new JSONObject();
+      childblob.put("name",   new JSONString(child.getName()));
+      childblob.put("fileId", new JSONString(child.getFileId()));
+      childblob.put("projectId", new JSONNumber(child.getProjectId()));
+      children.set(children.size(), childblob);
+    }
+    editorblob.put("children", children);
+    return editorblob.getJavaScriptObject();
+  }
+
+
+
   public static native void exportHelperMethods() /*-{
       console.log("HELPER METHODS ARE BEING EXPORTED!!!");
       $wnd.exported = $wnd.exported || {};
-      $wnd.exported.inspectProject = $entry(@com.google.appinventor.client.helper.Helper::inspectProject(Ljava/lang/String;));
       $wnd.exported.getAllProjects = $entry(@com.google.appinventor.client.helper.Helper::getAllProjects());
+      $wnd.exported.inspectProject = $entry(@com.google.appinventor.client.helper.Helper::inspectProject(Ljava/lang/String;));
+      $wnd.exported.inspectFile = $entry(@com.google.appinventor.client.helper.Helper::inspectFile(Ljava/lang/String;Ljava/lang/String;));
 
       //the following puts stuff on global namespace, might be unsafe ...
       $wnd.printProjects = function() {
@@ -197,10 +219,15 @@ public class Helper {
       $wnd.printProject = function(projectId) {
         console.log(JSON.stringify($wnd.exported.inspectProject(projectId), undefined, 2));
       };
+      $wnd.printFile = function(projectName, fileName) {
+        console.log(JSON.stringify($wnd.exported.inspectFile(projectName, fileName), undefined, 2));
+      };
 
-      $wnd.projects = $wnd.exported.getAllProjects
+      $wnd.projects = $wnd.exported.getAllProjects;
       $wnd.ip = $wnd.exported.inspectProject;
+      $wnd.ifl = $wnd.exported.inspectFile;
       $wnd.pp = $wnd.printProject;
+      $wnd.pf = $wnd.printFile;
       $wnd.pps = $wnd.printProjects;
   }-*/;
 }

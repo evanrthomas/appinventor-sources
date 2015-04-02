@@ -18,7 +18,7 @@ public final class YaFormPageEditor extends YaCodePageEditor implements FormChan
   private YaFormEditor myFormEditor;
   protected YaFormPageEditor(YaProjectEditor projectEditor, YACachedBlocksNode blocksNode) {
     super(projectEditor, blocksNode);
-    myFormEditor = projectEditor.getFormFileEditor(blocksNode.getFileName());
+    myFormEditor = projectEditor.getFormFileEditor(blocksNode.getFormName());
   }
 
   @Override
@@ -147,7 +147,7 @@ public final class YaFormPageEditor extends YaCodePageEditor implements FormChan
 
   public MockForm getForm() {
     YaProjectEditor yaProjectEditor = (YaProjectEditor) projectEditor;
-    YaFormEditor myFormEditor = yaProjectEditor.getFormFileEditor(blocksNode.getFileName());
+    YaFormEditor myFormEditor = yaProjectEditor.getFormFileEditor(blocksNode.getFormName());
     if (myFormEditor != null) {
       return myFormEditor.getForm();
     } else {
