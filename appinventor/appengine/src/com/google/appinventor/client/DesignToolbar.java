@@ -297,6 +297,7 @@ public class DesignToolbar extends Toolbar {
       projectEditor.selectFileEditor(screen.blocksEditor);
       setButtonEnabled(WIDGET_NAME_SWITCH_TO_BLOCKS_EDITOR, false);
       setButtonEnabled(WIDGET_NAME_SWITCH_TO_FORM_EDITOR, false);
+      setButtonEnabled(WIDGET_NAME_ADDFORM, false);
       Ode.getInstance().getTopToolbar().updateFileMenuButtons(1);
     } else if (currentView == View.FORM && screen.formEditor != null) {
       projectEditor.selectFileEditor(screen.formEditor);
@@ -584,6 +585,7 @@ public class DesignToolbar extends Toolbar {
             screen.screenName, new SwitchScreenAction(projectId, screen.screenName)));
       }
       projectNameLabel.setText(projectName);
+      setButtonEnabled(WIDGET_NAME_ADDFORM, !isBook(projectId));
     } else {
       ErrorReporter.reportError("Design toolbar doesn't know about project " + projectName +
           " with id " + projectId);

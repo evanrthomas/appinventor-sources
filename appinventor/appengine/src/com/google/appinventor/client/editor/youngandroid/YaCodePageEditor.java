@@ -27,7 +27,6 @@ import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YAFormPageBlocksNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
 import com.google.common.collect.Maps;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
