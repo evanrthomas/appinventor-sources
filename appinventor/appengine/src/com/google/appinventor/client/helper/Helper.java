@@ -84,13 +84,10 @@ public class Helper {
     debugger;
   }-*/;
 
-  public static native String jsonToString(JavaScriptObject obj) /*-{
-    return JSON.stringify(obj);
-  }-*/;
 
-  public static native String jsonToString(JavaScriptObject obj, int tabs) /*-{
-    return JSON.stringify(obj, undefined, tabs);
-  }-*/;
+  public static native JavaScriptObject callJSFunc(JavaScriptObject callback, JavaScriptObject arg) /*-{
+      return callback(arg);
+    }-*/;
 
   public static String getProjectName(YaCodePageEditor editor) {
     return editor.getProjectRootNode().getName();

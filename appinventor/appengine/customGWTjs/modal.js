@@ -36,12 +36,24 @@ var networkOptions = {
   onConnect: function(data, connect) {
     var parent = nodes.get(data.from).info;
     var child = nodes.get(data.to).info;
+    //TODO (evan): both here and in importNewPage, check to make sure isn't importing itself
     window.exported.importNewPage(parent, child,
         function onSuccess() {
           connect(data);
         }, function onFail(message) {
           alert(message);
         });
+  },
+
+  onAdd: function(data, callback) {
+    //data and callback are provided by vis js. We don't use them here
+    window.exported.newSharedPage(function onSuccess(newPageInfo) {
+      nodes.add(nodeOptions(newPageInfo,
+            currentPage.projectId == newPageInfo.projectId));
+    });
+  },
+  onDelete: function(data, callback) {
+    //TODO (evan): implement
   }
 }
 
@@ -84,13 +96,10 @@ function initializeLibrariesDropDown(target) {
         position:'right middle',
         openOn: 'hover',
     });
-
   });
 }
 
 function initializeOverlay() {
-  document.getElementById('new_shared_page_btn').onclick =
-    window.exported.newSharedPage;
   document.getElementById('fade').addEventListener("click", clearOverlay);
   window.onkeyup = function(e) { //TODO (evan): I think this will overwrite any other onkeyup functions, make it add instead of replace
     if (e.keyCode == 27) { //escape key code

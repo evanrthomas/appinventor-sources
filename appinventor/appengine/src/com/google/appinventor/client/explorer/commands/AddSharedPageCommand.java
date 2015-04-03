@@ -8,10 +8,12 @@ package com.google.appinventor.client.explorer.commands;
 import com.google.appinventor.client.DesignToolbar;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
+import com.google.appinventor.client.SharedPagesOverlay;
 import com.google.appinventor.client.editor.FileEditor;
 import com.google.appinventor.client.editor.ProjectEditor;
 import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
 import com.google.appinventor.client.explorer.project.Project;
+import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.widgets.LabeledTextBox;
 import com.google.appinventor.client.youngandroid.TextValidators;
@@ -21,6 +23,7 @@ import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocks
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidPackageNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
 import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
+import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Window;
@@ -40,6 +43,14 @@ import static com.google.appinventor.client.Ode.MESSAGES;
  * @author lizlooney@google.com (Liz Looney)
  */
 public final class AddSharedPageCommand extends ChainableCommand {
+  private final JavaScriptObject onSuccessCallback;
+  private final JavaScriptObject onFailCallback;
+
+  public AddSharedPageCommand(JavaScriptObject onSuccessCallback, JavaScriptObject onFailCallback) {
+    super();
+    this.onSuccessCallback = onSuccessCallback;
+    this.onFailCallback = onSuccessCallback;
+  }
 
   @Override
   public boolean willCallExecuteNextCommand() {
@@ -74,29 +85,30 @@ public final class AddSharedPageCommand extends ChainableCommand {
             // failure message
             MESSAGES.addFormError()) {
       @Override
-      public void onSuccess(Long modDate) {
+      public void onSuccess(final Long modDate) {
+
         final Ode ode = Ode.getInstance();
         ode.updateModificationDate(projectRootNode.getProjectId(), modDate);
 
-        // Add the new blocks node to the project
         final Project project = ode.getProjectManager().getProject(projectRootNode);
-        project.addNode(packageNode, new YASharedPageBlocksNode(blocksFileId));
+        YASharedPageBlocksNode blocksNode = new YASharedPageBlocksNode(blocksFileId);
+        project.addNode(packageNode, blocksNode);
+        Helper.callJSFunc(onSuccessCallback, SharedPagesOverlay.pageDescriptor(blocksNode).getJavaScriptObject());
 
         Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
           @Override
           public void execute() {
-            //TODO (evan): consider making a YoungAndroidSharedBlocksNode here, and adding that to the screen instead
             ProjectEditor projectEditor =
                     ode.getEditorManager().getOpenProjectEditor(project.getProjectId());
             FileEditor blocksEditor = projectEditor.getFileEditor(blocksFileId);
+
             if (blocksEditor != null && !ode.screensLocked()) {
               DesignToolbar designToolbar = Ode.getInstance().getDesignToolbar();
               long projectId = blocksEditor.getProjectId();
-              designToolbar.addScreen(projectId, new DesignToolbar.Screen(name, (YaCodePageEditor)blocksEditor));
+              designToolbar.addScreen(projectId, new DesignToolbar.Screen(name, (YaCodePageEditor) blocksEditor));
               executeNextCommand(projectRootNode);
-              reloadOverlay();
             } else {
-              // The form editor and/or blocks editor is still not there. Try again later.
+              // The or blocks editor is still not there. Try again later.
               Scheduler.get().scheduleDeferred(this);
             }
           }
@@ -106,6 +118,7 @@ public final class AddSharedPageCommand extends ChainableCommand {
       @Override
       public void onFailure(Throwable caught) {
         super.onFailure(caught);
+        Helper.callJSFunc(onFailCallback, null);
         executionFailedOrCanceled();
       }
     };
@@ -114,9 +127,6 @@ public final class AddSharedPageCommand extends ChainableCommand {
     ode.getProjectService().addFile(projectRootNode.getProjectId(), blocksFileId, callback);
   }
 
-  public native void reloadOverlay() /*-{
-     $wnd.exported.openSharedPagesOverlay();
-    }-*/;
   private class NewSharedPageDialog extends DialogBox {
     // UI elements
     private final LabeledTextBox textBox;
