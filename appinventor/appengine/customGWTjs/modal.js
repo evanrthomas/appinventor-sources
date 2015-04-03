@@ -1,6 +1,14 @@
 (function() {
 var network, nodes, edges,
+  currentPage,
   firstTimeOpened = true;
+
+//for debugging
+window.network = network;
+window.nodes = nodes;
+window.edges = edges;
+window.currentPage = currentPage;
+window.firstTimeOpened = firstTimeOpened;
 
 var networkOptions = {
   //dragNodes : false,
@@ -28,18 +36,21 @@ var networkOptions = {
   onConnect: function(data, connect) {
     var parent = nodes.get(data.from).info;
     var child = nodes.get(data.to).info;
-    window.exported.importNewPage(parent, child, function() {
-      connect(data);
-    });
+    window.exported.importNewPage(parent, child,
+        function onSuccess() {
+          connect(data);
+        }, function onFail(message) {
+          alert(message);
+        });
   }
 }
 
-var clearOverlay = function() {
+function clearOverlay() {
   document.getElementById('fade').style.display = 'none';
   document.getElementById('overlay').style.display = 'none';
 }
 
-var initializeLibrariesDropDown = function(target) {
+function initializeLibrariesDropDown(target) {
   var mainUl = document.createElement('ul');
   mainUl.classList.add('libraries-dropdown');
 
@@ -61,7 +72,7 @@ var initializeLibrariesDropDown = function(target) {
       var pageli = document.createElement('li');
       pageli.onclick = (function(page) {
         return function() {
-          nodes.add(nodeOptions(page));
+          nodes.add(nodeOptions(page, page.projectId == currentPage.projectId));
         } //closure so page doesn't get mutated before onclick is called
       })(page);
       submenu.appendChild(pageli);
@@ -77,7 +88,7 @@ var initializeLibrariesDropDown = function(target) {
   });
 }
 
-var initializeOverlay = function() {
+function initializeOverlay() {
   document.getElementById('new_shared_page_btn').onclick =
     window.exported.newSharedPage;
   document.getElementById('fade').addEventListener("click", clearOverlay);
@@ -88,7 +99,7 @@ var initializeOverlay = function() {
   }
 }
 
-var clearNetwork = function() {
+function clearNetwork() {
   if (network) network.destroy();
   if (nodes) nodes.clear();
   if (edges) edges.clear();
@@ -98,27 +109,29 @@ var getId = function(pageinfo) {
   return pageinfo.projectId + "_" + pageinfo.fileName;
 }
 
-var nodeOptions  = function(pageinfo, isFromAnotherProject) {
-  var projectPrefix = isFromAnotherProject ?
-    pageinfo.projectName + "::" : "";
+function nodeOptions(pageinfo, isFromCurrentProject) {
+  var projectPrefix = isFromCurrentProject ?
+    "" : pageinfo.projectName + "::";
   return {
       id: getId(pageinfo),
       shape: 'box',
       info: pageinfo,
       label:projectPrefix + pageinfo.name,
-      color:pageinfo.type == "sharedPage" ? 'blue' : 'green',
+      color:pageinfo.type == "sharedPage" ? '#C3FAF5' : '#88F77E',
   }
 }
 
-var newDataSet = function() {
+function newDataSet() {
   var pages = window.exported.getProjectPages();
   nodes = new vis.DataSet();
   edges = new vis.DataSet();
+  currentPage = pages.currentPage;
   var formPages = pages.formPages;
   var sharedPages = pages.sharedPages;
 
   formPages.forEach(function(thisFormPage) {
-    nodes.add(nodeOptions(thisFormPage));
+    nodes.add(nodeOptions(thisFormPage,
+        currentPage.projectId == thisFormPage.projectId));
     thisFormPage.children.forEach(function(child)  {
       edges.add({
         from:getId(thisFormPage),
@@ -128,7 +141,8 @@ var newDataSet = function() {
   });
 
   sharedPages.forEach(function(thisSharedPage) {
-    nodes.add(nodeOptions(thisSharedPage));
+    nodes.add(nodeOptions(thisSharedPage,
+      currentPage.projectId == thisSharedPage.projectId));
     thisSharedPage.children.forEach(function(child) {
       edges.add({
         from:getId(thisSharedPage),
@@ -143,7 +157,7 @@ var newDataSet = function() {
   };
 }
 
-var openSharedPagesOverlay =  function() {
+function openSharedPagesOverlay() {
   if (firstTimeOpened) {
     initializeOverlay();
   }

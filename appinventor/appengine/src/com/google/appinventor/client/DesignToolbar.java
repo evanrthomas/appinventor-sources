@@ -18,6 +18,7 @@ import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.explorer.project.ProjectChangeAdapter;
 import com.google.appinventor.client.helper.Callback;
 import com.google.appinventor.client.helper.CountDownCallback;
+import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.tracking.Tracking;
 import com.google.appinventor.client.widgets.DropDownButton.DropDownItem;
@@ -458,7 +459,8 @@ public class DesignToolbar extends Toolbar {
       return json.getJavaScriptObject();
     }
 
-    private void importNewPage(final JavaScriptObject parentObj, final JavaScriptObject childObj, final JavaScriptObject callback) { //called from javascript
+    private void importNewPage(final JavaScriptObject parentObj, final JavaScriptObject childObj,
+                               final JavaScriptObject onSuccess, final JavaScriptObject onFail) { //called from javascript
       final JSONObject jsonParent = new JSONObject(parentObj);
       final JSONObject jsonChild = new JSONObject(childObj);
 
@@ -477,11 +479,9 @@ public class DesignToolbar extends Toolbar {
 
           if (child instanceof YaSharedPageEditor) {
             parent.addChild((YaSharedPageEditor) child); //TODO (evan): get rid of this cast
-            Ode.getInstance().getEditorManager().scheduleAutoSave(parent);
-            parent.loadFile(null);
-            callJSFunc(callback, null);
+            callJSFunc(onSuccess, null);
           } else {
-            alert("child must be a shared page " + child.isFormPageEditor());
+            callJSFunc(onFail, Helper.eval("\"child must be a shared page\""));
           }
         }
 
@@ -518,8 +518,8 @@ public class DesignToolbar extends Toolbar {
       $wnd.exported.getProjectPages = $entry(function() {
         return that.@com.google.appinventor.client.DesignToolbar$OpenSharedPagesOverlay::getProjectPages()();
       });
-      $wnd.exported.importNewPage = $entry(function(parent, child, callback) {
-        return that.@com.google.appinventor.client.DesignToolbar$OpenSharedPagesOverlay::importNewPage(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(parent, child, callback);
+      $wnd.exported.importNewPage = $entry(function(parent, child, onSuccess, onFail) {
+        return that.@com.google.appinventor.client.DesignToolbar$OpenSharedPagesOverlay::importNewPage(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(parent, child, onSuccess, onFail);
       });
     }-*/;
 
