@@ -235,6 +235,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   public void addChild(YaSharedPageEditor child) {
     children.add(child);
+    Ode.getInstance().getEditorManager().scheduleAutoSave(this);
   }
 
   public Collection<YaSharedPageEditor> getChildren() {
@@ -271,33 +272,22 @@ public abstract class YaCodePageEditor extends SimpleEditor
     });
   }
 
-  protected void linkAndCompile(Element dom, Set<YaCodePageEditor> visited, int depth, Callback<Element> onComplete) {
+  protected void linkAndCompile(final Element dom, Set<YaCodePageEditor> visited,
+                                final int depth, final Callback<Element> onComplete) {
     Helper.println("linkAndCompile() " + Helper.editorDescriptor(this) + " num children:: " + children.size());
     if (visited.contains(this)) {
       return;
     }
     visited.add(this);
-    CountDownCallback callback = new CountDownCallback(children.size() + 1, onComplete); //TODO (evan): this callback spagettii is messy. Re design
-    addAndLabelAllBlocks(dom, depth, callback);
-    for (YaSharedPageEditor child: children) {
-      child.linkAndCompile(dom, visited, depth + 1, callback);
-    }
+    final CountDownCallback callback = new CountDownCallback(children.size() + 1, onComplete); //TODO (evan): this callback spagettii is messy. Re design
 
-  }
-
-  private void addAndLabelAllBlocks(final Element dom, final int depth, final Callback<Element> onComplete) {
     blocksNode.load(new OdeAsyncCallback<ChecksumedLoadFile>() {
       @Override
       public void onSuccess(ChecksumedLoadFile result) {
         try {
           String content = result.getContent();
-          JsArray<Element> blocks;
-          if (content.equals("")) {
-            blocks = JavaScriptObject.createArray().cast();
-          } else {
-            blocks = getTopLevelBlocks(textToDom(content));
-          }
-
+          JsArray<Element> blocks = content.equals("") ? (JsArray<Element>)JavaScriptObject.createArray().cast() :
+                  getTopLevelBlocks(textToDom(content));
           labelBlocks(blocks, depth);
           addAllBlocks(dom, blocks);
           onComplete.call(dom);
@@ -306,6 +296,10 @@ public abstract class YaCodePageEditor extends SimpleEditor
         }
       }
     });
+    for (YaSharedPageEditor child: children) {
+      child.linkAndCompile(dom, visited, depth + 1, callback);
+    }
+
   }
 
   private void labelBlocks(JsArray<Element> blocks, int depth) {
