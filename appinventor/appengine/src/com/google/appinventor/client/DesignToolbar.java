@@ -465,7 +465,6 @@ public class DesignToolbar extends Toolbar {
       return json.getJavaScriptObject();
     }
 
-    //returns whether the child can be imported
     private void importNewPage(final JavaScriptObject parentObj, final JavaScriptObject childObj, final JavaScriptObject callback) { //called from javascript
       final JSONObject jsonParent = new JSONObject(parentObj);
       final JSONObject jsonChild = new JSONObject(childObj);
@@ -485,9 +484,9 @@ public class DesignToolbar extends Toolbar {
 
 
           if (child instanceof YaSharedPageEditor) {
-
             parent.addChild((YaSharedPageEditor) child); //TODO (evan): get rid of this cast
             Ode.getInstance().getEditorManager().scheduleAutoSave(parent);
+            parent.loadFile(null);
             callJSFunc(callback, null);
           } else {
             alert("child must be a shared page " + child.isFormPageEditor());

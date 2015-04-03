@@ -145,6 +145,7 @@ public final class ProjectManager {
    */
   public void removeProject(long projectId) {
     Project project = projectsMap.remove(projectId);
+    library.remove(project);
     fireProjectRemoved(project);
   }
 
