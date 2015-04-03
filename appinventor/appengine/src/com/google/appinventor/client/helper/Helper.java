@@ -98,7 +98,7 @@ public class Helper {
   }
 
   public static String editorDescriptor(YaCodePageEditor editor) {
-    return editor.getProjectId() + "_"  + editor.getName();
+    return editor.getProjectRootNode().getName() + "_"  + editor.getName();
   }
 
   public static void printChildrenDescriptor(Collection<YaSharedPageEditor> children) {
@@ -213,15 +213,18 @@ public class Helper {
       $wnd.exported.inspectFile = $entry(@com.google.appinventor.client.helper.Helper::inspectFile(Ljava/lang/String;Ljava/lang/String;));
 
       //the following puts stuff on global namespace, might be unsafe ...
+
+      var printJson = $entry(@com.google.appinventor.client.helper.Helper::printJson(Lcom/google/gwt/core/client/JavaScriptObject;));
       $wnd.printProjects = function() {
-        console.log(JSON.stringify($wnd.exported.getAllProjects(), undefined, 2));
+        console.log(printJson($wnd.exported.getAllProjects(), undefined, 2));
       };
       $wnd.printProject = function(projectId) {
-        console.log(JSON.stringify($wnd.exported.inspectProject(projectId), undefined, 2));
+        console.log(printJson($wnd.exported.inspectProject(projectId), undefined, 2));
       };
       $wnd.printFile = function(projectName, fileName) {
-        console.log(JSON.stringify($wnd.exported.inspectFile(projectName, fileName), undefined, 2));
+        console.log(printJson($wnd.exported.inspectFile(projectName, fileName), undefined, 2));
       };
+      $wnd.pj = printJson;
 
       $wnd.projects = $wnd.exported.getAllProjects;
       $wnd.ip = $wnd.exported.inspectProject;
@@ -229,5 +232,9 @@ public class Helper {
       $wnd.pp = $wnd.printProject;
       $wnd.pf = $wnd.printFile;
       $wnd.pps = $wnd.printProjects;
+      $wnd.pj = printJson;
+      $wnd.pcc = $wnd.printCachedContent;
+      $wnd.plc = $wnd.printLinkedContent;
+      $wnd.pdes = $wnd.printDirtyEditors;
   }-*/;
 }
