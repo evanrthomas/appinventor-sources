@@ -25,8 +25,8 @@ import com.google.appinventor.client.widgets.Toolbar;
 import com.google.appinventor.common.version.AppInventorFeatures;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.ProjectRootNode;
+import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
-import com.google.appinventor.shared.storage.StorageUtil;
 import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -357,15 +357,7 @@ public class DesignToolbar extends Toolbar {
                 continue;
               }
               JSONObject pagejson = new JSONObject();
-
-              pagejson.put("projectId", new JSONNumber((double) page.getProjectId()));
-              String filename = StorageUtil.trimOffExtension(StorageUtil.basename(page.getFileId()));
-              pagejson.put("fileName", new JSONString(filename));
-              pagejson.put("fileId", new JSONString(page.getFileId()));
-              String name = page.getName();
-              name = name.substring(0, name.length() - 4); //get rid of .bky
-              pagejson.put("name", new JSONString(name));
-              pages.set(pages.size(), pagejson);
+              pages.set(pages.size(), pageDescriptor((YoungAndroidBlocksNode)page));
             }
             bookjson.put("pages", pages);
             callJSFunc(callback, bookjson.getJavaScriptObject());
@@ -399,39 +391,40 @@ public class DesignToolbar extends Toolbar {
       }
     }
 
+    private JSONObject pageDescriptor(YoungAndroidBlocksNode node) {
+      YaCodePageEditor editor =
+              YaCodePageEditor.getCodePageEditorByFileId(node.getProjectId(), node.getFileId());
+      //I don't think it should be possible for editor to be null if node exists.
+      if (editor == null)  throw new RuntimeException("somehow, editor for existing YABlocksNode is null");
+      return pageDescriptor(editor);
+    }
+
     private JSONObject pageDescriptor(YaCodePageEditor editor) {
-      JSONObject json = new JSONObject();
+      JSONObject jsonBlob = new JSONObject();
       String name = editor.getFileName();
       if (name.endsWith(YoungAndroidSourceAnalyzer.FORM_PAGE_SOURCE_EXTENSION)) {
         name = name.substring(0, name.length() - YoungAndroidSourceAnalyzer.FORM_PAGE_SOURCE_EXTENSION.length());
       }
-      json.put("name", new JSONString(name));
-      json.put("projectId", new JSONNumber((double)editor.getProjectId()));
-      json.put("fileName", new JSONString(editor.getFileName()));
-      json.put("fileId", new JSONString(editor.getFileId()));
+      jsonBlob.put("name", new JSONString(name));
+      jsonBlob.put("projectId", new JSONNumber((double) editor.getProjectId()));
+      jsonBlob.put("projectName", new JSONString(editor.getProjectRootNode().getName()));
+      jsonBlob.put("fileName", new JSONString(editor.getFileName()));
+      jsonBlob.put("fileId", new JSONString(editor.getFileId()));
+      jsonBlob.put("type", editor.isFormPageEditor() ?
+              new JSONString("formPage") :
+              new JSONString("sharedPage"));
 
-      JSONArray componentArr = new JSONArray();
-      //for (String componentName: editor.getComponents().keySet()) {
-      //  MockComponent component = editor.getComponents().get(componentName);
-      //  JSONObject jsonComponent = new JSONObject();
-      //  jsonComponent.put("name", new JSONString(component.getName()));
-      //  jsonComponent.put("type", new JSONString(component.getType()));
-      //  jsonComponent.put("iconUrl", new JSONString(component.getIconImage().getUrl()));
-      //  componentArr.set(componentArr.size(), jsonComponent);
-      //}
 
-      json.put("components", componentArr);
-
-      JSONArray childrenArr = new JSONArray();
+      JSONArray children = new JSONArray();
       for (YaSharedPageEditor child : editor.getChildren()) {
-        JSONObject jsonComponent = new JSONObject();
-        jsonComponent.put("projectId", new JSONNumber(child.getProjectId()));
-        jsonComponent.put("fileName", new JSONString(child.getFileName()));
-        jsonComponent.put("fileId", new JSONString(child.getFileId()));
-        childrenArr.set(childrenArr.size(), jsonComponent);
+        JSONObject childBlob = new JSONObject();
+        childBlob.put("projectId", new JSONNumber(child.getProjectId()));
+        childBlob.put("fileName", new JSONString(child.getFileName()));
+        childBlob.put("fileId", new JSONString(child.getFileId()));
+        children.set(children.size(), childBlob);
       }
-      json.put("children", childrenArr);
-      return json;
+      jsonBlob.put("children", children);
+      return jsonBlob;
     }
 
     private JavaScriptObject getProjectPages() { //called from javascript
@@ -468,7 +461,6 @@ public class DesignToolbar extends Toolbar {
     private void importNewPage(final JavaScriptObject parentObj, final JavaScriptObject childObj, final JavaScriptObject callback) { //called from javascript
       final JSONObject jsonParent = new JSONObject(parentObj);
       final JSONObject jsonChild = new JSONObject(childObj);
-
 
       CountDownCallback<Project> addChildToParent =
               new CountDownCallback<Project>(2, new Callback<Project>() {
