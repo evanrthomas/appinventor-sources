@@ -259,7 +259,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   @Override
   public void loadFile(final Command afterFileLoaded) {
     Element dom = blocklyXmlContainer();
-    linkAndCompile(dom, new HashSet<YaCodePageEditor>(), 0, new Callback<Element>() {
+    linkImports(dom, new HashSet<YaCodePageEditor>(), 0, new Callback<Element>() {
       @Override
       public void call(Element dom) {
         blocksArea.setBlocksContent(domToText(dom));
@@ -272,9 +272,9 @@ public abstract class YaCodePageEditor extends SimpleEditor
     });
   }
 
-  protected void linkAndCompile(final Element dom, Set<YaCodePageEditor> visited,
-                                final int depth, final Callback<Element> onComplete) {
-    Helper.println("linkAndCompile() " + Helper.editorDescriptor(this) + " num children:: " + children.size());
+  protected void linkImports(final Element dom, Set<YaCodePageEditor> visited,
+                             final int depth, final Callback<Element> onComplete) {
+    if (depth == 0) Helper.println("linkAndCompile() " + Helper.editorDescriptor(this) + " num children:: " + children.size());
     if (visited.contains(this)) {
       return;
     }
@@ -297,7 +297,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
       }
     });
     for (YaSharedPageEditor child: children) {
-      child.linkAndCompile(dom, visited, depth + 1, callback);
+      child.linkImports(dom, visited, depth + 1, callback);
     }
 
   }
