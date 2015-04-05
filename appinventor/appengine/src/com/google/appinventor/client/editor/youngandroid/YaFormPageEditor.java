@@ -1,11 +1,11 @@
 
 package com.google.appinventor.client.editor.youngandroid;
 
-import com.google.appinventor.client.YACachedBlocksNode;
 import com.google.appinventor.client.editor.simple.components.FormChangeListener;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.editor.simple.components.MockForm;
 import com.google.appinventor.shared.rpc.project.FileDescriptorWithContent;
+import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
 import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
 import com.google.gwt.user.client.ui.TreeItem;
 
@@ -16,14 +16,9 @@ public final class YaFormPageEditor extends YaCodePageEditor implements FormChan
 
   // The form editor associated with this blocks editor
   private YaFormEditor myFormEditor;
-  protected YaFormPageEditor(YaProjectEditor projectEditor, YACachedBlocksNode blocksNode) {
+  protected YaFormPageEditor(YaProjectEditor projectEditor, YoungAndroidBlocksNode blocksNode) {
     super(projectEditor, blocksNode);
     myFormEditor = projectEditor.getFormFileEditor(blocksNode.getFormName());
-  }
-
-  @Override
-  public boolean isFormPageEditor() {
-    return true;
   }
 
   @Override

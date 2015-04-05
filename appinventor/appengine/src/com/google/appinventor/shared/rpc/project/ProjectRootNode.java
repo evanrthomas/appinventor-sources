@@ -5,6 +5,9 @@
 
 package com.google.appinventor.shared.rpc.project;
 
+import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
+import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,6 +59,16 @@ public abstract class ProjectRootNode extends ProjectNode {
     return sourceNodes;
   }
 
+  public List<YoungAndroidBlocksNode> getAllBlocksNodes() {
+    List<YoungAndroidBlocksNode> nodes = new ArrayList<YoungAndroidBlocksNode>();
+    for (ProjectNode node : getAllSourceNodes()) {
+      if (YoungAndroidSourceAnalyzer.isBlocksNodeSourceFileId(node.getFileId())) {
+        nodes.add((YoungAndroidBlocksNode)node);
+      }
+    }
+    return nodes;
+  }
+
   /**
    * Returns the source node with the given fileId, or null if there is no source node with the
    * given fileId.
@@ -65,6 +78,14 @@ public abstract class ProjectRootNode extends ProjectNode {
       if (node.getFileId().equals(fileId)) {
         return node;
       }
+    }
+    return null;
+  }
+
+  public YoungAndroidBlocksNode getBlocksFile(String fileId) {
+    ProjectNode node;
+    if ((node = getSourceNode(fileId)) instanceof YoungAndroidBlocksNode) {
+      return (YoungAndroidBlocksNode)node;
     }
     return null;
   }

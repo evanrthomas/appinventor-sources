@@ -7,6 +7,7 @@ package com.google.appinventor.client.wizards.youngandroid;
 
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.explorer.project.Project;
+import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.tracking.Tracking;
 import com.google.appinventor.client.widgets.LabeledTextBox;
 import com.google.appinventor.client.wizards.NewProjectWizard;
@@ -78,16 +79,16 @@ public final class NewYoungAndroidProjectWizard extends NewProjectWizard {
           NewProjectCommand callbackCommand = new NewProjectCommand() {
               @Override
               public void execute(final Project project) {
-                Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-                    @Override
-                    public void execute() {
-                      if (Ode.getInstance().screensLocked()) { // Wait until I/O finished
-                        Scheduler.get().scheduleDeferred(this); // on other project
-                      } else {
-                        Ode.getInstance().openYoungAndroidProjectInDesigner(project);
-                      }
+                Helper.schedule("createYoungAndroidProject", new Scheduler.ScheduledCommand() {
+                  @Override
+                  public void execute() {
+                    if (Ode.getInstance().screensLocked()) { // Wait until I/O finished
+                      Helper.schedule("createYoungAndroidProject", this); // on other project
+                    } else {
+                      Ode.getInstance().openYoungAndroidProjectInDesigner(project);
                     }
-                  });
+                  }
+                });
               }
             };
 

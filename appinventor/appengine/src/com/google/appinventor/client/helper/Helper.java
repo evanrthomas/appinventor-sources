@@ -1,19 +1,26 @@
 package com.google.appinventor.client.helper;
 
 import com.google.appinventor.client.Ode;
+import com.google.appinventor.client.YACachedBlocksNode;
+import com.google.appinventor.client.editor.FileEditor;
 import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
 import com.google.appinventor.client.editor.youngandroid.YaSharedPageEditor;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.output.OdeLog;
+import com.google.appinventor.shared.rpc.project.FileNode;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.ProjectRootNode;
+import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
 import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.json.client.JSONArray;
 import com.google.gwt.json.client.JSONNumber;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Helper {
 
@@ -71,6 +78,10 @@ public class Helper {
      return $wnd.eval(s);
     }-*/;
 
+  public static native JavaScriptObject printJson(JavaScriptObject json) /*-{
+    console.log(JSON.stringify(json, undefined, 2));
+  }-*/;
+
   public static native void set(Object o) /*-{
     $wnd.obj = o;
   }-*/;
@@ -85,17 +96,14 @@ public class Helper {
   }-*/;
 
 
-  public static native JavaScriptObject callJSFunc(JavaScriptObject callback, JavaScriptObject arg) /*-{
-      return callback(arg);
-    }-*/;
 
   public static String getProjectName(YaCodePageEditor editor) {
     return editor.getProjectRootNode().getName();
 
   }
 
-  public static String editorDescriptor(YaCodePageEditor editor) {
-    return editor.getProjectRootNode().getName() + "_"  + editor.getName();
+  public static String editorDescriptor(FileEditor editor) {
+    return editor.getProjectRootNode().getName() + "_"  + editor.getFileNode().getName();
   }
 
   public static void printChildrenDescriptor(Collection<YaSharedPageEditor> children) {
@@ -112,7 +120,13 @@ public class Helper {
     Helper.printChildrenDescriptor(children);
   }
 
+  public static String getNodeName(FileNode node) {
+    return node.getProjectRoot().getName() + "_" + node.getName();
+  }
 
+  public static String getNodeName(YACachedBlocksNode node) {
+    return getNodeName(node.getRealNode());
+  }
 
 
   // ---------------------------------------------------------
@@ -120,6 +134,22 @@ public class Helper {
   // ---------------------------------------------------------
 
 
+
+  private static FileNode getFileNodeByFileName(long projectId, String fileName) {
+    Project project = Ode.getInstance().getProjectManager().getProject(projectId);
+    if (project == null) return null; //invalid projectId, project does not exist
+    ProjectRootNode root = project.getRootNode();
+    if (root == null) return null; //have not called project.loadNodes() yet
+
+    YoungAndroidBlocksNode fileNode = null;
+    for (ProjectNode potentialNode : root.getAllSourceNodes()) {
+      if (potentialNode.getName().equals(fileName) && potentialNode instanceof YoungAndroidBlocksNode) {
+        return fileNode;
+      }
+    }
+    return null;
+
+  }
 
   public static JavaScriptObject getAllProjects() {
     Collection<Project> projects = Ode.getInstance().getProjectManager().getProjects();
@@ -133,7 +163,6 @@ public class Helper {
     }
     return allJsonProjects.getJavaScriptObject();
   }
-
 
   public static JavaScriptObject inspectProject(String projectIdAsStringOrProjectName) {
     Project project;
@@ -174,7 +203,6 @@ public class Helper {
     return jsonblob.getJavaScriptObject();
   }
 
-
   public static native JavaScriptObject getLoadProjectNodesFunction(Project project) /*-{
     return $entry(function() {
       project.@com.google.appinventor.client.explorer.project.Project::loadProjectNodes()();
@@ -182,14 +210,20 @@ public class Helper {
   }-*/;
 
   public static JavaScriptObject inspectFile(String projectName, String fileName) {
+    return Helper.eval("\"deprecated\"");
+    /*
     Project project = Ode.getInstance().getProjectManager().getProject(projectName);
-    YaCodePageEditor editor = YaCodePageEditor.getCodePageEditorByFileName(project.getProjectId(), fileName);
-    if (editor == null) return null;
+    project.getRootNode().getSourceNode()
+    YACachedBlocksNode cachedNode = YACachedBlocksNode.getCachedNode(project.getProjectId(), fileName);
+    if (cachedNode == null) {
+      Helper.println("error :: editor is null");
+      return null;
+    }
 
     JSONObject editorblob = new JSONObject();
     JSONArray children = new JSONArray();
-    editorblob.put("content", new JSONString(editor.getCachedContent()));
-    for (YaCodePageEditor child: editor.getChildren()) {
+    editorblob.put("content", new JSONString(cachedNode.getContent()));
+    for (YACachedBlocksNode child: Linker.getInstance().getChildren(cachedNode)) {
       JSONObject childblob = new JSONObject();
       childblob.put("name",   new JSONString(child.getName()));
       childblob.put("fileId", new JSONString(child.getFileId()));
@@ -198,9 +232,61 @@ public class Helper {
     }
     editorblob.put("children", children);
     return editorblob.getJavaScriptObject();
+    */
+  }
+
+  public static String getCachedContent(String projectName, String fileName) {
+    Project project = Ode.getInstance().getProjectManager().getProject(projectName);
+    FileNode node = getFileNodeByFileName(project.getProjectId(), fileName);
+    return YACachedBlocksNode.getCachedNode(project.getProjectId(), node.getFileId()).getContent();
   }
 
 
+  public static String getLinkedContent(String projectName, String fileName) {
+    return "deprecated";
+    /*
+    Project project = Ode.getInstance().getProjectManager().getProject(projectName);
+    YaCodePageEditor editor = YaCodePageEditor.getCodePageEditorByFileName(project.getProjectId(), fileName);
+    return editor.getLinkedContent();
+    */
+  }
+
+  public static JavaScriptObject getDirtyEditors() {
+    Collection<FileEditor> editors = Ode.getInstance().getEditorManager().getDirtyEditors();
+    JSONArray arr = new JSONArray();
+    for (FileEditor editor: editors) {
+      arr.set(arr.size(), new JSONString(editorDescriptor(editor)));
+    }
+    return arr.getJavaScriptObject();
+  }
+
+  private static Map<String, Scheduler.ScheduledCommand> scheduledCommands =
+          new HashMap<String, Scheduler.ScheduledCommand>();
+  private static String running;
+  public static void schedule(final String commandName, final Scheduler.ScheduledCommand command) {
+    Scheduler.ScheduledCommand newCommand = new Scheduler.ScheduledCommand() {
+      @Override
+      public void execute() {
+        scheduledCommands.remove(commandName);
+        running = commandName;
+        command.execute();
+        running = null;
+      }
+    };
+    scheduledCommands.put(commandName, newCommand);
+    Scheduler.get().scheduleDeferred(newCommand);
+  }
+
+  public static JavaScriptObject getScheduledTasks() {
+    JSONObject scheduedBlob = new JSONObject();
+    JSONArray all = new JSONArray();
+    for (String key: scheduledCommands.keySet()) {
+      all.set(all.size(), new JSONString(key+""));
+    }
+    scheduedBlob.put("running", new JSONString(running+""));
+    scheduedBlob.put("all", all);
+    return scheduedBlob.getJavaScriptObject();
+  }
 
   public static native void exportHelperMethods() /*-{
       console.log("HELPER METHODS ARE BEING EXPORTED!!!");
@@ -213,25 +299,45 @@ public class Helper {
 
       var printJson = $entry(@com.google.appinventor.client.helper.Helper::printJson(Lcom/google/gwt/core/client/JavaScriptObject;));
       $wnd.printProjects = function() {
-        console.log(printJson($wnd.exported.getAllProjects(), undefined, 2));
+        printJson($wnd.exported.getAllProjects());
       };
+
       $wnd.printProject = function(projectId) {
-        console.log(printJson($wnd.exported.inspectProject(projectId), undefined, 2));
+        printJson($wnd.exported.inspectProject(projectId));
       };
+
       $wnd.printFile = function(projectName, fileName) {
-        console.log(printJson($wnd.exported.inspectFile(projectName, fileName), undefined, 2));
+        printJson($wnd.exported.inspectFile(projectName, fileName), undefined, 2);
       };
       $wnd.pj = printJson;
 
+      $wnd.printCachedContent = function(projectName, fileName) {
+        console.log(@com.google.appinventor.client.helper.Helper::getCachedContent(Ljava/lang/String;Ljava/lang/String;)(projectName, fileName));
+      };
+
+      $wnd.printLinkedContent = function(projectName, fileName) {
+        console.log(@com.google.appinventor.client.helper.Helper::getLinkedContent(Ljava/lang/String;Ljava/lang/String;)(projectName, fileName));
+      };
+
+      $wnd.printDirtyEditors = function() {
+        printJson(@com.google.appinventor.client.helper.Helper::getDirtyEditors()());
+      };
+
+      $wnd.printScheduledTasks = function() {
+        printJson(@com.google.appinventor.client.helper.Helper::getScheduledTasks()());
+       }
+
+      $wnd.pj = printJson;
       $wnd.projects = $wnd.exported.getAllProjects;
       $wnd.ip = $wnd.exported.inspectProject;
       $wnd.ifl = $wnd.exported.inspectFile;
       $wnd.pp = $wnd.printProject;
       $wnd.pf = $wnd.printFile;
       $wnd.pps = $wnd.printProjects;
-      $wnd.pj = printJson;
+
       $wnd.pcc = $wnd.printCachedContent;
       $wnd.plc = $wnd.printLinkedContent;
       $wnd.pdes = $wnd.printDirtyEditors;
+      $wnd.pst = $wnd.getScheduledTasks;
   }-*/;
 }

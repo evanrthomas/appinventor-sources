@@ -5,7 +5,10 @@
 
 package com.google.appinventor.client.editor;
 
-import com.google.appinventor.client.*;
+import com.google.appinventor.client.ErrorReporter;
+import com.google.appinventor.client.Ode;
+import com.google.appinventor.client.OdeAsyncCallback;
+import com.google.appinventor.client.YACachedBlocksNode;
 import com.google.appinventor.client.editor.youngandroid.YaFormPageEditor;
 import com.google.appinventor.client.editor.youngandroid.YailGenerationException;
 import com.google.appinventor.client.explorer.project.Project;
@@ -274,7 +277,19 @@ public final class EditorManager {
       projectSettings.saveSettings(callAfterSavingCommand);
     }
   }
-  
+
+  public void saveDirtyEditorsToCache() {
+    List<FileDescriptorWithContent> filesToSave = new ArrayList<FileDescriptorWithContent>();
+    for (FileDescriptorWithContent fd : filesToSave) {
+      long projectId = fd.getProjectId();
+      String fileId = fd.getFileId();
+      YACachedBlocksNode node;
+      if ((node = YACachedBlocksNode.getCachedNode(projectId, fileId)) != null) {
+        node.saveToCache(fd.getContent());
+      }
+    }
+  }
+
   /**
    * For each block editor (screen) in the current project, generate and save yail code for the 
    * blocks.
@@ -398,5 +413,10 @@ public final class EditorManager {
         }
       }
     }
+  }
+
+  // FOR DEBUGGING ONLY
+  public Collection<FileEditor> getDirtyEditors() {
+    return dirtyFileEditors;
   }
 }

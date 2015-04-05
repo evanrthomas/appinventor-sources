@@ -12,6 +12,7 @@ import com.google.appinventor.client.editor.youngandroid.YaFormEditor;
 import com.google.appinventor.client.explorer.commands.AddFormCommand;
 import com.google.appinventor.client.explorer.commands.ChainableCommand;
 import com.google.appinventor.client.explorer.commands.DeleteFileCommand;
+import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.tracking.Tracking;
 import com.google.appinventor.client.widgets.DropDownButton.DropDownItem;
@@ -27,7 +28,9 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import static com.google.appinventor.client.Ode.MESSAGES;
 
@@ -233,16 +236,16 @@ public class DesignToolbar extends Toolbar {
   }
 
   private void doSwitchScreen(final long projectId, final String screenName, final View view) {
-    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-        @Override
-        public void execute() {
-          if (Ode.getInstance().screensLocked()) { // Wait until I/O complete
-            Scheduler.get().scheduleDeferred(this);
-          } else {
-            doSwitchScreen1(projectId, screenName, view);
-          }
+    Helper.schedule("doSwitchScreen", new Scheduler.ScheduledCommand() {
+      @Override
+      public void execute() {
+        if (Ode.getInstance().screensLocked()) { // Wait until I/O complete
+          Helper.schedule("doSwitchScreen", this);
+        } else {
+          doSwitchScreen1(projectId, screenName, view);
         }
-      });
+      }
+    });
   }
 
   private void doSwitchScreen1(long projectId, String screenName, View view) {
@@ -318,7 +321,6 @@ public class DesignToolbar extends Toolbar {
   private class OpenSharedPagesOverlay implements Command {
     @Override
     public void execute() {
-      SharedPagesOverlay.getInstance().exportMethods();
       SharedPagesOverlay.getInstance().openOverlay();
     }
   }

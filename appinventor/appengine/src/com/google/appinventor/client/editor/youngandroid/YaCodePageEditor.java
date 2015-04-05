@@ -6,32 +6,21 @@ package com.google.appinventor.client.editor.youngandroid;
 
 import com.google.appinventor.client.ComponentList;
 import com.google.appinventor.client.Ode;
-import com.google.appinventor.client.OdeAsyncCallback;
-import com.google.appinventor.client.YACachedBlocksNode;
 import com.google.appinventor.client.boxes.AssetListBox;
 import com.google.appinventor.client.boxes.BlockSelectorBox;
 import com.google.appinventor.client.boxes.PaletteBox;
-import com.google.appinventor.client.editor.ProjectEditor;
 import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
 import com.google.appinventor.client.editor.simple.SimpleEditor;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.explorer.SourceStructureExplorer;
 import com.google.appinventor.client.explorer.SourceStructureExplorerItem;
-import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.helper.Callback;
-import com.google.appinventor.client.helper.CountDownCallback;
-import com.google.appinventor.client.helper.Helper;
+import com.google.appinventor.client.helper.Utils;
+import com.google.appinventor.client.linker.Linker;
 import com.google.appinventor.client.output.OdeLog;
-import com.google.appinventor.shared.rpc.project.ChecksumedFileException;
-import com.google.appinventor.shared.rpc.project.ChecksumedLoadFile;
-import com.google.appinventor.shared.rpc.project.ProjectNode;
-import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YAFormPageBlocksNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
 import com.google.common.collect.Maps;
-import com.google.gwt.core.client.JavaScriptObject;
-import com.google.gwt.core.client.JsArray;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.event.logical.shared.ResizeEvent;
 import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.user.client.Command;
@@ -39,7 +28,6 @@ import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.TreeItem;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -74,13 +62,12 @@ public abstract class YaCodePageEditor extends SimpleEditor
   // projectid_formname for this blocks editor. Our index into the static nameToCodePageEditor map.
   private String fullName;
 
-  protected final YACachedBlocksNode blocksNode;
+  protected final YoungAndroidBlocksNode blocksNode;
 
   // References to other panels that we need to control.
   private final SourceStructureExplorer sourceStructureExplorer;
 
   protected final ComponentList components;
-  private final Collection<YaSharedPageEditor> children;
 
 
   // Blocks area. Note that the blocks area is a part of the "document" in the
@@ -107,15 +94,17 @@ public abstract class YaCodePageEditor extends SimpleEditor
   //Timer used to poll blocks editor to check if it is initialized
   private static Timer timer;
 
-  protected YaCodePageEditor(YaProjectEditor projectEditor, YACachedBlocksNode blocksNode) {
-    super(projectEditor, blocksNode.getRealNode());
 
+  //FOR DEBUGGING ONLY!!!
+  private String currentLinkedWorkspace;
+  private String projectName;
+
+  protected YaCodePageEditor(YaProjectEditor projectEditor, YoungAndroidBlocksNode blocksNode) {
+    super(projectEditor, blocksNode);
     this.blocksNode = blocksNode;
+
     components = new ComponentList();
     //TODO (evan): make abstract method initComponents(components) and override in children
-
-    children = new HashSet<YaSharedPageEditor>();
-    addChildrenFromHeader();
 
     fullName = blocksNode.getProjectId() + "_" + blocksNode.getFormName();
 
@@ -142,6 +131,9 @@ public abstract class YaCodePageEditor extends SimpleEditor
     // Listen for selection events for built-in drawers
     BlockSelectorBox.getBlockSelectorBox().addBlockDrawerSelectionListener(this);
 
+    // FOR DEBUGGING ONLY
+    projectName = getProjectRootNode().getName();
+
   }
 
   public static YaCodePageEditor getOrCreateEditor(YaProjectEditor project, YoungAndroidBlocksNode sourceNode) {
@@ -151,103 +143,11 @@ public abstract class YaCodePageEditor extends SimpleEditor
       return editor;
     }
 
-    YACachedBlocksNode cachedNode =  YACachedBlocksNode.getOrCreateCachedNode(sourceNode);
     if (sourceNode instanceof YAFormPageBlocksNode) {
-      return new YaFormPageEditor(project, cachedNode);
+      return new YaFormPageEditor(project, sourceNode);
     } else {
-      return new YaSharedPageEditor(project, cachedNode);
+      return new YaSharedPageEditor(project, sourceNode);
     }
-  }
-
-  public static YaCodePageEditor getCodePageEditorByFileName(long projectId, String fileName) {
-    //FOR DEBUGGING PURPOSES ONLY!!!
-    Project project = Ode.getInstance().getProjectManager().getProject(projectId);
-    if (project == null) return null; //invalid projectId, project does not exist
-    ProjectRootNode root = project.getRootNode();
-    if (root == null) return null; //have not called project.loadNodes() yet
-
-    YoungAndroidBlocksNode fileNode = null;
-    for (ProjectNode potentialNode : root.getAllSourceNodes()) {
-      if (potentialNode.getName().equals(fileName) && potentialNode instanceof YoungAndroidBlocksNode) {
-        fileNode = (YoungAndroidBlocksNode)potentialNode;
-      }
-    }
-    if (fileNode == null) return null; //either invalid projectName, or have not called project.loadNodes() yet
-    ProjectEditor projeditor = Ode.getInstance().getEditorManager().openProject(root);
-    return YaCodePageEditor.getOrCreateEditor((YaProjectEditor) projeditor, fileNode);
-
-  }
-
-  public static YaCodePageEditor getCodePageEditorByFileId(long projectId, String fileId) {
-    Project project = Ode.getInstance().getProjectManager().getProject(projectId);
-    if (project == null) return null; //invalid projectId, project does not exist
-    ProjectRootNode root = project.getRootNode();
-    if (root == null) return null; //have not called project.loadNodes() yet
-
-    ProjectNode node = root.getSourceNode(fileId);
-    if (node instanceof YoungAndroidBlocksNode) {
-      ProjectEditor projeditor = Ode.getInstance().getEditorManager().openProject(root);
-      return YaCodePageEditor.getOrCreateEditor((YaProjectEditor) projeditor,
-              (YoungAndroidBlocksNode) node);
-    }
-    return null;
-  }
-
-  private void addChildrenFromHeader() {
-    blocksNode.load(new OdeAsyncCallback<ChecksumedLoadFile>() {
-      @Override
-      public void onSuccess(ChecksumedLoadFile result) {
-        try {
-          if (result.getContent() != "") {
-            JsArray<Element> childrenXml = getChildrenFromHeader(textToDom(result.getContent()));
-            Element childXml;
-            for (int i = 0; i < childrenXml.length(); i++) {
-              childXml = childrenXml.get(i);
-              String projectIdString = childXml.getAttribute("projectId");
-              if (projectIdString.length() == 0) { //TODO (evan): fix this. Silly hack because gwt for some reason makes the I in projectId lowercase
-                projectIdString = childXml.getAttribute("projectid");
-              }
-              long projectId = Long.parseLong(projectIdString);
-              String fileId = childXml.getAttribute("fileId");
-              if (fileId.length() == 0) { //TODO (evan): fix this. Silly hack because gwt for some reason makes the I in projectId lowercase
-                fileId = childXml.getAttribute("fileid");
-              }
-              YaCodePageEditor child = getCodePageEditorByFileId(projectId, fileId);
-
-              if (child == null) {
-                //TODO (evan): child was deleted but is still in header
-              } else if (child instanceof YaSharedPageEditor) {
-                addChild((YaSharedPageEditor) child); //TODO (evan): get rid of this cast and instanceof
-              } else {
-                String message = "header child is not a shared page " +
-                        "\n\t child == null " + (child == null) +
-                        "\n\t result.getContent() " + result.getContent();
-                throw new RuntimeException(message);
-              }
-            }
-          }
-        } catch (ChecksumedFileException e) {
-          onFailure(e);
-        }
-      }
-    });
-  }
-
-  public void addChild(YaSharedPageEditor child) {
-    children.add(child);
-    Ode.getInstance().getEditorManager().scheduleAutoSave(this);
-  }
-
-  public Collection<YaSharedPageEditor> getChildren() {
-    return children;
-  }
-
-  private native JsArray<Element> getChildrenFromHeader(JavaScriptObject xml) /*-{
-    return xml.querySelectorAll('header > children > child');
-  }-*/;
-
-  public boolean isFormPageEditor()  {
-    return false;
   }
 
   //SimpleEditor methods
@@ -258,94 +158,25 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   @Override
   public void loadFile(final Command afterFileLoaded) {
-    Element dom = blocklyXmlContainer();
-    linkImports(dom, new HashSet<YaCodePageEditor>(), 0, new Callback<Element>() {
+    relinkBlocksArea(afterFileLoaded);
+  }
+
+  private void relinkBlocksArea(final Command afterFileLoaded) {
+    loadComplete = false;
+    Linker.getInstance().loadLinkedContent(blocksNode, new Callback<String>() {
       @Override
-      public void call(Element dom) {
-        blocksArea.setBlocksContent(domToText(dom));
+      public void call(String content) {
+        blocksArea.setBlocksContent(currentLinkedWorkspace = content);
         loadComplete = true;
         selectedDrawer = null;
-        if (afterFileLoaded != null) {
-          afterFileLoaded.execute();
-        }
+        if (afterFileLoaded != null) afterFileLoaded.execute();
       }
     });
   }
-
-  protected void linkImports(final Element dom, Set<YaCodePageEditor> visited,
-                             final int depth, final Callback<Element> onComplete) {
-    if (depth == 0) Helper.println("linkAndCompile() " + Helper.editorDescriptor(this) + " num children:: " + children.size());
-    if (visited.contains(this)) {
-      return;
-    }
-    visited.add(this);
-    final CountDownCallback callback = new CountDownCallback(children.size() + 1, onComplete); //TODO (evan): this callback spagettii is messy. Re design
-
-    blocksNode.load(new OdeAsyncCallback<ChecksumedLoadFile>() {
-      @Override
-      public void onSuccess(ChecksumedLoadFile result) {
-        try {
-          String content = result.getContent();
-          JsArray<Element> blocks = content.equals("") ? (JsArray<Element>)JavaScriptObject.createArray().cast() :
-                  getTopLevelBlocks(textToDom(content));
-          labelBlocks(blocks, depth);
-          addAllBlocks(dom, blocks);
-          onComplete.call(dom);
-        } catch (ChecksumedFileException e) {
-          onFailure(e);
-        }
-      }
-    });
-    for (YaSharedPageEditor child: children) {
-      child.linkImports(dom, visited, depth + 1, callback);
-    }
-
-  }
-
-  private void labelBlocks(JsArray<Element> blocks, int depth) {
-    //TODO (evan): when you add components, label each function with the version of it (ie what components it's using)
-    for (int i = 0; i<blocks.length(); i++) {
-      blocks.get(i).setAttribute("depth", depth +"");
-    }
-  }
-
-  private void addAllBlocks(Element dom, JsArray<Element> blocks) {
-    //traverse in reverse order because the size of the array elements delete themselves as you add them to dom
-    for (int i = blocks.length() - 1; i>=0; i--) {
-      Element block = blocks.get(i);
-      dom.appendChild(block);
-    }
-  }
-
-  private native JavaScriptObject filterOutImportedBlocks(Element e) /*-{
-    return $wnd.exported.filterOutImportedBlocks(e);
-  }-*/;
-
-  protected native Element textToDom(String s) /*-{
-    return $wnd.exported.textToDom(s);
-  }-*/;
-
-  protected native String domToText(Element xml) /*-{
-    return $wnd.exported.domToText(xml);
-  }-*/;
-
-  private native JsArray<Element> getTopLevelBlocks(JavaScriptObject root) /*-{
-    return $wnd.exported.getTopLevelBlocks(root);
-  }-*/;
-
-  private native Element blocklyXmlContainer() /*-{
-    return $wnd.exported.blocklyXmlContainer();
-  }-*/;
-
-  private native void appendChildrenToParent(JsArray<Element> children, Element parent) /*-{
-    return $wnd.exported.appendChildrenToParent(children, parent);
-  }-*/;
 
   private native String evalJS(String s) /*-{
      return eval(s);
   }-*/;
-
-
 
   @Override
   public String getTabText() {
@@ -355,13 +186,19 @@ public abstract class YaCodePageEditor extends SimpleEditor
   @Override
   public void onShow() {
     OdeLog.log("YaBlocksEditor: got onShow() for " + getFileId());
+
+    //before you switch to a new blocks editor,
+    //make sure all the pending changes from other shared pages that this editor might depend on are
+    //saved and loaded into this editor
+    Ode.getInstance().getEditorManager().saveDirtyEditorsToCache();
     super.onShow();
+    relinkBlocksArea(null);
     showWhenInitialized();
   }
 
   public void showWhenInitialized() {
     //check if blocks are initialized
-    if(BlocklyPanel.blocksInited(fullName)) {
+    if(BlocklyPanel.blocksInited(fullName) && loadComplete) {
       updateBlocksTree(null);
       blocksArea.showDifferentForm(fullName);
       loadBlocksEditor();
@@ -387,11 +224,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
    * properties panel.
    */
   private void loadBlocksEditor() {
-    //before you switch to a new blocks editor,
-    //make sure all the pending changes from other shared pages that this editor might depend on are
-    //saved and loaded into this editor
-    Ode.getInstance().getEditorManager().saveDirtyEditors(null);
-    loadFile(null);
     PaletteBox.getPaletteBox().setVisible(false);
 
       // Update the source structure explorer with the tree of this form's components.
@@ -491,31 +323,15 @@ public abstract class YaCodePageEditor extends SimpleEditor
   @Override
   public String getRawFileContent() {
     String content = blocksArea.getBlocksContent();
-    content = content.equals("") ? domToText(blocklyXmlContainer())  : content;
-    return domToText(setChildrenHeader(
-            filterOutImportedBlocks(textToDom(content)), makeChildrenXmlArray(children)));
-  }
-
-
-  private JsArray<Element> makeChildrenXmlArray(Collection<YaSharedPageEditor> children) {
-    JsArray<Element> childrenXmlArr = JavaScriptObject.createArray().cast();
-    for (YaSharedPageEditor child: children) {
-      Element xmlchild = createElement("child"); //hack because I can't figure out to make an Element
-      xmlchild.setAttribute("projectId", child.getProjectId()+"");
-      xmlchild.setAttribute("fileId", child.getFileId());
-      childrenXmlArr.push(xmlchild);
+    if (content.equals("")) {
+      return Utils.domToText(Utils.blocklyXmlContainer());
     }
-    return childrenXmlArr;
+    return Linker.getInstance().unlinkContent(blocksNode, content);
   }
 
-  private native Element createElement(String name) /*-{
-    return document.createElement(name);
-  }-*/;
-  private native Element setChildrenHeader(JavaScriptObject xml, JsArray<Element> children) /*-{
-    return $wnd.exported.setChildrenHeader(xml, children);
-  }-*/;
   @Override
   public void onSave() {
+
     // Nothing to do after blocks are saved.
   }
 
@@ -672,9 +488,9 @@ public abstract class YaCodePageEditor extends SimpleEditor
     blocksArea.switchLanguage(newLanguage);
   }
 
-  // --- FOR DEBUGGING PURPOSES ONLY ---
-  public String getCachedContent() {
-    return blocksNode.getContent();
+  public YoungAndroidBlocksNode getBlocksNode() {
+
+    return blocksNode;
   }
 }
 

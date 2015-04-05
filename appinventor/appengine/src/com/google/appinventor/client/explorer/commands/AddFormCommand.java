@@ -12,10 +12,14 @@ import com.google.appinventor.client.editor.ProjectEditor;
 import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
 import com.google.appinventor.client.editor.youngandroid.YaFormEditor;
 import com.google.appinventor.client.explorer.project.Project;
+import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.widgets.LabeledTextBox;
 import com.google.appinventor.client.youngandroid.TextValidators;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
-import com.google.appinventor.shared.rpc.project.youngandroid.*;
+import com.google.appinventor.shared.rpc.project.youngandroid.YAFormPageBlocksNode;
+import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidFormNode;
+import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidPackageNode;
+import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.user.client.Window;
@@ -220,22 +224,22 @@ public final class AddFormCommand extends ChainableCommand {
           // that with the current work done in YaProjectEditor.addFormEditor,
           // consider moving this deferred work to the explicit command for
           // after the form file is loaded.
-          Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+          Helper.schedule("addFormAction", new Scheduler.ScheduledCommand() {
             @Override
             public void execute() {
               ProjectEditor projectEditor =
-                  ode.getEditorManager().getOpenProjectEditor(project.getProjectId());
-              YaFormEditor formEditor = (YaFormEditor)projectEditor.getFileEditor(formFileId);
-              YaCodePageEditor blocksEditor = (YaCodePageEditor)projectEditor.getFileEditor(blocksFileId);
+                      ode.getEditorManager().getOpenProjectEditor(project.getProjectId());
+              YaFormEditor formEditor = (YaFormEditor) projectEditor.getFileEditor(formFileId);
+              YaCodePageEditor blocksEditor = (YaCodePageEditor) projectEditor.getFileEditor(blocksFileId);
               if (formEditor != null && blocksEditor != null && !ode.screensLocked()) {
                 DesignToolbar designToolbar = Ode.getInstance().getDesignToolbar();
                 long projectId = formEditor.getProjectId();
-                designToolbar.addScreen(projectId, new DesignToolbar.Screen(formName, formEditor,  blocksEditor));
+                designToolbar.addScreen(projectId, new DesignToolbar.Screen(formName, formEditor, blocksEditor));
                 designToolbar.switchToScreen(projectId, formName, DesignToolbar.View.FORM);
                 executeNextCommand(projectRootNode);
               } else {
                 // The form editor and/or blocks editor is still not there. Try again later.
-                Scheduler.get().scheduleDeferred(this);
+                Helper.schedule("addFormAction", this);
               }
             }
           });
@@ -258,7 +262,7 @@ public final class AddFormCommand extends ChainableCommand {
     public void show() {
       super.show();
 
-      Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      Helper.schedule("AddFormCommand.showTextBox", new Scheduler.ScheduledCommand() {
         @Override
         public void execute() {
           newNameTextBox.setFocus(true);

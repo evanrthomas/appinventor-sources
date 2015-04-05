@@ -14,6 +14,7 @@ import com.google.appinventor.client.editor.ProjectEditor;
 import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.helper.Helper;
+import com.google.appinventor.client.helper.Utils;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.widgets.LabeledTextBox;
 import com.google.appinventor.client.youngandroid.TextValidators;
@@ -49,7 +50,7 @@ public final class AddSharedPageCommand extends ChainableCommand {
   public AddSharedPageCommand(JavaScriptObject onSuccessCallback, JavaScriptObject onFailCallback) {
     super();
     this.onSuccessCallback = onSuccessCallback;
-    this.onFailCallback = onSuccessCallback;
+    this.onFailCallback = onFailCallback;
   }
 
   @Override
@@ -93,9 +94,9 @@ public final class AddSharedPageCommand extends ChainableCommand {
         final Project project = ode.getProjectManager().getProject(projectRootNode);
         YASharedPageBlocksNode blocksNode = new YASharedPageBlocksNode(blocksFileId);
         project.addNode(packageNode, blocksNode);
-        Helper.callJSFunc(onSuccessCallback, SharedPagesOverlay.pageDescriptor(blocksNode).getJavaScriptObject());
+        Utils.callJSFunc(onSuccessCallback, SharedPagesOverlay.pageDescriptor(blocksNode).getJavaScriptObject());
 
-        Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+        Helper.schedule("addBlocksNode", new Scheduler.ScheduledCommand() {
           @Override
           public void execute() {
             ProjectEditor projectEditor =
@@ -109,7 +110,7 @@ public final class AddSharedPageCommand extends ChainableCommand {
               executeNextCommand(projectRootNode);
             } else {
               // The or blocks editor is still not there. Try again later.
-              Scheduler.get().scheduleDeferred(this);
+              Helper.schedule("addBlocksNode", this);
             }
           }
         });
@@ -118,7 +119,7 @@ public final class AddSharedPageCommand extends ChainableCommand {
       @Override
       public void onFailure(Throwable caught) {
         super.onFailure(caught);
-        Helper.callJSFunc(onFailCallback, null);
+        Utils.callJSFunc(onFailCallback, null);
         executionFailedOrCanceled();
       }
     };
@@ -224,7 +225,7 @@ public final class AddSharedPageCommand extends ChainableCommand {
     @Override
     public void show() {
       super.show();
-      Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+      Helper.schedule("AddSharedPageCommand.showTextBox", new Scheduler.ScheduledCommand() {
         @Override
         public void execute() {
           textBox.setFocus(true);

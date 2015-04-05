@@ -20,12 +20,6 @@ var domToText = function(dom) {
   return oSerializer.serializeToString(dom);
 };
 
-var blocklyXmlContainer = function() {
-  //TODO (evan): allow changing the ya-version and language-version numbers
-  return textToDom(
-      '<xml xmlns="http://www.w3.org/1999/xhtml"> <yacodeblocks ya-version="104" language-version="17"></yacodeblocks> </xml>');
-}
-
 var getTopLevelBlocks = function(root) {
   if (root.tagName == "block") {
     return [root];
@@ -92,7 +86,6 @@ var setChildrenHeader = function(dom, children) {
 window.exported = window.exported || {};
 window.exported.textToDom = textToDom;
 window.exported.domToText = domToText;
-window.exported.blocklyXmlContainer = blocklyXmlContainer;
 window.exported.getTopLevelBlocks = getTopLevelBlocks;
 window.exported.appendChildrenToParent = appendChildrenToParent;
 window.exported.filterOutImportedBlocks = filterOutImportedBlocks;

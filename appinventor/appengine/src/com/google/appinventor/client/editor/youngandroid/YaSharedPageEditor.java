@@ -1,14 +1,14 @@
 package com.google.appinventor.client.editor.youngandroid;
 
 import com.google.appinventor.client.ComponentList;
-import com.google.appinventor.client.OdeAsyncCallback;
-import com.google.appinventor.client.YACachedBlocksNode;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.editor.simple.palette.SimpleComponentDescriptor;
 import com.google.appinventor.client.editor.youngandroid.palette.YoungAndroidPalettePanel;
+import com.google.appinventor.client.helper.Callback;
+import com.google.appinventor.client.helper.Utils;
+import com.google.appinventor.client.linker.Linker;
 import com.google.appinventor.client.widgets.TextButton;
-import com.google.appinventor.shared.rpc.project.ChecksumedFileException;
-import com.google.appinventor.shared.rpc.project.ChecksumedLoadFile;
+import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Element;
@@ -25,19 +25,12 @@ import java.util.Map;
 
 public final class YaSharedPageEditor extends YaCodePageEditor {
 
-  public YaSharedPageEditor(YaProjectEditor projectEditor, YACachedBlocksNode blocksNode) {
+  public YaSharedPageEditor(YaProjectEditor projectEditor, YoungAndroidBlocksNode blocksNode) {
     super(projectEditor, blocksNode);
-    blocksNode.load(new OdeAsyncCallback<ChecksumedLoadFile>() {
+    Linker.getInstance().loadLinkedContent(blocksNode, new Callback<String>() {
       @Override
-      public void onSuccess(ChecksumedLoadFile result) {
-        try {
-          String content;
-          if ((content = result.getContent()) != "") {
-            addComponentsFromHeader(textToDom(content));
-          }
-        } catch (ChecksumedFileException e) {
-          onFailure(e);
-        }
+      public void call(String content) {
+        if (!content.equals("")) addComponentsFromHeader(Utils.textToDom(content));
       }
     });
   }
@@ -83,9 +76,9 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
     for (MockComponent comp: components.getComponents()) {
       componentsXmlArr.push(comp.toXmlRepr());
     }
-    Element newcontents = setDemandedComponentsHeader(textToDom(super.getRawFileContent()),
+    Element newcontents = setDemandedComponentsHeader(Utils.textToDom(super.getRawFileContent()),
             componentsXmlArr);
-    String s = domToText(newcontents);
+    String s = Utils.domToText(newcontents);
     return s;
   }
 
