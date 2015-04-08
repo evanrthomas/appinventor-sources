@@ -311,8 +311,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
             getGenericComponentsTree(new ComponentList(ComponentList.flatten(components.getComponents())));
   }
 
-
-
   // Do whatever is needed to save Blockly state when our project is about to be
   // detached from the parent document. Note that this is not for saving the blocks file itself.
   // We use EditorManager.scheduleAutoSave for that.

@@ -408,6 +408,7 @@ public final class EditorManager {
         if (YACachedBlocksNode.getCachedNode(projectId, fileId) != null) {
           YACachedBlocksNode.getCachedNode(projectId, fileId).save(content, false, saveCallback);
         } else {
+          //The caching layer doesn't know about YAFormNodes and YAAssetNodes, we have to save them directly using projectservice
           Ode.getInstance().getProjectService().save2(Ode.getInstance().getSessionId(),
                   projectId, fileId, false, content, saveCallback);
         }

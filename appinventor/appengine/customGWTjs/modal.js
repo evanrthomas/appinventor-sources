@@ -5,7 +5,7 @@ var network, nodes, edges,
 
 var networkOptions = {
   //dragNodes : false,
-  //stabilize : false,
+  stabilize : false,
   dataManipulation : {
     enabled: true,
     initiallyVisible: true,
@@ -16,7 +16,7 @@ var networkOptions = {
   },
   physics : {
     barnesHut : {
-    enabled: false,
+    //enabled: false,
   },
     repulsion: {
       centralGravity:1,
@@ -72,10 +72,12 @@ function renderProjectPage(page) {
 
 function renderLibraryPage(page) {
   var bookli = librariesUl.querySelector("#" + librariesUl.id + " > li.book-" + page.projectId),
-      submenu = librariesUl.querySelector("#" + librariesUl.id + " > li.book-" + page.projectId + " ul.book-" + page-projectId);
+      submenu = librariesUl.querySelector("#" + librariesUl.id + " > li.book-" + page.projectId + " ul.book-" + page.projectId);
   if (!bookli) {
     var bookli = document.createElement('li');
+    bookli.innerHTML = page.projectName;
     var submenu = document.createElement('ul');
+    librariesUl.appendChild(bookli);
     bookli.appendChild(submenu);
     bookli.classList.add('book-'+page.projectId);
     submenu.classList.add('libraries-dropdown');
@@ -89,7 +91,7 @@ function renderLibraryPage(page) {
   }
 
   var pageli = document.createElement('li');
-  pageli.onclick = function(page) {
+  pageli.onclick = function() {
     nodes.add(nodeOptions(page, page.projectId == currentProjectId));
   };
   submenu.appendChild(pageli);
