@@ -1,6 +1,7 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2014 MIT, All rights reserved
-// Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
+// Released under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 
 package com.google.appinventor.client;
 
@@ -19,7 +20,14 @@ public class TranslationComponentProperty {
   }
 
   public static String getName(String key) {
-    return myMap.get(key);
+    String value = myMap.get(key);
+    if (key == null) {
+      // This will help implementors debug if the forget to add an entry
+      // when defining a new property
+      return "**Missing key in TranslationComponentProperty**";
+    } else {
+      return value;
+    }
   }
 
   /**
@@ -44,6 +52,8 @@ public class TranslationComponentProperty {
     map.put("Angle", MESSAGES.AngleProperties());
     map.put("Animation", MESSAGES.AnimationProperties());
     map.put("Available", MESSAGES.AvailableProperties());
+    map.put("AvailableCountries", MESSAGES.AvailableCountriesProperties());
+    map.put("AvailableLanguages", MESSAGES.AvailableLanguagesProperties());
     map.put("AvailableProviders", MESSAGES.AvailableProvidersProperties());
     map.put("Azimuth", MESSAGES.AzimuthProperties());
     map.put("BallotOptions", MESSAGES.BallotOptionsProperties());
@@ -76,6 +86,7 @@ public class TranslationComponentProperty {
     map.put("Players", MESSAGES.PlayersProperties());
     map.put("RequestHeaders", MESSAGES.RequestHeadersProperties());
     map.put("Result", MESSAGES.ResultProperties());
+    map.put("UseExternalScanner", MESSAGES.UseExternalScannerProperties());
     map.put("ResultType", MESSAGES.ResultTypeProperties());
     map.put("ResultUri", MESSAGES.ResultUriProperties());
     map.put("Roll", MESSAGES.RollProperties());
@@ -128,6 +139,7 @@ public class TranslationComponentProperty {
     map.put("HighByteFirst", MESSAGES.HighByteFirstProperties());
     map.put("Hint", MESSAGES.HintProperties());
     map.put("HomeUrl", MESSAGES.HomeUrlProperties());
+    map.put("IgnoreSslErrors", MESSAGES.IgnoreSslErrorsProperties());
     map.put("Image", MESSAGES.ImageProperties());
     map.put("Interval", MESSAGES.IntervalProperties());
     map.put("Language", MESSAGES.LanguageProperties());
@@ -153,6 +165,7 @@ public class TranslationComponentProperty {
     map.put("ResultName", MESSAGES.ResultNameProperties());
     map.put("Rotates", MESSAGES.RotatesProperties());
     map.put("SaveResponse", MESSAGES.SaveResponseProperties());
+    map.put("SavedRecording", MESSAGES.SavedRecordingProperties());
     map.put("ScalePictureToFit", MESSAGES.ScalePictureToFitProperties());
     map.put("ScreenOrientation", MESSAGES.ScreenOrientationProperties());
     map.put("Scrollable", MESSAGES.ScrollableProperties());
@@ -164,6 +177,7 @@ public class TranslationComponentProperty {
     map.put("Speed", MESSAGES.SpeedProperties());
     map.put("StopBeforeDisconnect", MESSAGES.StopBeforeDisconnectProperties());
     map.put("Text", MESSAGES.TextProperties());
+    map.put("TextAlignment", MESSAGES.TextAlignmentProperties());
     map.put("TextColor", MESSAGES.TextColorProperties());
     map.put("TimeInterval", MESSAGES.TimeIntervalProperties());
     map.put("TimerAlwaysFires", MESSAGES.TimerAlwaysFiresProperties());
@@ -180,6 +194,7 @@ public class TranslationComponentProperty {
     map.put("Y", MESSAGES.YProperties());
     map.put("Z", MESSAGES.ZProperties());
     map.put("ShowFilterBar", MESSAGES.ShowFilterBarProperties());
+    map.put("TextSize", MESSAGES.TextSizeProperties());
     map.put("NotifierLength", MESSAGES.NotifierLengthProperties());
     map.put("Loop", MESSAGES.LoopProperties());
     map.put("Pitch", MESSAGES.PitchProperties());
@@ -192,6 +207,7 @@ public class TranslationComponentProperty {
     map.put("MaxValue", MESSAGES.MaxValueProperties());
     map.put("MinValue", MESSAGES.MinValueProperties());
     map.put("ThumbPosition", MESSAGES.ThumbPositionProperties());
+    map.put("ThumbEnabled", MESSAGES.ThumbEnabled());
     map.put("FontBold", MESSAGES.FontBoldProperties());
     map.put("FontItalic", MESSAGES.FontItalicProperties());
     map.put("ShowFeedback", MESSAGES.ShowFeedbackProperties());
@@ -216,6 +232,16 @@ public class TranslationComponentProperty {
     map.put("UseGPS", MESSAGES.UseGPSProperties());
     map.put("Hour", MESSAGES.HourProperties());
     map.put("Minute", MESSAGES.MinuteProperties());
+    map.put("HasMargins", MESSAGES.HasMarginsProperties());
+
+    // =========== ProximitySensor
+    map.put("MaximumRange", MESSAGES.MaximumRangeProperties());
+    map.put("KeepRunningWhenOnPause", MESSAGES.KeepRunningWhenOnPauseProperties());
+    map.put("ProximityChanged", MESSAGES.ProximityChangedPropertiesProperties());
+
+    // ========== ListPicker
+    map.put("ItemTextColor", MESSAGES.ItemTextColorProperties());
+    map.put("ItemBackgroundColor", MESSAGES.ItemBackgroundColorProperties());
 
     return map;
   }

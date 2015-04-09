@@ -1,7 +1,8 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
 // Copyright 2011-2012 MIT, All rights reserved
-// Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
+// Released under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 
 package com.google.appinventor.client.editor.youngandroid;
 
@@ -12,7 +13,10 @@ import com.google.appinventor.client.boxes.PaletteBox;
 import com.google.appinventor.client.boxes.PropertiesBox;
 import com.google.appinventor.client.boxes.SourceStructureBox;
 import com.google.appinventor.client.editor.ProjectEditor;
-import com.google.appinventor.client.editor.simple.*;
+import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
+import com.google.appinventor.client.editor.simple.SimpleEditor;
+import com.google.appinventor.client.editor.simple.SimpleNonVisibleComponentsPanel;
+import com.google.appinventor.client.editor.simple.SimpleVisibleComponentsPanel;
 import com.google.appinventor.client.editor.simple.components.FormChangeListener;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.editor.simple.components.MockContainer;
@@ -28,7 +32,6 @@ import com.google.appinventor.client.widgets.dnd.DropTarget;
 import com.google.appinventor.client.widgets.properties.EditableProperties;
 import com.google.appinventor.client.widgets.properties.PropertiesPanel;
 import com.google.appinventor.client.youngandroid.YoungAndroidFormUpgrader;
-import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.shared.properties.json.JSONObject;
 import com.google.appinventor.shared.properties.json.JSONParser;
 import com.google.appinventor.shared.properties.json.JSONValue;
@@ -99,6 +102,15 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
   private final SimpleNonVisibleComponentsPanel nonVisibleComponentsPanel;
 
   private MockForm form;  // initialized lazily after the file is loaded from the ODE server
+
+  // [lyn, 2014/10/13] Need to remember JSON initially loaded from .scm file *before* it is upgraded
+  // by YoungAndroidFormUpgrader within upgradeFile. This JSON contains pre-upgrade component
+  // version info that is needed by Blockly.SaveFile.load to perform upgrades in the Blocks Editor.
+  // This was unnecessary in AI Classic because the .blk file contained component version info
+  // as well as the .scm file. But in AI2, the .bky file contains no component version info,
+  // and we rely on the pre-upgraded .scm file for this info.
+  private String preUpgradeJsonString;
+
 
   /**
    * Creates a new YaFormEditor.
@@ -227,7 +239,7 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
 
   @Override
   public String getRawFileContent() {
-    String encodedProperties = encodeFormAsJsonString();
+    String encodedProperties = MockComponent.encodeFormAsJsonString(form);
     JSONObject propertiesObject = JSON_PARSER.parse(encodedProperties).asObject();
     return YoungAndroidSourceAnalyzer.generateSourceFile(propertiesObject);
   }
@@ -248,8 +260,6 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
     Map<String, MockComponent> map = Maps.newHashMap();
     if (loadComplete) {
       populateComponentsMap(form, map);
-    } else {
-      OdeLog.log("YaFormEditor: about to return an empty map!!!!!");
     }
     return map;
   }
@@ -313,6 +323,7 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
   public void onComponentRenamed(MockComponent component, String oldName) {
     if (loadComplete) {
       onFormStructureChange();
+      updatePropertiesPanel(component);
     } else {
       OdeLog.elog("onComponentRenamed called when loadComplete is false");
     }
@@ -370,6 +381,7 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
       final Command afterUpgradeComplete) {
     JSONObject propertiesObject = YoungAndroidSourceAnalyzer.parseSourceFile(
         fileContentHolder.getFileContent(), JSON_PARSER);
+    preUpgradeJsonString =  propertiesObject.toJson(); // [lyn, [2014/10/13] remember pre-upgrade component versions.
     if (YoungAndroidFormUpgrader.upgradeSourceProperties(propertiesObject.getProperties())) {
       String upgradedContent = YoungAndroidSourceAnalyzer.generateSourceFile(propertiesObject);
       fileContentHolder.setFileContent(upgradedContent);
@@ -458,6 +470,13 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
       }
     }
 
+    //This is for old project which doesn't have the AppName property
+    if (!properties.keySet().contains("AppName")) {
+      String fileId = getFileId();
+      String projectName = fileId.split("/")[3];
+      mockComponent.changeProperty("AppName", projectName);
+    }
+
 
     // Add nested components
     if (properties.containsKey("$Components")) {
@@ -534,60 +553,13 @@ public final class YaFormEditor extends SimpleEditor implements FormChangeListen
     }
   }
 
-  /*
-   * Encodes the form's properties as a JSON encoded string. Used by YaBlocksEditor as well,
-   * to send the form info to the blockly world during code generation.
-   */
-  protected String encodeFormAsJsonString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("{");
-    sb.append("\"YaVersion\":\"").append(YaVersion.YOUNG_ANDROID_VERSION).append("\",");
-    sb.append("\"Source\":\"Form\",");
-    sb.append("\"Properties\":");
-    encodeComponentProperties(form, sb);
-    sb.append("}");
-    return sb.toString();
+
+  // [lyn, 2014/10/13] returns the *pre-upgraded* JSON for this form.
+  // needed to allow associated blocks editor to get this info.
+  protected String preUpgradeJsonString() {
+    return preUpgradeJsonString;
   }
 
-  /*
-   * Encodes a component and its properties into a JSON encoded string.
-   */
-  private void encodeComponentProperties(MockComponent component, StringBuilder sb) {
-    // The component encoding starts with component name and type
-    String componentType = component.getType();
-    EditableProperties properties = component.getProperties();
-    sb.append("{\"$Name\":\"");
-    sb.append(properties.getPropertyValue("Name"));
-    sb.append("\",\"$Type\":\"");
-    sb.append(componentType);
-    sb.append("\",\"$Version\":\"");
-    sb.append(COMPONENT_DATABASE.getComponentVersion(componentType));
-    sb.append('"');
-
-    // Next the actual component properties
-    //
-    // NOTE: It is important that these be encoded before any children components.
-    String propertiesString = properties.encodeAsPairs();
-    if (propertiesString.length() > 0) {
-      sb.append(',');
-      sb.append(propertiesString);
-    }
-
-    // Finally any children of the component
-    List<MockComponent> children = component.getChildren();
-    if (!children.isEmpty()) {
-      sb.append(",\"$Components\":[");
-      String separator = "";
-      for (MockComponent child : children) {
-        sb.append(separator);
-        encodeComponentProperties(child, sb);
-        separator = ",";
-      }
-      sb.append(']');
-    }
-
-    sb.append('}');
-  }
 
   /*
    * Clears the palette, source structure explorer, and properties panel.

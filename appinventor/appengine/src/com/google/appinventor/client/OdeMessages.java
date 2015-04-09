@@ -1,7 +1,8 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
 // Copyright 2011-2012 MIT, All rights reserved
-// Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
+// Released under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 
 package com.google.appinventor.client;
 
@@ -162,6 +163,170 @@ public interface OdeMessages extends Messages {
 //  @Description("Label of the button for switching language to Vietnamese")
 //  String switchLanguageVietnameseButton();
 
+  //Used in ModerationPage.java
+  @DefaultMessage("...")
+  @Description("Label of ... ")
+  String moderationDotDotDot();
+
+  @DefaultMessage("Report")
+  @Description("Label of the report text field on moderation page")
+  String moderationReportTextHeader();
+
+  @DefaultMessage("App")
+  @Description("Label of the app field on moderation page")
+  String moderationAppHeader();
+
+  @DefaultMessage("Reported On")
+  @Description("Label of the created date of report field on moderation page")
+  String moderationReportDateCreatedHeader();
+
+  @DefaultMessage("App Author")
+  @Description("Label of the app author field on moderation page")
+  String moderationAppAuthorHeader();
+
+  @DefaultMessage("Reporter")
+  @Description("Label of the reporter field on moderation page")
+  String moderationReporterHeader();
+
+  // Used in ReportList.java
+  @DefaultMessage("Inappropriate App Content: Remove")
+  @Description("Label of the Inappropriate App Content Remove on reportlist")
+  String inappropriateAppContentRemoveTitle();
+
+  @DefaultMessage("Inappropriate App Content")
+  @Description("Label of the Inappropriate App Content on reportlist")
+  String inappropriateAppContentTitle();
+
+  @DefaultMessage("Inappropriate User Profile Content")
+  @Description("Label of the Inappropriate User Profile Content on reportlist")
+  String inappropriateUserProfileContentTitle();
+
+  @DefaultMessage("Choose Template")
+  @Description("Label of the Choose Template Label on reportlist")
+  String labelChooseTemplate();
+
+  @DefaultMessage("Sent From: ")
+  @Description("Label of the Sent From on reportlist")
+  String emailSentFrom();
+
+  @DefaultMessage("Sent To: ")
+  @Description("Label of the Sent To on reportlist")
+  String emailSentTo();
+
+  @DefaultMessage("Send Email")
+  @Description("Label of the Send Email of reportlist")
+  String buttonSendEmail();
+
+  @DefaultMessage("Deactivate App")
+  @Description("Label of the Deactivate App on reportlist")
+  String labelDeactivateApp();
+
+  @DefaultMessage("Reactivate App")
+  @Description("Label of the Reactivate App on reportlist")
+  String labelReactivateApp();
+
+  @DefaultMessage("Deactivate App & Send Email")
+  @Description("Label of the Deactivate App & Send Email on reportlist")
+  String labelDeactivateAppAndSendEmail();
+
+  @DefaultMessage("Mark As Resolved")
+  @Description("Label of the Mark As Resolved of reportlist")
+  String labelmarkAsResolved();
+
+  @DefaultMessage("Mark As Unresolved")
+  @Description("Label of the Mark As Unresolved of reportlist")
+  String labelmarkAsUnresolved();
+
+  @DefaultMessage("Previous Actions")
+  @Description("Label of the See All Actions of reportlist")
+  String labelSeeAllActions();
+
+  @DefaultMessage("Previous Actions on Report")
+  @Description("Title of the Previous Actions Popup of reportlist")
+  String titleSeeAllActionsPopup();
+
+  @DefaultMessage("X")
+  @Description("Symbol X")
+  String symbolX();
+
+  @DefaultMessage("Cancel")
+  @Description("Label of the Cancel Action on reportlist")
+  String labelCancel();
+
+  @DefaultMessage("Confirm")
+  @Description("Label of the Confirm Action on reportlist")
+  String labelConfirm();
+
+  @DefaultMessage("Your app \"{0}\" has been removed from the gallery due to inappropriate content. "
+          + "Please review the guidelines at ..."
+          + "If you feel this action has been taken in error, or you would like to discuss the issue, "
+          + "please use the App Inventor forum at: \n")
+  @Description("Label of the Text of Template 1 of reportlist")
+  String inappropriateAppContentRemoveEmail(String title);
+
+  @DefaultMessage("Your app \"{0}\" has inappropriate content. "
+          + "Please review the guidelines at ..."
+          + "and modify your app accordingly. ")
+  @Description("Label of the Text of Template 2 of reportlist")
+  String inappropriateAppContentEmail(String title);
+
+  @DefaultMessage("Your profile contains inappropriate content. Please modify your profile.\n")
+  @Description("Label of the Text of Template 3 of reportlist")
+  String inappropriateUserProfileContentEmail();
+
+  @DefaultMessage("see more ...")
+  @Description("Label of the Text of seeing more of reportlist")
+  String seeMoreLink();
+
+  @DefaultMessage("hide")
+  @Description("Label of the Text of hiding of reportlist")
+  String hideLink();
+
+  @DefaultMessage("sends an email: ")
+  @Description("Label of the Text of sending an email of reportlist")
+  String moderationActionSendAnEmail();
+
+  @DefaultMessage("deativates this app with email: ")
+  @Description("Label of the Text of deativating this app with email of reportlist")
+  String moderationActionDeactivateThisAppWithEmail();
+
+  @DefaultMessage("reactivates this app")
+  @Description("Label of the Text of reactivating this app of reportlist")
+  String moderationActionReactivateThisApp();
+
+  @DefaultMessage("marks this report as resolved")
+  @Description("Label of the Text of marking this report as resolved of reportlist")
+  String moderationActionMarkThisReportAsResolved();
+
+  @DefaultMessage("marks this report as unresolved")
+  @Description("Label of the Text of marking this report as unresolved of reportlist")
+  String moderationActionMarkThisReportAsUnresolved();
+
+  @DefaultMessage("Show resolved reports")
+  @Description("Label of the Text of showing resolved reports of reportlist")
+  String moderationShowResolvedReports();
+
+  @DefaultMessage("An Email from App Inventor Gallery")
+  @Description("Title of the email when moderator sends out an email")
+  String moderationSendEmailTitle();
+
+  @DefaultMessage("App Inventor Gallery: App Activated")
+  @Description("Title of the email when app was activated")
+  String moderationAppReactivatedTitle();
+
+  @DefaultMessage("Your app \"{0}\" has been reactivated.")
+  @Description("Body of the email when app was activated")
+  String moderationAppReactivateBody(String title);
+
+  @DefaultMessage("App Inventor Gallery: App Deactivated")
+  @Description("Title of the email when app was deactivated")
+  String moderationAppDeactivatedTitle();
+
+  @DefaultMessage("Fail to send out the email, please try again later")
+  @Description("error message when fail to send to user from moderator")
+  String moderationErrorFailToSendEmail();
+
+
   // Used in MotdFetcher.java
 
   @DefaultMessage("Failed to contact server to get the MOTD.")
@@ -202,6 +367,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("You must first create or select a project before connecting!")
   @Description("Error message for connection attempt without a project selected.")
   String noprojectDuringConnect();
+
+  @DefaultMessage("There is no Gallery App with the given id.")
+  @Description("Error message if the gallery id does not exist")
+  String galleryIdNotExist();
 
   // Used in RpcStatusPopup.java
 
@@ -322,6 +491,26 @@ public interface OdeMessages extends Messages {
   @Description("Message providing details about starting the emulator connection.")
   String emulatorMenuItem();
 
+  @DefaultMessage("Report an Issue")
+  @Description("Link for Report an Issue form")
+  String feedbackLink();
+
+  @DefaultMessage("Gallery")
+  @Description("Name of Gallery tab")
+  String tabNameGallery();
+
+  @DefaultMessage("Moderation")
+  @Description("Name of moderation tab")
+  String tabNameModeration();
+
+  @DefaultMessage("Profile")
+  @Description("Label of the link for private user profile")
+  String privateProfileLink();
+
+  @DefaultMessage("My Projects")
+  @Description("Name of My Projects tab")
+  String tabNameProjects();
+
   @DefaultMessage("USB")
   @Description("Message providing details about starting a USB connection.")
   String usbMenuItem();
@@ -437,6 +626,14 @@ public interface OdeMessages extends Messages {
   @Description("Message shown when there is no current file editor to switch to")
   String chooseProject();
 
+  @DefaultMessage("Emails")
+  @Description("Title for user's email inbox")
+  String emailInboxTitle();
+
+  @DefaultMessage("Send an Email")
+  @Description("Title for moderator send email dialog")
+  String emailSendTitle();
+
   // Used in boxes/AssetListBox.java
 
   @DefaultMessage("Media")
@@ -469,14 +666,49 @@ public interface OdeMessages extends Messages {
 
   // Used in boxes/ProjectListBox.java
 
-  @DefaultMessage("Projects")
+  @DefaultMessage("My Projects")
   @Description("Caption for project list box.")
   String projectListBoxCaption();
-
 
   @DefaultMessage("My Library")
   @Description("Caption for library list box.")
   String libraryListBoxCaption();
+
+  // Used in boxes/ProjectListBox.java
+
+  @DefaultMessage("My Studios")
+  @Description("Caption for studio list box.")
+  String studioListBoxCaption();
+
+  // Used in boxes/ProjectListBox.java
+
+  @DefaultMessage("My Profile")
+  @Description("Caption for profile page box.")
+  String profilePageBoxCaption();
+
+  // Used in boxes/ModerationPageBox.java
+
+  @DefaultMessage("Reports")
+  @Description("Caption for moderation page box.")
+  String moderationPageBoxCaption();
+
+  // Used in boxes/GalleryListBox.java
+
+  @DefaultMessage("Gallery")
+  @Description("Caption for gallery list box.")
+  String galleryListBoxCaption();
+
+  // Used in boxes/GalleryAppBox.java
+
+  @DefaultMessage("Gallery App")
+  @Description("Caption for gallery app box.")
+  String galleryAppBoxCaption();
+
+  // Used in boxes/UserProfileBox.java
+
+  @DefaultMessage("User Profile")
+  @Description("Caption for user profile box.")
+  String userProfileBoxCaption();
 
   // Used in boxes/PropertiesBox.java
 
@@ -1125,15 +1357,26 @@ public interface OdeMessages extends Messages {
   @Description("Confirmation message for selecting a single project and clicking delete")
   String confirmDeleteSingleProject(String projectName);
 
-  @DefaultMessage("Are you really sure you want to delete these projects: {0}")
+  @DefaultMessage("Are you really sure you want to delete this project: {0}?"+
+      " Note that the published copy of this project will be removed from the gallery as well.")
+  @Description("Confirmation message for selecting a single project and clicking delete when gallery is on")
+  String confirmDeleteSinglePublishedProject(String projectName);
+
+  @DefaultMessage("Are you really sure you want to delete these projects: {0}?")
   @Description("Confirmation message for selecting multiple projects and clicking delete")
   String confirmDeleteManyProjects(String projectNames);
+
+  @DefaultMessage("Are you really sure you want to delete these projects: {0}?"+
+      " Note that if any of the projects have been published, the published version in"+
+      " the gallery will be removed as well.")
+  @Description("Confirmation message for selecting multiple projects and clicking delete when gallery is on")
+  String confirmDeleteManyProjectsWithGalleryOn(String projectNames);
 
   @DefaultMessage("Server error: could not delete project. Please try again later!")
   @Description("Error message reported when deleting a project failed on the server.")
   String deleteProjectError();
 
-  @DefaultMessage("One project must be selected")
+  @DefaultMessage("One project must be selected.")
   @Description("Error message displayed when no or many projects are selected")
   String wrongNumberProjectsSelected();
 
@@ -1333,6 +1576,205 @@ public interface OdeMessages extends Messages {
   @Description("Caption for project upload wizard.")
   String projectUploadWizardCaption();
 
+  // Used in GalleryToolBar.java
+  @DefaultMessage("Search")
+  @Description("Text for gallery search button")
+  String gallerySearch();
+
+  // Used in GalleryPage.java
+  @DefaultMessage("")
+  @Description("Text for gallery Empty Text")
+  String galleryEmptyText();
+
+  @DefaultMessage("Feature")
+  @Description("Text for gallery Feature Text")
+  String galleryFeaturedText();
+
+  @DefaultMessage("Unfeature")
+  @Description("Text for gallery Unfeature Text")
+  String galleryUnfeaturedText();
+
+  @DefaultMessage(" ")
+  @Description("Text for gallery Single Space Text")
+  String gallerySingleSpaceText();
+
+  @DefaultMessage("By Author")
+  @Description("Text for gallery By Author Text")
+  String galleryByAuthorText();
+
+  @DefaultMessage("Open the App")
+  @Description("Text for gallery page open the app button")
+  String galleryOpenText();
+
+  @DefaultMessage("Publish")
+  @Description("Text for gallery page publish button")
+  String galleryPublishText();
+
+  @DefaultMessage("Update")
+  @Description("Text for gallery page update button")
+  String galleryUpdateText();
+
+  @DefaultMessage("Remove")
+  @Description("Text for gallery page remove button")
+  String galleryRemoveText();
+
+  @DefaultMessage("Are you really sure you want to remove this app from gallery?")
+  @Description("Text for remove confirm alert")
+  String galleryRemoveConfirmText();
+
+  @DefaultMessage("Edit")
+  @Description("Text for gallery page edit button")
+  String galleryEditText();
+
+  @DefaultMessage("By ")
+  @Description("Text for gallery app developer prefix text label")
+  String galleryByDeveloperPrefixedText();
+
+  @DefaultMessage("Created Date: ")
+  @Description("Text for gallery page created date label")
+  String galleryCreatedDateLabel();
+
+  @DefaultMessage("Changed Date: ")
+  @Description("Text for gallery page changed date label")
+  String galleryChangedDateLabel();
+
+  @DefaultMessage("Tutorial / Video: ")
+  @Description("Text for gallery page more info link label")
+  String galleryMoreInfoLabel();
+
+  @DefaultMessage("Credits: ")
+  @Description("Text for gallery page credit label")
+  String galleryCreditLabel();
+
+  @DefaultMessage("If this app has a tutorial or video, please enter the URL here.")
+  @Description("Text for gallery page more info link hint")
+  String galleryMoreInfoHint();
+
+  @DefaultMessage("Are you remixing code of another app? Credit them here.")
+  @Description("Text for gallery page credit hint")
+  String galleryCreditHint();
+
+  @DefaultMessage("Please write the description of the app here.")
+  @Description("Text for gallery page description hint")
+  String galleryDescriptionHint();
+
+  @DefaultMessage("Opening ...")
+  @Description("Text for gallery page opening feedback")
+  String galleryAppOpening();
+
+  @DefaultMessage("Publishing ...")
+  @Description("Text for gallery page publishing feedback.")
+  String galleryAppPublishing();
+
+  @DefaultMessage("Updating ...")
+  @Description("Text for gallery page updating feedback")
+  String galleryAppUpdating();
+
+  @DefaultMessage("Removing ...")
+  @Description("Text for gallery page removing feedback")
+  String galleryAppRemoving();
+
+  @DefaultMessage("Like")
+  @Description("Text for gallery page like button (not liked yet).")
+  String galleryAppsLike();
+
+  @DefaultMessage("Unlike")
+  @Description("Text for gallery page like button (already liked).")
+  String galleryAppsAlreadyLike();
+
+  @DefaultMessage("Apps developed by")
+  @Description("Title for the gallery page sidebar that shows list of apps of a specific author.")
+  String galleryAppsByAuthorSidebar();
+
+  @DefaultMessage("Created on ")
+  @Description("Text prefix for the gallery app shared / created date.")
+  String galleryAppCreatedPrefix();
+
+  @DefaultMessage("Changed on ")
+  @Description("Text prefix for the gallery app last changed date.")
+  String galleryAppChangedPrefix();
+
+  @DefaultMessage("Remixed from: ")
+  @Description("Text prefix for the gallery app remixed from label.")
+  String galleryRemixedFrom();
+
+  @DefaultMessage("Click to view the remixes of this app!")
+  @Description("Text for the gallery app remix children list.")
+  String galleryRemixChildren();
+
+  @DefaultMessage("Remixes of ")
+  @Description("Title prefix for the gallery page sidebar that shows list of remixed apps.")
+  String galleryAppsRemixesSidebar();
+
+  @DefaultMessage("Please explain why you feel this app is disrespectful or inappropriate, or otherwise breaks the <a href=\"http://google.com\">App Inventor Gallery Community Guidelines.</a> " +
+      "")
+  @Description("Prompt for the gallery app report section.")
+  String galleryReportPrompt();
+
+  @DefaultMessage("Copy and share link: ")
+  @Description("Prompt for the gallery app share section.")
+  String gallerySharePrompt();
+
+  @DefaultMessage("Copy")
+  @Description("Button for copying share link to clipboard")
+  String galleryCopyButton();
+
+  @DefaultMessage("/?galleryId=")
+  @Description("redirect action of galleryId")
+  String galleryGalleryIdAction();
+
+  @DefaultMessage("\n\nVisit your app: {0}/?galleryId={1}")
+  @Description("gallery app link label")
+  String galleryVisitGalleryAppLinkLabel(String host, long galleryId);
+
+  @DefaultMessage("Submit report")
+  @Description("Text for the gallery app report button.")
+  String galleryReportButton();
+
+  @DefaultMessage("You reported this app. An administrator will process your report shortly.")
+  @Description("Prompt for the gallery app report section when user just submitted the report.")
+  String galleryReportCompletionPrompt();
+
+  @DefaultMessage("You already reported this app. An administrator will process your report shortly.")
+  @Description("Prompt for the gallery app report section if user has already reported.")
+  String galleryAlreadyReportedPrompt();
+
+  @DefaultMessage("Server error: could not retrieve comments")
+  @Description("Error message reported when can't get gallery app comments on server.")
+  String galleryCommentError();
+
+  @DefaultMessage("Server error: could not retrieve num of like")
+  @Description("Error message reported when can't get gallery app like on server.")
+  String galleryAppLikeError();
+
+  @DefaultMessage("Server error: could not retrieve developer gallery apps from gallery")
+  @Description("Error message reported when can't get developer gallery apps on server.")
+  String galleryDeveloperAppError();
+
+  @DefaultMessage("Server error: could not retrieve featured apps from gallery")
+  @Description("Error message reported when can't get featured on server.")
+  String galleryFeaturedAppError();
+
+  @DefaultMessage("Server error: could not complete a search of gallery")
+  @Description("Error message reported when can't search on server.")
+  String gallerySearchError();
+
+  @DefaultMessage("Server error: could not get recent apps from gallery")
+  @Description("Error message reported when can't get recent apps server.")
+  String galleryRecentAppsError();
+
+  @DefaultMessage("Server error: could not get most downloaded apps from gallery")
+  @Description("Error message reported when can't get most downloaded apps server.")
+  String galleryDownloadedAppsError();
+
+  @DefaultMessage("Server error: gallery deletion error")
+  @Description("Error message reported when the gallery delete breaks")
+  String galleryDeleteError();
+
+  @DefaultMessage("Server error: gallery error when setting project gallery id")
+  @Description("Error message reported when the gallery trying to set project gallery id")
+  String gallerySetProjectIdError();
+
   @DefaultMessage("Server error: could not upload project. Please try again later!")
   @Description("Error message reported when a project couldn't be uploaded to the server.")
   String projectUploadError();
@@ -1341,6 +1783,86 @@ public interface OdeMessages extends Messages {
       "Project source files are aia files.")
   @Description("Error message reported when the file selected for upload is not a project archive.")
   String notProjectArchiveError();
+
+  // Used in RemixedYoungAndroidProjectWizard.java
+  @DefaultMessage("Loading App ...")
+  @Description("loading indicator when opening the app")
+  String loadingAppIndicatorText();
+
+  // Used in ProfilePage.java
+  @DefaultMessage("Edit Profile")
+  @Description("Edit Profile Button, only seen by profile owner")
+  String buttonEditProfile();
+
+  @DefaultMessage("Update Profile")
+  @Description("Update Profile Button, only seen by profile owner")
+  String buttonUpdateProfile();
+
+  @DefaultMessage("Edit your profile")
+  @Description("label of editing your profile")
+  String labelEditYourProfile();
+
+  @DefaultMessage("Your display name")
+  @Description("label of your display name")
+  String labelYourDisplayName();
+
+  @DefaultMessage("More info link")
+  @Description("label of more info link")
+  String labelMoreInfoLink();
+
+  @DefaultMessage("App Inventor will send you a notification "
+      + "when the apps you have posted are liked or downloaded. "
+      + "Below, you can enable/disable this feature and you can "
+      + "specify how often you want to be notified")
+  @Description("label of email description")
+  String labelEmailDescription();
+
+  @DefaultMessage("Get email for every ")
+  @Description("label of email frequency prefix")
+  String labelEmailFrequencyPrefix();
+
+  @DefaultMessage(" new Likes + Downloads")
+  @Description("label of email frequency suffix")
+  String labelEmailFrequencySuffix();
+
+  @DefaultMessage("Invalid Email Frequency: Must be an numeric and greater than 0")
+  @Description("error message of wrong email frequency")
+  String errorEmailFrequency();
+
+  // Used in GalleryList.java
+  @DefaultMessage("Search for Apps")
+  @Description("Search for Apps Text")
+  String gallerySearchForAppsButton();
+
+  @DefaultMessage("More Apps")
+  @Description("More Apps Text")
+  String galleryMoreApps();
+
+  @DefaultMessage("search for \"")
+  @Description("Search Results Prefix")
+  String gallerySearchResultsPrefix();
+
+  @DefaultMessage("\" returned ")
+  @Description("Search Results Infix")
+  String gallerySearchResultsInfix();
+
+  @DefaultMessage(" results")
+  @Description("Search Results Suffix")
+  String gallerySearchResultsSuffix();
+
+  @DefaultMessage("Server error: gallery cannot be accessed")
+  @Description("Error message reported when the gallery cannot be accessed.")
+  String galleryError();
+
+  @DefaultMessage("No Results Found")
+  @Description("Label feedback for no results found after searching.")
+  String noResultsFound();
+
+  // Used in GalleryClient.java
+
+  @DefaultMessage("Server error: gallery settings could not be accessed")
+  @Description("Error message reported when unable to extract gallery settings from xml.")
+  String gallerySettingsError();
 
   // Used in wizards/Wizard.java
 
@@ -1357,6 +1879,12 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Create new App Inventor project")
   @Description("Caption for the wizard to create a new Young Android project")
   String newYoungAndroidProjectWizardCaption();
+
+  // Used in wizards/youngandroid/RemixedYoungAndroidProjectWizard.java
+
+  @DefaultMessage("Name this App Inventor project")
+  @Description("Caption for the wizard to name the opening Young Android project")
+  String remixedYoungAndroidProjectWizardCaption();
 
   @DefaultMessage("Project name:")
   @Description("Label for the project name input text box")
@@ -1781,6 +2309,14 @@ public interface OdeMessages extends Messages {
   @Description("")
   String ApiKeyProperties();
 
+  @DefaultMessage("AvailableCountries")
+  @Description("")
+  String AvailableCountriesProperties();
+
+  @DefaultMessage("AvailableLanguages")
+  @Description("")
+  String AvailableLanguagesProperties();
+
   @DefaultMessage("BackgroundColor")
   @Description("")
   String BackgroundColorProperties();
@@ -1909,6 +2445,10 @@ public interface OdeMessages extends Messages {
   @Description("")
   String GoogleVoiceEnabledProperties();
 
+  @DefaultMessage("HasMargins")
+  @Description("")
+  String HasMarginsProperties();
+
   @DefaultMessage("Heading")
   @Description("")
   String HeadingProperties();
@@ -1928,6 +2468,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Icon")
   @Description("")
   String IconProperties();
+
+  @DefaultMessage("IgnoreSslErrors")
+  @Description("")
+  String IgnoreSslErrorsProperties();
 
   @DefaultMessage("Image")
   @Description("")
@@ -2028,6 +2572,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Rows")
   @Description("")
   String RowsProperties();
+
+  @DefaultMessage("SavedRecording")
+  @Description("")
+  String SavedRecordingProperties();
 
   @DefaultMessage("SaveResponse")
   @Description("")
@@ -2213,6 +2761,10 @@ public interface OdeMessages extends Messages {
   @Description("")
   String ShowFilterBarProperties();
 
+  @DefaultMessage("TextSize")
+  @Description("")
+  String TextSizeProperties();
+
   @DefaultMessage("NotifierLength")
   @Description("")
   String NotifierLengthProperties();
@@ -2260,6 +2812,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("ThumbPosition")
   @Description("")
   String ThumbPositionProperties();
+
+  @DefaultMessage("ThumbEnabled")
+  @Description("")
+  String ThumbEnabled();
 
   @DefaultMessage("Day")
   @Description("")
@@ -2481,6 +3037,10 @@ public interface OdeMessages extends Messages {
   @Description("")
   String ResultProperties();
 
+  @DefaultMessage("UseExternalScanner")
+  @Description("")
+  String UseExternalScannerProperties();
+
   @DefaultMessage("ResultType")
   @Description("")
   String ResultTypeProperties();
@@ -2650,6 +3210,10 @@ public interface OdeMessages extends Messages {
   @Description("")
   String draggedSpriteParams();
 
+  @DefaultMessage("draggedAnySprite")
+  @Description("")
+  String draggedAnySpriteParams();
+
   @DefaultMessage("flungSprite")
   @Description("")
   String flungSpriteParams();
@@ -2657,6 +3221,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("touchedSprite")
   @Description("")
   String touchedSpriteParams();
+
+  @DefaultMessage("touchedAnySprite")
+  @Description("")
+  String touchedAnySpriteParams();
 
   @DefaultMessage("x")
   @Description("")
@@ -2666,9 +3234,21 @@ public interface OdeMessages extends Messages {
   @Description("")
   String yParams();
 
+  @DefaultMessage("centerX")
+  @Description("")
+  String centerXParams();
+
+  @DefaultMessage("centerY")
+  @Description("")
+  String centerYParams();
+
   @DefaultMessage("r")
   @Description("")
   String rParams();
+
+  @DefaultMessage("radius")
+  @Description("")
+  String radiusParams();
 
   @DefaultMessage("x1")
   @Description("")
@@ -3178,6 +3758,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("LongClick")
   @Description("")
   String LongClickEvents();
+
+  @DefaultMessage("RequestFocus")
+  @Description("")
+  String RequestFocusMethods();
 
   @DefaultMessage("LostFocus")
   @Description("")
@@ -3844,6 +4428,14 @@ public interface OdeMessages extends Messages {
   @Description("")
   String ShowTextDialogMethods();
 
+  @DefaultMessage("ShowProgressDialog")
+  @Description("")
+  String ShowProgressDialogMethods();
+
+  @DefaultMessage("DismissProgressDialog")
+  @Description("")
+  String DismissProgressDialogMethods();
+
   @DefaultMessage("GetColor")
   @Description("")
   String GetColorMethods();
@@ -4144,6 +4736,10 @@ public interface OdeMessages extends Messages {
   @Description("")
   String JsonTextDecodeMethods();
 
+  @DefaultMessage("XmlTextDecode")
+  @Description("")
+  String XmlTextDecodeMethods();
+
   @DefaultMessage("PostFile")
   @Description("")
   String PostFileMethods();
@@ -4171,6 +4767,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("ClearLocations")
   @Description("")
   String ClearLocationsMethods();
+
+  @DefaultMessage("ClearCaches")
+  @Description("")
+  String ClearCachesMethods();
 
   @DefaultMessage("GoBack")
   @Description("")
@@ -4339,7 +4939,11 @@ public interface OdeMessages extends Messages {
   @Description("")
   String CheckBoxHelpStringComponentPallette();
 
-  @DefaultMessage("Non-visible component that provides the phone\"s clock, a timer, and time calculations.")
+  @DefaultMessage("Non-visible component that provides the instant in time"+
+      "using the internal clock on the phone. It can fire a timer at " +
+      "regularly set intervals and perform time calculations, " +
+      "manipulations, and conversions. Methods to format the date and " +
+      "time are also available.")
   @Description("")
   String ClockHelpStringComponentPallette();
 
@@ -4407,7 +5011,7 @@ public interface OdeMessages extends Messages {
   @Description("")
   String NearFieldHelpStringComponentPallette();
 
-  @DefaultMessage("The Notifier component displays alert dialogs, messages, and temporary alerts, and creates Android log entries through the following methods: <ul><li> ShowMessageDialog: displays a message which the user must dismiss by pressing a button.</li><li> ShowChooseDialog: displays a message two buttons to let the user choose one of two responses, for example, yes or no, after which the AfterChoosing event is raised.</li><li> ShowTextDialog: lets the user enter text in response to the message, after which the AfterTextInput event is raised. <li> ShowAlert: displays a temporary  alert that goes away by itself after a short time.</li><li> LogError: logs an error message to the Android log. </li><li> LogInfo: logs an info message to the Android log.</li><li> LogWarning: logs a warning message to the Android log.</li><li>The messages in the dialogs (but not the alert) can be formatted using the following HTML tags:&lt;b&gt;, &lt;big&gt;, &lt;blockquote&gt;, &lt;br&gt;, &lt;cite&gt;, &lt;dfn&gt;, &lt;div&gt;, &lt;em&gt;, &lt;small&gt;, &lt;strong&gt;, &lt;sub&gt;, &lt;sup&gt;, &lt;tt&gt;. &lt;u&gt;</li><li>You can also use the font tag to specify color, for example, &lt;font color=\"blue\"&gt;.  Some of the available color names are aqua, black, blue, fuchsia, green, grey, lime, maroon, navy, olive, purple, red, silver, teal, white, and yellow</li></ul>")
+  @DefaultMessage("The Notifier component displays alert dialogs, messages, and temporary alerts, and creates Android log entries through the following methods: <ul><li> ShowMessageDialog: displays a message which the user must dismiss by pressing a button.</li><li> ShowChooseDialog: displays a message two buttons to let the user choose one of two responses, for example, yes or no, after which the AfterChoosing event is raised.</li><li> ShowTextDialog: lets the user enter text in response to the message, after which the AfterTextInput event is raised. <li> ShowAlert: displays a temporary  alert that goes away by itself after a short time.</li><li> ShowProgressDialog: displays an alert with a loading spinner that cannot be dismissed by the user. It can only be dismissed by using the DismissProgressDialog block.</li><li> DismissProgressDialog: Dismisses the progress dialog displayed by ShowProgressDialog.</li><li> LogError: logs an error message to the Android log. </li><li> LogInfo: logs an info message to the Android log.</li><li> LogWarning: logs a warning message to the Android log.</li><li>The messages in the dialogs (but not the alert) can be formatted using the following HTML tags:&lt;b&gt;, &lt;big&gt;, &lt;blockquote&gt;, &lt;br&gt;, &lt;cite&gt;, &lt;dfn&gt;, &lt;div&gt;, &lt;em&gt;, &lt;small&gt;, &lt;strong&gt;, &lt;sub&gt;, &lt;sup&gt;, &lt;tt&gt;. &lt;u&gt;</li><li>You can also use the font tag to specify color, for example, &lt;font color=\"blue\"&gt;.  Some of the available color names are aqua, black, blue, fuchsia, green, grey, lime, maroon, navy, olive, purple, red, silver, teal, white, and yellow</li></ul>")
   @Description("")
   String NotifierHelpStringComponentPallette();
 
@@ -4665,8 +5269,8 @@ public interface OdeMessages extends Messages {
   String corruptionDialogText();
 
   @DefaultMessage("<p><b>We detected errors while reading in your project</b></p>" +
-	        "<p>To protect your project from damage, we have ended this session. You may close this " +
-	        "window.</p>")
+                "<p>To protect your project from damage, we have ended this session. You may close this " +
+                "window.</p>")
   @Description("")
   String corruptionDialogMessage();
 
@@ -4675,10 +5279,10 @@ public interface OdeMessages extends Messages {
   String blocksTruncatedDialogText();
 
   @DefaultMessage("<p>It appears that <b>" + "%1" +
-	        "</b> has had all blocks removed. Either you removed them intentionally, or this is " +
-	        "the result of a bug in our system.</p><p>" +
-	        "<ul><li>Select \"OK, save the empty screen\" to continue to save the empty screen</li>" +
-	        "<li>Select \"No, Don\"t Save\" below to restore the previously saved version</li></ul></p>")
+                "</b> has had all blocks removed. Either you removed them intentionally, or this is " +
+                "the result of a bug in our system.</p><p>" +
+                "<ul><li>Select \"OK, save the empty screen\" to continue to save the empty screen</li>" +
+                "<li>Select \"No, Don\"t Save\" below to restore the previously saved version</li></ul></p>")
   @Description("")
   String blocksTruncatedDialogMessage();
 
@@ -4714,7 +5318,58 @@ public interface OdeMessages extends Messages {
   @Description("")
   String SwitchToTraditionalChinese();
 
+  @DefaultMessage("Español")
+  @Description("")
+  String SwitchToSpanish();
+
+  @DefaultMessage("Italiano")
+  @Description("")
+  String SwitchToItalian();
+
   @DefaultMessage("Progress Bar")
   @Description("")
   String ProgressBarFor();
+
+  // =========== ProximitySensor
+  @DefaultMessage("ProximitySensor")
+  @Description("")
+  String proximitySensorComponentPallette();
+
+  @DefaultMessage("Non-visible component that can measures the proximity of an object in cm relative to the view screen of a device. This sensor is typically used to determine whether a handset is being held up to a persons ear; i.e. lets you determine how far away an object is from a device. Many devices return the absolute distance, in cm, but some return only near and far values. In this case, the sensor usually reports its maximum range value in the far state and a lesser value in the near state.")
+  @Description("")
+  String ProximitySensorHelpStringComponentPallette();
+
+  @DefaultMessage("MaximumRange")
+  @Description("")
+  String MaximumRangeProperties();
+
+  @DefaultMessage("KeepRunningWhenOnPause")
+  @Description("")
+  String KeepRunningWhenOnPauseProperties();
+
+  @DefaultMessage("ProximityChangedProperties")
+  @Description("")
+  String ProximityChangedPropertiesProperties();
+
+  @DefaultMessage("ProximityChanged")
+  @Description("")
+  String ProximityChangedMethods();
+
+  @DefaultMessage("MaximumRangeMethods")
+  @Description("")
+  String MaximumRangeMethods();
+
+  // =========== ListPicker
+  @DefaultMessage("ItemTextColor")
+  @Description("")
+  String ItemTextColorProperties();
+
+  @DefaultMessage("ItemBackgroundColor")
+  @Description("")
+  String ItemBackgroundColorProperties();
+
+  @DefaultMessage("Error on Fusion Tables query")
+  @Description("")
+  String FusionTablesStandardErrorMessage();
+
 }

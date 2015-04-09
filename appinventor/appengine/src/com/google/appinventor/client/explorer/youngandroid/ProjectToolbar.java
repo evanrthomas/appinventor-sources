@@ -1,11 +1,13 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
 // Copyright 2011-2012 MIT, All rights reserved
-// Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
+// Released under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 
 package com.google.appinventor.client.explorer.youngandroid;
 
 import com.google.appinventor.client.ErrorReporter;
+import com.google.appinventor.client.GalleryClient;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.boxes.ProjectListBox;
@@ -14,6 +16,7 @@ import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.tracking.Tracking;
 import com.google.appinventor.client.widgets.Toolbar;
 import com.google.appinventor.client.wizards.youngandroid.NewYoungAndroidProjectWizard;
+import com.google.appinventor.shared.rpc.project.GallerySettings;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 
@@ -28,7 +31,6 @@ import static com.google.appinventor.client.Ode.MESSAGES;
 public class ProjectToolbar extends Toolbar {
   private static final String WIDGET_NAME_NEW = "New";
   private static final String WIDGET_NAME_DELETE = "Delete";
-
   /**
    * Initializes and assembles all commands into buttons in the toolbar.
    */
@@ -60,7 +62,7 @@ public class ProjectToolbar extends Toolbar {
     @Override
     public void execute() {
       List<Project> selectedProjects =
-        ProjectListBox.getProjectListBox().getProjectList().getSelectedProjects();
+          ProjectListBox.getProjectListBox().getProjectList().getSelectedProjects();
       if (selectedProjects.size() > 0) {
         // Show one confirmation window for selected projects.
         if (deleteConfirmation(selectedProjects)) {
@@ -77,8 +79,13 @@ public class ProjectToolbar extends Toolbar {
 
     private boolean deleteConfirmation(List<Project> projects) {
       String message;
+      GallerySettings gallerySettings = GalleryClient.getInstance().getGallerySettings();
       if (projects.size() == 1) {
-        message = MESSAGES.confirmDeleteSingleProject(projects.get(0).getProjectName());
+        if (projects.get(0).isPublished()) {
+          message = MESSAGES.confirmDeleteSinglePublishedProject(projects.get(0).getProjectName());
+        } else {
+          message = MESSAGES.confirmDeleteSingleProject(projects.get(0).getProjectName());
+        }
       } else {
         StringBuilder sb = new StringBuilder();
         String separator = "";
@@ -87,7 +94,11 @@ public class ProjectToolbar extends Toolbar {
           separator = ", ";
         }
         String projectNames = sb.toString();
-        message = MESSAGES.confirmDeleteManyProjects(projectNames);
+        if(!gallerySettings.galleryEnabled()){
+          message = MESSAGES.confirmDeleteManyProjects(projectNames);
+        } else {
+          message = MESSAGES.confirmDeleteManyProjectsWithGalleryOn(projectNames);
+        }
       }
       return Window.confirm(message);
     }
@@ -106,6 +117,9 @@ public class ProjectToolbar extends Toolbar {
         // need to clear the ViewerBox first.
         ViewerBox.getViewerBox().clear();
       }
+      if (project.isPublished()) {
+        doDeleteGalleryApp(project.getGalleryId());
+      }
       // Make sure that we delete projects even if they are not open.
       doDeleteProject(projectId);
     }
@@ -115,18 +129,30 @@ public class ProjectToolbar extends Toolbar {
           new OdeAsyncCallback<Void>(
               // failure message
               MESSAGES.deleteProjectError()) {
-        @Override
-        public void onSuccess(Void result) {
-          Ode.getInstance().getProjectManager().removeProject(projectId);
-          // Show a welcome dialog in case there are no
-          // projects saved.
-          if (Ode.getInstance().getProjectManager().getProjects().size() == 0) {
-            Ode.getInstance().createWelcomeDialog(false);
-          }
-        }
-      });
+            @Override
+            public void onSuccess(Void result) {
+              Ode.getInstance().getProjectManager().removeProject(projectId);
+              // Show a welcome dialog in case there are no
+              // projects saved.
+              if (Ode.getInstance().getProjectManager().getProjects().size() == 0) {
+                Ode.getInstance().createNoProjectsDialog(true);
+              }
+            }
+          });
     }
-
+    private void doDeleteGalleryApp(final long galleryId) {
+      Ode.getInstance().getGalleryService().deleteApp(galleryId,
+          new OdeAsyncCallback<Void>(
+              // failure message
+              MESSAGES.galleryDeleteError()) {
+            @Override
+            public void onSuccess(Void result) {
+              // need to update gallery list
+              GalleryClient gallery = GalleryClient.getInstance();
+              gallery.appWasChanged();
+            }
+          });
+    }
   }
 
   /**

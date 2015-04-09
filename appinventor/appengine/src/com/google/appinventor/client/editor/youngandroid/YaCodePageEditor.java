@@ -1,7 +1,8 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
 // Copyright 2011-2012 MIT, All rights reserved
-// Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
+// Released under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 package com.google.appinventor.client.editor.youngandroid;
 
 import com.google.appinventor.client.ComponentList;
@@ -109,7 +110,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
     fullName = blocksNode.getProjectId() + "_" + blocksNode.getFormName();
 
     nameToCodePageEditor.put(fullName, this);
-    blocksArea = new BlocklyPanel(fullName);
+    blocksArea = new BlocklyPanel(this, fullName);
     blocksArea.setWidth("100%");
     // This code seems to be using a rather old layout, so we cannot simply pass 100% for height.
     // Instead, it needs to be calculated from the client's window, and a listener added to Window
@@ -162,12 +163,25 @@ public abstract class YaCodePageEditor extends SimpleEditor
     relinkBlocksArea(afterFileLoaded);
   }
 
+  protected String getUpgraderJson() {
+    throw new RuntimeException("getUpgraderJson() must be overridden in subclasses");
+  }
+
+  /*
+   * [lyn, 2014/10/28] Added for accessing current form json from BlocklyPanel
+   * Encodes the associated form's properties as a JSON encoded string. Used by YaBlocksEditor as well,
+   * to send the form info to the blockly world during code generation.
+   */
+  public String encodeFormAsJsonString() {
+    throw new RuntimeException("encodeFormAsJsonString must be overriden in subclasses");
+  }
+
   private void relinkBlocksArea(final Command afterFileLoaded) {
     loadComplete = false;
     Linker.getInstance().loadLinkedContent(blocksNode, new Callback<String>() {
       @Override
       public void call(String content) {
-        blocksArea.setBlocksContent(currentLinkedWorkspace = content);
+        blocksArea.setBlocksContent(getUpgraderJson(), currentLinkedWorkspace = content);
         loadComplete = true;
         selectedDrawer = null;
         if (afterFileLoaded != null) afterFileLoaded.execute();
@@ -491,5 +505,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
     return blocksNode;
   }
+
 }
 

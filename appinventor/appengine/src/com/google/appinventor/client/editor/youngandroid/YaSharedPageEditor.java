@@ -2,13 +2,18 @@ package com.google.appinventor.client.editor.youngandroid;
 
 import com.google.appinventor.client.ComponentList;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
+import com.google.appinventor.client.editor.simple.components.MockForm;
 import com.google.appinventor.client.editor.simple.palette.SimpleComponentDescriptor;
 import com.google.appinventor.client.editor.youngandroid.palette.YoungAndroidPalettePanel;
 import com.google.appinventor.client.helper.Callback;
 import com.google.appinventor.client.helper.Utils;
 import com.google.appinventor.client.linker.Linker;
+import com.google.appinventor.client.properties.json.ClientJsonParser;
 import com.google.appinventor.client.widgets.TextButton;
+import com.google.appinventor.client.youngandroid.YoungAndroidFormUpgrader;
+import com.google.appinventor.shared.properties.json.JSONObject;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
+import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.core.client.JsArray;
 import com.google.gwt.dom.client.Element;
@@ -120,5 +125,25 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
           Node blocklyXml, JsArray<Node> arr) /*-{
     return $wnd.exported.setDemandedComponentsHeader(blocklyXml, arr);
   }-*/;
+
+  @Override
+  public String getUpgraderJson() {
+    String encodedProperties = encodeFormAsJsonString();
+    JSONObject propertiesObject = new ClientJsonParser().parse(encodedProperties).asObject();
+    if (YoungAndroidFormUpgrader.upgradeSourceProperties(propertiesObject.getProperties())) {
+      String upgradedContent = YoungAndroidSourceAnalyzer.generateSourceFile(propertiesObject);
+      return upgradedContent;
+    }
+    return propertiesObject.toJson();
+  }
+
+  @Override
+  public String encodeFormAsJsonString() {
+    MockForm form = new MockForm(this);
+    for (MockComponent comp: components.getComponents()) {
+      form.addComponent(comp);
+    }
+    return MockComponent.encodeFormAsJsonString(form);
+  }
 
 }

@@ -1,7 +1,8 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
 // Copyright 2011-2012 MIT, All rights reserved
-// Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
+// Released under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 
 package com.google.appinventor.client.editor.simple.components;
 
@@ -24,6 +25,7 @@ import com.google.appinventor.client.widgets.dnd.DropTarget;
 import com.google.appinventor.client.widgets.properties.*;
 import com.google.appinventor.client.youngandroid.TextValidators;
 import com.google.appinventor.components.common.PropertyTypeConstants;
+import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.shared.rpc.project.HasAssetsFolder;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidAssetsFolder;
@@ -127,6 +129,9 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
 
     private void handleOkClick() {
       String newName = newNameTextBox.getText();
+      // Remove leading and trailing whitespace
+      // Replace nonempty sequences of internal spaces by underscores
+      newName = newName.trim().replaceAll("[\\s\\xa0]+", "_");
       if (newName.equals(getName())) {
         hide();
       } else if (validate(newName)) {
@@ -142,7 +147,7 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
     private boolean validate(String newName) {
 
       // Check that it meets the formatting requirements.
-      if (!TextValidators.isValidIdentifier(newName)) {
+      if (!TextValidators.isValidComponentIdentifier(newName)) {
         Window.alert(MESSAGES.malformedComponentNameError());
         return false;
       }
@@ -398,7 +403,7 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
     } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_TYPEFACE)) {
       return new YoungAndroidFontTypefaceChoicePropertyEditor();
     } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_VISIBILITY)) {
-      return new YoungAndroidVisibilityChoicePropertyEditor();
+      return new YoungAndroidBooleanPropertyEditor();
     } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_TEXT_RECEIVING)) {
       return new YoungAndroidTextReceivingPropertyEditor();
     } else if (editorType.equals(PropertyTypeConstants.PROPERTY_TYPE_ACCELEROMETER_SENSITIVITY)) {
@@ -733,7 +738,7 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
     itemNode.setUserObject(sourceStructureExplorerItem);
     return itemNode;
   }
-  
+
   /**
    * If this component isn't a Form, and this component's type isn't already in typesAndIcons,
    * adds this component's type name as a key to typesAndIcons, mapped to the HTML string used
@@ -766,7 +771,7 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
   protected ProjectNode getAssetNode(String name) {
     Project project = Ode.getInstance().getProjectManager().getProject(editor.getProjectId());
     if (project != null) {
-      HasAssetsFolder<YoungAndroidAssetsFolder> hasAssetsFolder = 
+      HasAssetsFolder<YoungAndroidAssetsFolder> hasAssetsFolder =
           (YoungAndroidProjectNode) project.getRootNode();
       for (ProjectNode asset : hasAssetsFolder.getAssetsFolder().getChildren()) {
         if (asset.getName().equals(name)) {
@@ -1022,5 +1027,62 @@ public abstract class MockComponent extends Composite implements PropertyChangeL
         return getPreferredHeight();
       }
     };
+  }
+
+
+  /*
+   * Encodes the form's properties as a JSON encoded string. Used by YaBlocksEditor as well,
+   * to send the form info to the blockly world during code generation.
+   */
+  public static String encodeFormAsJsonString(MockForm form) {
+    StringBuilder sb = new StringBuilder();
+    sb.append("{");
+    sb.append("\"YaVersion\":\"").append(YaVersion.YOUNG_ANDROID_VERSION).append("\",");
+    sb.append("\"Source\":\"Form\",");
+    sb.append("\"Properties\":");
+    encodeComponentProperties(form, sb);
+    sb.append("}");
+    return sb.toString();
+  }
+
+
+  /*
+   * Encodes a component and its properties into a JSON encoded string.
+   */
+  private static void encodeComponentProperties(MockComponent component, StringBuilder sb) {
+    // The component encoding starts with component name and type
+    String componentType = component.getType();
+    EditableProperties properties = component.getProperties();
+    sb.append("{\"$Name\":\"");
+    sb.append(properties.getPropertyValue("Name"));
+    sb.append("\",\"$Type\":\"");
+    sb.append(componentType);
+    sb.append("\",\"$Version\":\"");
+    sb.append(COMPONENT_DATABASE.getComponentVersion(componentType));
+    sb.append('"');
+
+    // Next the actual component properties
+    //
+    // NOTE: It is important that these be encoded before any children components.
+    String propertiesString = properties.encodeAsPairs();
+    if (propertiesString.length() > 0) {
+      sb.append(',');
+      sb.append(propertiesString);
+    }
+
+    // Finally any children of the component
+    List<MockComponent> children = component.getChildren();
+    if (!children.isEmpty()) {
+      sb.append(",\"$Components\":[");
+      String separator = "";
+      for (MockComponent child : children) {
+        sb.append(separator);
+        encodeComponentProperties(child, sb);
+        separator = ",";
+      }
+      sb.append(']');
+    }
+
+    sb.append('}');
   }
 }

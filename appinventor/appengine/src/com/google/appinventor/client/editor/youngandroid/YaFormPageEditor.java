@@ -48,6 +48,17 @@ public final class YaFormPageEditor extends YaCodePageEditor implements FormChan
     super.onClose();
   }
 
+  @Override
+  protected String getUpgraderJson() {
+    return myFormEditor.preUpgradeJsonString();
+  }
+
+  @Override
+   public String encodeFormAsJsonString() {
+    return MockComponent.encodeFormAsJsonString(getForm());
+  }
+
+
 
   // FormChangeListener implementation
   // Note: our companion YaFormEditor adds us as a listener on the form
@@ -152,7 +163,7 @@ public final class YaFormPageEditor extends YaCodePageEditor implements FormChan
 
   public synchronized void sendComponentData() {
     try {
-      blocksArea.sendComponentData(myFormEditor.encodeFormAsJsonString(),
+      blocksArea.sendComponentData(MockComponent.encodeFormAsJsonString(myFormEditor.getForm()),
               packageNameFromPath(getFileId()));
     } catch (YailGenerationException e) {
       e.printStackTrace();
@@ -162,7 +173,7 @@ public final class YaFormPageEditor extends YaCodePageEditor implements FormChan
 
   public FileDescriptorWithContent getYail() throws YailGenerationException {
     return new FileDescriptorWithContent(getProjectId(), yailFileName(),
-            blocksArea.getYail(myFormEditor.encodeFormAsJsonString(),
+            blocksArea.getYail(MockComponent.encodeFormAsJsonString(myFormEditor.getForm()),
                     packageNameFromPath(getFileId())));
   }
 

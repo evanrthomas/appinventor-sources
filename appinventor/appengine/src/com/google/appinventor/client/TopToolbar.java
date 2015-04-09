@@ -1,7 +1,8 @@
 // -*- mode: java; c-basic-offset: 2; -*-
 // Copyright 2009-2011 Google, All Rights reserved
 // Copyright 2011-2013 MIT, All rights reserved
-// Released under the MIT License https://raw.github.com/mit-cml/app-inventor/master/mitlicense.txt
+// Released under the Apache License, Version 2.0
+// http://www.apache.org/licenses/LICENSE-2.0
 
 package com.google.appinventor.client;
 
@@ -33,12 +34,11 @@ import com.google.appinventor.common.version.AppInventorFeatures;
 import com.google.appinventor.common.version.GitBuildId;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.shared.rpc.ServerLayout;
+import com.google.appinventor.shared.rpc.project.GallerySettings;
 import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
 import com.google.appinventor.shared.storage.StorageUtil;
 import com.google.common.collect.Lists;
-import com.google.gwt.http.client.UrlBuilder;
-import com.google.gwt.i18n.client.LocaleInfo;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -110,12 +110,10 @@ public class TopToolbar extends Composite {
   private static final String WIDGET_NAME_ADMIN = "Admin";
   private static final String WIDGET_NAME_DOWNLOAD_USER_SOURCE = "DownloadUserSource";
   private static final String WIDGET_NAME_SWITCH_TO_DEBUG = "SwitchToDebugPane";
-  private static final String WIDGET_NAME_LANGUAGE = "Language";
 
   public DropDownButton fileDropDown;
   public DropDownButton connectDropDown;
   public DropDownButton buildDropDown;
-  public DropDownButton languageDropDown;
   public DropDownButton helpDropDown;
   public DropDownButton adminDropDown;
 
@@ -123,7 +121,7 @@ public class TopToolbar extends Composite {
     /*
      * Layout is as follows:
      * +--------------------------------------------------------------+
-     * | Project ▾ | Connect ▾ | Build ▾| Language ▾| Help ▾| Admin ▾ |
+     * | Project ▾ | Connect ▾ | Build ▾| Help ▾| Admin ▾ |
      * +--------------------------------------------------------------+
      */
     HorizontalPanel toolbar = new HorizontalPanel();
@@ -132,7 +130,6 @@ public class TopToolbar extends Composite {
     List<DropDownItem> fileItems = Lists.newArrayList();
     List<DropDownItem> connectItems = Lists.newArrayList();
     List<DropDownItem> buildItems = Lists.newArrayList();
-    List<DropDownItem> languageItems = Lists.newArrayList();
     List<DropDownItem> helpItems = Lists.newArrayList();
 
     // File -> {New Project; Save; Save As; Checkpoint; |; Delete this Project; My Projects;}
@@ -191,22 +188,6 @@ public class TopToolbar extends Composite {
           new GenerateYailAction()));
     }
 
-    String[] localeNames = LocaleInfo.getAvailableLocaleNames();
-    String nativeName;
-    for (String localeName : localeNames) {
-      nativeName = LocaleInfo.getLocaleNativeDisplayName(localeName);
-      if (!localeName.equals("default")) {
-        SelectLanguage lang = new SelectLanguage();
-        lang.setLocale(localeName);
-        if (localeName == "zh_CN") {
-          nativeName = MESSAGES.SwitchToSimplifiedChinese();
-        } else if (localeName == "zh_TW") {
-          nativeName = MESSAGES.SwitchToTraditionalChinese();
-        }
-        languageItems.add(new DropDownItem(WIDGET_NAME_LANGUAGE, nativeName, lang));
-      }
-    }
-
     // Help -> {About, Library, Get Started, Tutorials, Troubleshooting, Forums, Report an Issue}
     helpItems.add(new DropDownItem(WIDGET_NAME_ABOUT, MESSAGES.aboutMenuItem(),
         new AboutAction()));
@@ -235,8 +216,6 @@ public class TopToolbar extends Composite {
         connectItems, false);
     buildDropDown = new DropDownButton(WIDGET_NAME_BUILD, MESSAGES.buildTabName(),
         buildItems, false);
-   languageDropDown = new DropDownButton(WIDGET_NAME_LANGUAGE, MESSAGES.switchLanguageButton(),
-       languageItems, false);
     helpDropDown = new DropDownButton(WIDGET_NAME_HELP, MESSAGES.helpTabName(),
         helpItems, false);
 
@@ -244,7 +223,6 @@ public class TopToolbar extends Composite {
     fileDropDown.setStyleName("ode-TopPanelButton");
     connectDropDown.setStyleName("ode-TopPanelButton");
     buildDropDown.setStyleName("ode-TopPanelButton");
-    languageDropDown.setStyleName("ode-TopPanelButton");
     helpDropDown.setStyleName("ode-TopPanelButton");
 
     // Add the Buttons to the Toolbar.
@@ -253,7 +231,6 @@ public class TopToolbar extends Composite {
     toolbar.add(buildDropDown);
 
     // Commented out language switching until we have a clean Chinese translation. (AFM)
-    toolbar.add(languageDropDown);
     toolbar.add(helpDropDown);
 
     //Only if logged in as an admin, add the Admin Button
@@ -502,8 +479,12 @@ public class TopToolbar extends Composite {
 
     private boolean deleteConfirmation(List<Project> projects) {
       String message;
+      GallerySettings gallerySettings = GalleryClient.getInstance().getGallerySettings();
       if (projects.size() == 1) {
-        message = MESSAGES.confirmDeleteSingleProject(projects.get(0).getProjectName());
+        if (projects.get(0).isPublished())
+          message = MESSAGES.confirmDeleteSinglePublishedProject(projects.get(0).getProjectName());
+        else
+          message = MESSAGES.confirmDeleteSingleProject(projects.get(0).getProjectName());
       } else {
         StringBuilder sb = new StringBuilder();
         String separator = "";
@@ -512,7 +493,11 @@ public class TopToolbar extends Composite {
           separator = ", ";
         }
         String projectNames = sb.toString();
-        message = MESSAGES.confirmDeleteManyProjects(projectNames);
+        if(!gallerySettings.galleryEnabled()){
+          message = MESSAGES.confirmDeleteManyProjects(projectNames);
+        } else {
+          message = MESSAGES.confirmDeleteManyProjectsWithGalleryOn(projectNames);
+        }
       }
       return Window.confirm(message);
     }
@@ -531,6 +516,9 @@ public class TopToolbar extends Composite {
         // need to clear the ViewerBox first.
         ViewerBox.getViewerBox().clear();
       }
+      if (project.isPublished()) {
+        doDeleteGalleryApp(project.getGalleryId());
+      }
       // Make sure that we delete projects even if they are not open.
       doDeleteProject(projectId);
     }
@@ -548,6 +536,19 @@ public class TopToolbar extends Composite {
               if (Ode.getInstance().getProjectManager().getProjects().size() == 0) {
                 Ode.getInstance().createNoProjectsDialog(true);
               }
+            }
+          });
+    }
+    private void doDeleteGalleryApp(final long galleryId) {
+      Ode.getInstance().getGalleryService().deleteApp(galleryId,
+          new OdeAsyncCallback<Void>(
+              // failure message
+              MESSAGES.galleryDeleteError()) {
+            @Override
+            public void onSuccess(Void result) {
+              // need to update gallery list
+              GalleryClient gallery = GalleryClient.getInstance();
+              gallery.appWasChanged();
             }
           });
     }
@@ -640,29 +641,6 @@ public class TopToolbar extends Composite {
               }
             });
       }
-    }
-  }
-  private class SelectLanguage implements Command {
-
-    private String localeName;
-
-    @Override
-    public void execute() {
-      final String queryParam = LocaleInfo.getLocaleQueryParam();
-      Command savecmd = new SaveAction();
-      savecmd.execute();
-      if (queryParam != null) {
-        UrlBuilder builder = Window.Location.createUrlBuilder().setParameter(
-            queryParam, localeName);
-        Window.Location.replace(builder.buildString());
-      } else {
-        // If we are using only cookies, just reload
-        Window.Location.reload();
-      }
-    }
-
-    public void setLocale(String nativeName) {
-      localeName = nativeName;
     }
   }
 
