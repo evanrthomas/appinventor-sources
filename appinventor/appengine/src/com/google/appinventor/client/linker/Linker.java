@@ -1,6 +1,8 @@
 package com.google.appinventor.client.linker;
 
+import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.YACachedBlocksNode;
+import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
 import com.google.appinventor.client.helper.Callback;
 import com.google.appinventor.client.helper.CountDownCallback;
 import com.google.appinventor.client.helper.Utils;
@@ -14,7 +16,7 @@ import java.util.*;
 
 public class Linker {
   private static final Linker INSTANCE = new Linker();
-  private static final Map<YACachedBlocksNode, Set<YACachedBlocksNode>> nodeToChildren =
+  private static final Map<YACachedBlocksNode, Set<YACachedBlocksNode>> linkSet =
           new HashMap<YACachedBlocksNode, Set<YACachedBlocksNode>>();
 
   private Linker() {
@@ -40,16 +42,17 @@ public class Linker {
   public static void newLink(YoungAndroidBlocksNode parentRealNode, YASharedPageBlocksNode childRealNode) {
     YACachedBlocksNode parent = YACachedBlocksNode.getCachedNode(parentRealNode);
     YACachedBlocksNode child = YACachedBlocksNode.getCachedNode(childRealNode);
-    if (nodeToChildren.get(parent) == null) {
-      nodeToChildren.put(parent, new HashSet<YACachedBlocksNode>());
+    if (linkSet.get(parent) == null) {
+      linkSet.put(parent, new HashSet<YACachedBlocksNode>());
     }
-    nodeToChildren.get(parent).add(child);
+    linkSet.get(parent).add(child);
+    Ode.getInstance().getEditorManager().scheduleAutoSave(YaCodePageEditor.getOrCreateEditor(parentRealNode));
   }
 
   public String unlinkContent(YoungAndroidBlocksNode realNode, String content) {
     YACachedBlocksNode cachedNode = YACachedBlocksNode.getCachedNode(realNode);
     JavaScriptObject filteredXml = filterOutImportedBlocks(Utils.textToDom(content));
-    Collection<YACachedBlocksNode> children = nodeToChildren.get(cachedNode);
+    Collection<YACachedBlocksNode> children = linkSet.get(cachedNode);
     children = (children == null ? new HashSet<YACachedBlocksNode>() : children);
     Element xml = setChildrenHeader(filteredXml, makeChildrenXmlArray(children));
     return Utils.domToText(xml);
@@ -107,8 +110,8 @@ public class Linker {
     node.load(new Callback<String>() {
       @Override
       public void call(String s) {
-        if (nodeToChildren.get(node) == null) {
-          nodeToChildren.put(node, new HashSet<YACachedBlocksNode>());
+        if (linkSet.get(node) == null) {
+          linkSet.put(node, new HashSet<YACachedBlocksNode>());
         }
 
         Element header = Utils.textToDom(s);
@@ -123,9 +126,9 @@ public class Linker {
           String fileId = childXml.getAttribute("fileId");
           if (fileId.length() == 0) fileId = childXml.getAttribute("fileid"); //TODO (evan): fix this. Silly hack because gwt for some reason makes the I in projectId lowercase
           YACachedBlocksNode child = YACachedBlocksNode.getCachedNode(projectId, fileId);
-          nodeToChildren.get(node).add(child); //nodeToChildren.get(node) is a Set, if it already has this child, the new child won't be added
+          linkSet.get(node).add(child); //linkSet.get(node) is a Set, if it already has this child, the new child won't be added
         }
-        onload.call(nodeToChildren.get(node));
+        onload.call(linkSet.get(node));
       }
     });
   }

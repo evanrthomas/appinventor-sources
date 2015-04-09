@@ -12,6 +12,7 @@ import com.google.appinventor.client.YACachedBlocksNode;
 import com.google.appinventor.client.editor.youngandroid.YaFormPageEditor;
 import com.google.appinventor.client.editor.youngandroid.YailGenerationException;
 import com.google.appinventor.client.explorer.project.Project;
+import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.client.settings.project.ProjectSettings;
 import com.google.appinventor.shared.rpc.BlocksTruncatedException;
@@ -100,7 +101,8 @@ public final class EditorManager {
       // Use the ProjectEditorRegistry to get the factory and create the project editor.
       ProjectEditorFactory factory = Ode.getProjectEditorRegistry().get(projectRootNode);
       if (factory != null) {
-        projectEditor = factory.createProjectEditor(projectRootNode);
+        projectEditor = factory.getOrCreateProjectEditor(projectRootNode);
+        Helper.println((projectEditor == null) + "");
 
         // Add the editor to the openProjectEditors map.
         openProjectEditors.put(projectId, projectEditor);

@@ -136,17 +136,18 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   }
 
-  public static YaCodePageEditor getOrCreateEditor(YaProjectEditor project, YoungAndroidBlocksNode sourceNode) {
-    String fullName = project.getProjectId() + "_"  + sourceNode.getFormName();
-    YaCodePageEditor editor;
-    if ((editor = nameToCodePageEditor.get(fullName)) != null) {
-      return editor;
-    }
+  public static YaCodePageEditor getOrCreateEditor(YoungAndroidBlocksNode sourceNode) {
+    String fullName = sourceNode.getProjectId() + "_"  + sourceNode.getFormName();
+    YaCodePageEditor editor = nameToCodePageEditor.get(fullName);
+    if (editor != null)  return editor;
 
+    //editor is not open
+    YaProjectEditor projectEditor = (YaProjectEditor)YaProjectEditor.getFactory()
+            .getOrCreateProjectEditor(sourceNode.getProjectRoot());
     if (sourceNode instanceof YAFormPageBlocksNode) {
-      return new YaFormPageEditor(project, sourceNode);
+      return new YaFormPageEditor(projectEditor, sourceNode);
     } else {
-      return new YaSharedPageEditor(project, sourceNode);
+      return new YaSharedPageEditor(projectEditor, sourceNode);
     }
   }
 

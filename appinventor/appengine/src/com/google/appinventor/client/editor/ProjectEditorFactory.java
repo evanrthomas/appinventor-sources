@@ -19,5 +19,5 @@ public interface ProjectEditorFactory {
    * @param projectRootNode  the project root node
    * @return a new project editor
    */
-  ProjectEditor createProjectEditor(ProjectRootNode projectRootNode);
+  ProjectEditor getOrCreateProjectEditor(ProjectRootNode projectRootNode);
 }

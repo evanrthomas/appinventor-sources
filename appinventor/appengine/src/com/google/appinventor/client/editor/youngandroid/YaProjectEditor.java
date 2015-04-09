@@ -51,6 +51,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
 
   // Maps form name -> editors for this form
   private final HashMap<String, EditorSet> editorMap = Maps.newHashMap();
+  private static HashMap<ProjectRootNode, YaProjectEditor> projectEditors = Maps.newHashMap();
 
   // State variables to help determine whether we are ready to show Screen1
   // Automatically select the Screen1 form editor when we have finished loading
@@ -70,7 +71,9 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
   public static ProjectEditorFactory getFactory() {
     return new ProjectEditorFactory() {
       @Override
-      public ProjectEditor createProjectEditor(ProjectRootNode projectRootNode) {
+      public ProjectEditor getOrCreateProjectEditor(ProjectRootNode projectRootNode) {
+        YaProjectEditor editor = projectEditors.get(projectRootNode);
+        if (editor != null) return projectEditors.get(projectRootNode);
         return new YaProjectEditor(projectRootNode);
       }
     };
@@ -79,6 +82,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
   public YaProjectEditor(ProjectRootNode projectRootNode) {
     super(projectRootNode);
     project.addProjectChangeListener(this);
+    projectEditors.put(projectRootNode, this);
   }
 
   private void loadBlocksEditor(String formNamePassedIn) {
@@ -333,7 +337,7 @@ public final class YaProjectEditor extends ProjectEditor implements ProjectChang
   }
 
   private void addBlocksEditor(final YoungAndroidBlocksNode blocksNode) {
-    final YaCodePageEditor newBlocksEditor = YaCodePageEditor.getOrCreateEditor(this, blocksNode);
+    final YaCodePageEditor newBlocksEditor = YaCodePageEditor.getOrCreateEditor(blocksNode);
     final String formName = blocksNode.getFormName();
     OdeLog.log("Adding blocks editor for " + formName);
     if (editorMap.containsKey(formName)) {

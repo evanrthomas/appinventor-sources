@@ -96,16 +96,20 @@ public class SharedPagesOverlay {
   private static void loadThisProjectsPages() {
     final JavaScriptObject renderPageFunction = getRenderProjectPageFunction();
     ProjectRootNode currentProject = Ode.getInstance().getCurrentYoungAndroidProjectRootNode();
-    final Set<YoungAndroidBlocksNode> loaded = new HashSet<YoungAndroidBlocksNode>();
+    final Set<YoungAndroidBlocksNode> rendered = new HashSet<YoungAndroidBlocksNode>();
     for (final YoungAndroidBlocksNode page : currentProject.getAllBlocksNodes()) {
-      Utils.callJSFunc(renderPageFunction, pageDescriptor(page).getJavaScriptObject());
+      if (!rendered.contains(page)) { //avoid adding a page that has already been added because it's the child of some other page in the project
+        Utils.callJSFunc(renderPageFunction, pageDescriptor(page).getJavaScriptObject());
+        rendered.add(page);
+      }
       Linker.getInstance().loadChildren(page, new Callback<Collection<YoungAndroidBlocksNode>>() {
         @Override
         public void call(Collection<YoungAndroidBlocksNode> children) {
           for (YoungAndroidBlocksNode child : children) {
-            if (loaded.contains(child)) continue; //avoid adding children that are the children of two pages twice
-            Utils.callJSFunc(renderPageFunction, pageDescriptor(child).getJavaScriptObject());
-            loaded.add(child);
+            if (!rendered.contains(child)) {  //avoid adding children that are the children of two pages twice
+              Utils.callJSFunc(renderPageFunction, pageDescriptor(child).getJavaScriptObject());
+              rendered.add(child);
+            }
           }
         }
       });
