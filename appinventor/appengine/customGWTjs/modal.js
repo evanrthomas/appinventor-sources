@@ -1,5 +1,5 @@
 var network, nodes, edges,
-  currentProjectId
+  currentProjectId, submenus,
   firstTimeOpened = true;
 
 
@@ -72,22 +72,23 @@ function renderProjectPage(page) {
 
 function renderLibraryPage(page) {
   var bookli = librariesUl.querySelector("#" + librariesUl.id + " > li.book-" + page.projectId),
-      submenu = librariesUl.querySelector("#" + librariesUl.id + " > li.book-" + page.projectId + " ul.book-" + page.projectId);
+      submenu = submenus[page.projectId];
   if (!bookli) {
-    var bookli = document.createElement('li');
-    bookli.innerHTML = page.projectName;
-    var submenu = document.createElement('ul');
+    bookli = document.createElement('li');
+    submenu = document.createElement('ul');
     librariesUl.appendChild(bookli);
-    bookli.appendChild(submenu);
-    bookli.classList.add('book-'+page.projectId);
-    submenu.classList.add('libraries-dropdown');
-    submenu.classList.add('book-'+page.projectId);
     new Drop({
       target: bookli,
         content:submenu,
         position:'right middle',
         openOn: 'hover',
     });
+
+    bookli.innerHTML = page.projectName;
+    submenus[page.projectId] = submenu;
+    bookli.classList.add('book-'+page.projectId);
+    submenu.classList.add('libraries-dropdown');
+    submenu.classList.add('book-'+page.projectId);
   }
 
   var pageli = document.createElement('li');
@@ -143,6 +144,7 @@ function clearNetwork() {
   nodes.clear();
   edges.clear();
   librariesUl.innerHTML = "";
+  submenus = {};
 }
 
 function getId(pageinfo) {
