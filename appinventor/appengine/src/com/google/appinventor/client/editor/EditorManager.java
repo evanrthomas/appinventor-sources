@@ -10,6 +10,7 @@ import com.google.appinventor.client.ErrorReporter;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.YACachedBlocksNode;
+import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
 import com.google.appinventor.client.editor.youngandroid.YaFormPageEditor;
 import com.google.appinventor.client.editor.youngandroid.YailGenerationException;
 import com.google.appinventor.client.explorer.project.Project;
@@ -282,13 +283,14 @@ public final class EditorManager {
   }
 
   public void saveDirtyEditorsToCache() {
-    List<FileDescriptorWithContent> filesToSave = new ArrayList<FileDescriptorWithContent>();
-    for (FileDescriptorWithContent fd : filesToSave) {
-      long projectId = fd.getProjectId();
-      String fileId = fd.getFileId();
-      YACachedBlocksNode node;
-      if ((node = YACachedBlocksNode.getCachedNode(projectId, fileId)) != null) {
-        node.saveToCache(fd.getContent());
+    // Collect the files that need to be saved.
+    for (FileEditor dirtyEditor : dirtyFileEditors) {
+      if (dirtyEditor instanceof YaCodePageEditor) {
+        YACachedBlocksNode node = YACachedBlocksNode.getCachedNode(
+                dirtyEditor.getProjectId(), dirtyEditor.getFileId());
+        if (node != null) node.saveToCache(dirtyEditor.getRawFileContent());
+      } else {
+        Helper.println("editor " + dirtyEditor.getFileId() + " is not CodePageEditor");
       }
     }
   }

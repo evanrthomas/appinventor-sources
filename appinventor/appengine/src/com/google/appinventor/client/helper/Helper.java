@@ -6,6 +6,7 @@ import com.google.appinventor.client.editor.FileEditor;
 import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
 import com.google.appinventor.client.editor.youngandroid.YaSharedPageEditor;
 import com.google.appinventor.client.explorer.project.Project;
+import com.google.appinventor.client.linker.Linker;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.shared.rpc.project.FileNode;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
@@ -137,14 +138,19 @@ public class Helper {
 
   private static FileNode getFileNodeByFileName(long projectId, String fileName) {
     Project project = Ode.getInstance().getProjectManager().getProject(projectId);
-    if (project == null) return null; //invalid projectId, project does not exist
+    if (project == null) {
+      Helper.println("invalid projectId, project does not exist");
+      return null;
+    }
     ProjectRootNode root = project.getRootNode();
-    if (root == null) return null; //have not called project.loadNodes() yet
+    if (root == null) {
+      Helper.println("have not called project.loadNodes() yet");
+      return null;
+    }
 
-    YoungAndroidBlocksNode fileNode = null;
     for (ProjectNode potentialNode : root.getAllSourceNodes()) {
       if (potentialNode.getName().equals(fileName) && potentialNode instanceof YoungAndroidBlocksNode) {
-        return fileNode;
+        return (FileNode)potentialNode;
       }
     }
     return null;
@@ -237,20 +243,46 @@ public class Helper {
 
   public static String getCachedContent(String projectName, String fileName) {
     Project project = Ode.getInstance().getProjectManager().getProject(projectName);
-    FileNode node = getFileNodeByFileName(project.getProjectId(), fileName);
-    return YACachedBlocksNode.getCachedNode(project.getProjectId(), node.getFileId()).getContent();
+    if (project == null) return "cannot find project for " + projectName;
+    FileNode fileNode = getFileNodeByFileName(project.getProjectId(), fileName);
+    if (fileNode == null) return "cannot find file " + projectName + " " + fileName;
+    YACachedBlocksNode cachedNode =  YACachedBlocksNode.getCachedNode(project.getProjectId(), fileNode.getFileId());
+    if (cachedNode == null) return "cannot find cachedContent of " + projectName + " " + fileName;
+    return cachedNode.getContent();
   }
 
-
-  public static String getLinkedContent(String projectName, String fileName) {
-    return "deprecated";
-    /*
+  public static void printLinkedContent(String projectName, String fileName) {
     Project project = Ode.getInstance().getProjectManager().getProject(projectName);
-    YaCodePageEditor editor = YaCodePageEditor.getCodePageEditorByFileName(project.getProjectId(), fileName);
-    return editor.getLinkedContent();
-    */
+    if (project == null) {
+      println("cannot find project for " + projectName);
+      return;
+    }
+    FileNode fileNode = getFileNodeByFileName(project.getProjectId(), fileName);
+    if (fileNode == null) {
+      println( "cannot find file " + projectName + " " + fileName);
+      return;
+    }
+    Linker.getInstance().loadLinkedContent((YoungAndroidBlocksNode)fileNode, new Callback<String>() {
+      @Override
+      public void call(String s) {
+        println("LINKED CONTENT\n" +s);
+      }
+    });
   }
 
+  public static void printRawContent(String projectName, String fileName) {
+    Project project = Ode.getInstance().getProjectManager().getProject(projectName);
+    if (project == null) {
+      println("cannot find project for " + projectName);
+      return;
+    }
+    FileNode fileNode = getFileNodeByFileName(project.getProjectId(), fileName);
+    if (fileNode == null) {
+      println( "cannot find file " + projectName + " " + fileName);
+      return;
+    }
+    println( YaCodePageEditor.getOrCreateEditor((YoungAndroidBlocksNode)fileNode).getRawFileContent());
+  }
   public static JavaScriptObject getDirtyEditors() {
     Collection<FileEditor> editors = Ode.getInstance().getEditorManager().getDirtyEditors();
     JSONArray arr = new JSONArray();
@@ -316,8 +348,12 @@ public class Helper {
       };
 
       $wnd.printLinkedContent = function(projectName, fileName) {
-        console.log(@com.google.appinventor.client.helper.Helper::getLinkedContent(Ljava/lang/String;Ljava/lang/String;)(projectName, fileName));
+        @com.google.appinventor.client.helper.Helper::printLinkedContent(Ljava/lang/String;Ljava/lang/String;)(projectName, fileName);
       };
+
+      $wnd.printRawContent = function(projectName, fileName) {
+        @com.google.appinventor.client.helper.Helper::printRawContent(Ljava/lang/String;Ljava/lang/String;)(projectName, fileName);
+       };
 
       $wnd.printDirtyEditors = function() {
         printJson(@com.google.appinventor.client.helper.Helper::getDirtyEditors()());
@@ -326,6 +362,7 @@ public class Helper {
       $wnd.printScheduledTasks = function() {
         printJson(@com.google.appinventor.client.helper.Helper::getScheduledTasks()());
        }
+
 
       $wnd.pj = printJson;
       $wnd.projects = $wnd.exported.getAllProjects;
@@ -339,5 +376,6 @@ public class Helper {
       $wnd.plc = $wnd.printLinkedContent;
       $wnd.pdes = $wnd.printDirtyEditors;
       $wnd.pst = $wnd.getScheduledTasks;
+      $wnd.prc = $wnd.printRawContent;
   }-*/;
 }

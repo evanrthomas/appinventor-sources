@@ -81,19 +81,17 @@ public class Linker {
     loadChildren(node, new Callback<Collection<YACachedBlocksNode>>() {
       @Override
       public void call(Collection<YACachedBlocksNode> children) {
-        final CountDownCallback thisLinked = new CountDownCallback(children.size() + 1, onLinked); //TODO (evan): this callback spagettii is messy. Re design
+        final CountDownCallback thisLinked = new CountDownCallback(children.size() + 1, onLinked); //TODO (evan): this callback  spaghetti is messy. Re design
 
         node.load(new Callback<String>() {
           @Override
           public void call(String content) {
             Element thisUnlinkedDom = Utils.textToDom(content);
-
-            getChildrenFromHeader(thisUnlinkedDom);
             JsArray<Element> blocks = content.equals("") ? (JsArray<Element>) JavaScriptObject.createArray().cast() :
                     getTopLevelBlocks(thisUnlinkedDom);
             labelBlocks(blocks, depth);
             addAllBlocks(finalDom, blocks);
-            thisLinked.call(thisUnlinkedDom);
+            thisLinked.call(finalDom);
           }
         });
 
@@ -102,7 +100,6 @@ public class Linker {
         }
       }
     });
-
   }
 
   private static void loadChildren(final YACachedBlocksNode node,
@@ -116,7 +113,6 @@ public class Linker {
 
         Element header = Utils.textToDom(s);
         JsArray<Element> childrenXml = getChildrenFromHeader(header);
-        Collection<YACachedBlocksNode> children = new ArrayList<YACachedBlocksNode>();
         Element childXml;
         for (int i = 0; i < childrenXml.length(); i++) {
           childXml = childrenXml.get(i);
