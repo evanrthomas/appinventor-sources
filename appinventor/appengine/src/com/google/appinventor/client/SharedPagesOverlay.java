@@ -7,7 +7,7 @@ import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.explorer.project.ProjectChangeAdapter;
 import com.google.appinventor.client.explorer.project.ProjectManager;
 import com.google.appinventor.client.helper.Callback;
-import com.google.appinventor.client.helper.CountDownCallback;
+import com.google.appinventor.client.helper.Closure;
 import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.helper.Utils;
 import com.google.appinventor.client.linker.Linker;
@@ -50,43 +50,58 @@ public class SharedPagesOverlay {
     cmd.startExecuteChain(Tracking.PROJECT_ACTION_ADD_SHARED_PAGE_YA, rootNode);
   }
 
-  public static void newLink(JavaScriptObject parentObj, JavaScriptObject childObj,
+  public static void newLink(final JavaScriptObject parentObject, final JavaScriptObject childObject,
                       final JavaScriptObject onSuccess, final JavaScriptObject onFail) {
-    JSONObject parent = new JSONObject(parentObj),
-               child = new JSONObject(childObj);
-    long parentProjectId = decodeLong(parent.get("projectId")),
-            childProjectId = decodeLong(child.get("projectId"));
-    final String parentFileId = parent.get("fileId").isString().stringValue(),
-            childFileId = child.get("fileId").isString().stringValue();
+    JSONObject parentDescriptor = new JSONObject(parentObject),
+            childDescriptor = new JSONObject(childObject);
+    Callback<YoungAndroidBlocksNode[]> addChildToParent = new Callback<YoungAndroidBlocksNode[]>() {
+      @Override
+      public void call(YoungAndroidBlocksNode[] nodes) {
+        YoungAndroidBlocksNode parentNode = nodes[0],
+                               childNode = nodes[1];
 
-    final Project parentProject, childProject;
-    if ((parentProject = projectManager.getProject(parentProjectId)) == null) {
-      throw new RuntimeException("invalid parent projectId"); //should never get here. This would mean a non-existant project ended up in the overlay
-    } else if ((childProject = projectManager.getProject(childProjectId)) == null) {
-      throw new RuntimeException("invalid child projectId"); //should never get here. This would mean a non-existant project ended up in the overlay
+        if (!(childNode instanceof YASharedPageBlocksNode)) {
+          Utils.callJSFunc(onFail, Helper.eval("\"child must be a shared page\""));
+          return;
+        }
+        Linker.getInstance().newLink(parentNode, (YASharedPageBlocksNode) childNode);
+        Utils.callJSFunc(onSuccess, null);
+      }
+    };
+    descriptorsToNodesAsync(addChildToParent, parentDescriptor, childDescriptor);
+  }
+
+  private static void descriptorsToNodesAsync(final Callback<YoungAndroidBlocksNode[]> onceAllLoaded,
+                                             final JSONObject ... nodeDescriptors) {
+    final YoungAndroidBlocksNode nodes[] = new YoungAndroidBlocksNode[nodeDescriptors.length];
+    final MutableInt timesCalled = new MutableInt(0);
+    for (int i = 0; i<nodeDescriptors.length; i++) {
+      final JSONObject descriptor = nodeDescriptors[i];
+      long projectId = decodeLong(descriptor.get("projectId"));
+      Project project = projectManager.getProject(projectId);
+      if (project == null) throw new RuntimeException("invalid projectId " + projectId);
+
+      onLoadProjectNodes(project, new Closure<Integer, Project>(i) {
+        @Override
+        public void call(Project project) {
+          timesCalled.value += 1;
+          nodes[this.env] = descriptorToNode(descriptor);
+          if (timesCalled.value == nodeDescriptors.length) onceAllLoaded.call(nodes);
+        }
+      });
     }
+  }
 
-    CountDownCallback<Project> addChildToParent =
-            new CountDownCallback<Project>(2, new Callback<Project>() {
-              @Override
-              public void call(Project proj) {
-                YoungAndroidBlocksNode parentNode, childNode;
-                if ((parentNode = parentProject.getRootNode().getBlocksFile(parentFileId)) == null) {
-                  throw new RuntimeException("invalid parent fileId");
-                } else if ((childNode = childProject.getRootNode().getBlocksFile(childFileId)) == null) {
-                  throw new RuntimeException("invalid child fileId");
-                }
+  private static YoungAndroidBlocksNode descriptorToNode(JSONObject descriptor) {
+    long projectId = decodeLong(descriptor.get("projectId"));
+    String fileId = descriptor.get("fileId").isString().stringValue();
 
-                if (!(childNode instanceof YASharedPageBlocksNode)) {
-                  Utils.callJSFunc(onFail, Helper.eval("\"child must be a shared page\""));
-                  return;
-                }
-                Linker.getInstance().newLink(parentNode, (YASharedPageBlocksNode) childNode);
-                Utils.callJSFunc(onSuccess, null);
-              }
-            });
-    onLoadProjectNodes(parentProject, addChildToParent);
-    onLoadProjectNodes(childProject, addChildToParent);
+    Project project = projectManager.getProject(projectId);
+    if (project == null) throw new RuntimeException("invalid projectId");
+    YoungAndroidBlocksNode node = project.getRootNode().getBlocksFile(fileId);
+    if (node == null) throw new RuntimeException("invalid fileId");
+    return node;
+
   }
 
   public static String getCurrentProjectId() {
@@ -225,4 +240,10 @@ public class SharedPagesOverlay {
     }-*/;
 
 
+  private static class MutableInt {
+    protected int value;
+    public MutableInt(int i) {
+      value = i;
+    }
+  }
 }

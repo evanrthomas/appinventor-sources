@@ -3,6 +3,7 @@ package com.google.appinventor.client.helper;
 
 /*
  * A callback that waits until it's called n times before it runs (runs on the nth time)
+ * TODO (evan): remove this file. CollectorCallback can always be used instead
  */
 public class CountDownCallback<E> implements Callback<E> {
   private int n;
