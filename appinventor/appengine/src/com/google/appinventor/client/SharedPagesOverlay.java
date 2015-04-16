@@ -52,8 +52,6 @@ public class SharedPagesOverlay {
 
   public static void newLink(final JavaScriptObject parentObject, final JavaScriptObject childObject,
                       final JavaScriptObject onSuccess, final JavaScriptObject onFail) {
-    JSONObject parentDescriptor = new JSONObject(parentObject),
-            childDescriptor = new JSONObject(childObject);
     Callback<YoungAndroidBlocksNode[]> addChildToParent = new Callback<YoungAndroidBlocksNode[]>() {
       @Override
       public void call(YoungAndroidBlocksNode[] nodes) {
@@ -68,7 +66,23 @@ public class SharedPagesOverlay {
         Utils.callJSFunc(onSuccess, null);
       }
     };
-    descriptorsToNodesAsync(addChildToParent, parentDescriptor, childDescriptor);
+    descriptorsToNodesAsync(addChildToParent, new JSONObject(parentObject), new JSONObject(childObject));
+  }
+
+
+  public static void removeLink(JavaScriptObject parentObject, JavaScriptObject childObject, final JavaScriptObject onSuccess) {
+    descriptorsToNodesAsync(new Callback<YoungAndroidBlocksNode[]>() {
+      @Override
+      public void call(YoungAndroidBlocksNode[] nodes) {
+        YoungAndroidBlocksNode parentNode = nodes[0],
+                childNode = nodes[1];
+
+        Linker.getInstance().removeLink(parentNode, childNode);
+        Utils.callJSFunc(onSuccess, null);
+
+      }
+    }, new JSONObject(parentObject), new JSONObject(childObject));
+
   }
 
   private static void descriptorsToNodesAsync(final Callback<YoungAndroidBlocksNode[]> onceAllLoaded,
@@ -234,6 +248,10 @@ public class SharedPagesOverlay {
 
       $wnd.exported.newLink = $entry(function(parent, child, onSuccess, onFail) {
         return @com.google.appinventor.client.SharedPagesOverlay::newLink(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(parent, child, onSuccess, onFail);
+      });
+
+      $wnd.exported.removeLink = $entry(function(parent, child, onSuccess) {
+        return @com.google.appinventor.client.SharedPagesOverlay::removeLink(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(parent, child, onSuccess);
       });
 
       $wnd.exported.getCurrentProjectId = $entry(@com.google.appinventor.client.SharedPagesOverlay::getCurrentProjectId());

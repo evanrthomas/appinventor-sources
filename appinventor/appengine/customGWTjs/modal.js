@@ -46,7 +46,22 @@ var networkOptions = {
     });
   },
   onDelete: function(data, callback) {
-    //TODO (evan): implement
+    data.edges.forEach(function(edgeid) {
+      var edge = edges.get(edgeid);
+      var from = nodes.get(edge.from).info;
+      var to = nodes.get(edge.to).info;
+      window.exported.removeLink(from, to, (function(edgeid) { //wierd closure so
+        return function() {
+          edges.remove(edgeid);
+        }
+      })(edgeid));
+    });
+
+    data.nodes.forEach(function(nodeid) {
+      //TODO (evan): implement
+      nodes.get(nodeid)
+    });
+
   }
 }
 

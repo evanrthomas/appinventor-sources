@@ -5,6 +5,7 @@ import com.google.appinventor.client.YACachedBlocksNode;
 import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
 import com.google.appinventor.client.helper.Callback;
 import com.google.appinventor.client.helper.CountDownCallback;
+import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.helper.Utils;
 import com.google.appinventor.shared.rpc.project.youngandroid.YASharedPageBlocksNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
@@ -47,6 +48,25 @@ public class Linker {
     }
     linkSet.get(parent).add(child);
     Ode.getInstance().getEditorManager().scheduleAutoSave(YaCodePageEditor.getOrCreateEditor(parentRealNode));
+  }
+
+
+  public static void removeLink(YoungAndroidBlocksNode parentNode, YoungAndroidBlocksNode childNode) {
+    YACachedBlocksNode parent = YACachedBlocksNode.getCachedNode(parentNode);
+    YACachedBlocksNode child = YACachedBlocksNode.getCachedNode(childNode);
+    Helper.println("Linker.removeLink" +
+    "\n\t parent::" + parent +
+    "\n\t child::" + child +
+    "\n\t linkSet.get(parent)::" + linkSet.get(parent) +
+    "\n\t linkSet.get(parent).contains(child)::" + linkSet.get(parent).contains(child));
+    if (linkSet.get(parent) != null) {
+      linkSet.get(parent).remove(child);
+      Helper.println("\t newSet::" + linkSet.get(parent));
+      if (linkSet.get(parent).size() == 0) {
+        linkSet.remove(parent);
+      }
+    }
+    Ode.getInstance().getEditorManager().scheduleAutoSave(YaCodePageEditor.getOrCreateEditor(parentNode));
   }
 
   public String unlinkContent(YoungAndroidBlocksNode realNode, String content) {
@@ -104,6 +124,11 @@ public class Linker {
 
   private static void loadChildren(final YACachedBlocksNode node,
                                    final Callback<Collection<YACachedBlocksNode>> onload) {
+    if (linkSet.containsKey(node)) {
+      onload.call(linkSet.get(node));
+      return;
+    }
+
     node.load(new Callback<String>() {
       @Override
       public void call(String s) {
