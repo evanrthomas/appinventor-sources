@@ -47,6 +47,7 @@ public class Linker {
       linkSet.put(parent, new HashSet<YACachedBlocksNode>());
     }
     linkSet.get(parent).add(child);
+    YaCodePageEditor.getOrCreateEditor(parentRealNode).relinkBlocksArea(null);
     Ode.getInstance().getEditorManager().scheduleAutoSave(YaCodePageEditor.getOrCreateEditor(parentRealNode));
   }
 
@@ -54,18 +55,10 @@ public class Linker {
   public static void removeLink(YoungAndroidBlocksNode parentNode, YoungAndroidBlocksNode childNode) {
     YACachedBlocksNode parent = YACachedBlocksNode.getCachedNode(parentNode);
     YACachedBlocksNode child = YACachedBlocksNode.getCachedNode(childNode);
-    Helper.println("Linker.removeLink" +
-    "\n\t parent::" + parent +
-    "\n\t child::" + child +
-    "\n\t linkSet.get(parent)::" + linkSet.get(parent) +
-    "\n\t linkSet.get(parent).contains(child)::" + linkSet.get(parent).contains(child));
     if (linkSet.get(parent) != null) {
       linkSet.get(parent).remove(child);
-      Helper.println("\t newSet::" + linkSet.get(parent));
-      if (linkSet.get(parent).size() == 0) {
-        linkSet.remove(parent);
-      }
     }
+    YaCodePageEditor.getOrCreateEditor(parentNode).relinkBlocksArea(null);
     Ode.getInstance().getEditorManager().scheduleAutoSave(YaCodePageEditor.getOrCreateEditor(parentNode));
   }
 

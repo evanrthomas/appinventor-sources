@@ -176,7 +176,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
     throw new RuntimeException("encodeFormAsJsonString must be overriden in subclasses");
   }
 
-  private void relinkBlocksArea(final Command afterFileLoaded) {
+  public void relinkBlocksArea(final Command afterFileLoaded) {
     loadComplete = false;
     Linker.getInstance().loadLinkedContent(blocksNode, new Callback<String>() {
       @Override
@@ -188,10 +188,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
       }
     });
   }
-
-  private native String evalJS(String s) /*-{
-     return eval(s);
-  }-*/;
 
   @Override
   public String getTabText() {
