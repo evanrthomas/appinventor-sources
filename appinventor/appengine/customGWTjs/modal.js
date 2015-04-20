@@ -57,11 +57,14 @@ var networkOptions = {
       })(edgeid));
     });
 
-    data.nodes.forEach(function(nodeid) {
-      //TODO (evan): implement
-      nodes.get(nodeid)
+    var descriptors = data.nodes.map(function(nodeid) {
+      return nodes.get(nodeid).info;
+    })
+    window.exported.removeNodes(descriptors, function() {
+      data.nodes.forEach(function(nodeid) {
+        nodes.remove(nodeid);
+      });
     });
-
   }
 }
 
