@@ -8,10 +8,12 @@ package com.google.appinventor.client.explorer.project;
 
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
+import com.google.appinventor.client.linker.Linker;
 import com.google.appinventor.client.settings.project.ProjectSettings;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.project.UserProject;
+import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
 
 import java.util.ArrayList;
@@ -226,6 +228,7 @@ public final class Project {
     if (parent != null) {
       parent.removeChild(node);
     }
+    if (node instanceof YoungAndroidBlocksNode) Linker.getInstance().removeAllLinksForParent((YoungAndroidBlocksNode)node);
     fireProjectNodeRemoved(node);
   }
 
