@@ -50,7 +50,6 @@ public class Linker {
     Ode.getInstance().getEditorManager().scheduleAutoSave(YaCodePageEditor.getOrCreateEditor(parentRealNode));
   }
 
-
   public static void removeLink(YoungAndroidBlocksNode parentNode, YoungAndroidBlocksNode childNode) {
     YACachedBlocksNode parent = YACachedBlocksNode.getCachedNode(parentNode);
     YACachedBlocksNode child = YACachedBlocksNode.getCachedNode(childNode);
@@ -58,6 +57,18 @@ public class Linker {
       linkSet.get(parent).remove(child);
     }
     YaCodePageEditor.getOrCreateEditor(parentNode).relinkBlocksArea(null);
+    Ode.getInstance().getEditorManager().scheduleAutoSave(YaCodePageEditor.getOrCreateEditor(parentNode));
+  }
+
+  public static void removeAllLinksForParent(final YoungAndroidBlocksNode parentNode) {
+    loadChildren(parentNode, new Callback<Collection<YoungAndroidBlocksNode>>() {
+      @Override
+      public void call(Collection<YoungAndroidBlocksNode> youngAndroidBlocksNodes) {
+        for (YoungAndroidBlocksNode childNode: youngAndroidBlocksNodes) {
+          removeLink(parentNode, childNode);
+        }
+      }
+    });
     Ode.getInstance().getEditorManager().scheduleAutoSave(YaCodePageEditor.getOrCreateEditor(parentNode));
   }
 
