@@ -1,3 +1,4 @@
+//(function() {
 var network, nodes, edges,
   currentProjectId, submenus,
   firstTimeOpened = true;
@@ -62,7 +63,7 @@ var networkOptions = {
     });
     nodeInfos.forEach(function(nodeinfo) {
       window.exported.removeNode(nodeinfo, function onSuccess() {
-        nodes.remove(nodeinfo.id);
+        nodes.remove(getId(nodeinfo));
       })
     });
   }
@@ -186,3 +187,4 @@ window.exported.openModal = openModal;
 window.exported.renderProjectPage = renderProjectPage;
 window.exported.renderLibraryPage = renderLibraryPage;
 window.exported.renderLink = renderLink;
+//})();
