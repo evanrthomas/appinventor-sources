@@ -186,6 +186,7 @@ public final class EditorManager {
    * @param fileEditor the file editor for which to schedule auto-save
    */
   public void scheduleAutoSave(FileEditor fileEditor) {
+
     // Add the file editor to the dirtyFileEditors list.
     if (!fileEditor.isDamaged()) { // Don't save damaged files
       dirtyFileEditors.add(fileEditor);
@@ -232,6 +233,7 @@ public final class EditorManager {
    *                     settings and file editors are saved successfully
    */
   public void saveDirtyEditors(final Command afterSaving) {
+    Helper.println("saveDirtyEditors()");
     // Collect the files that need to be saved.
     List<FileDescriptorWithContent> filesToSave = new ArrayList<FileDescriptorWithContent>();
     for (FileEditor fileEditor : dirtyFileEditors) {
@@ -286,8 +288,10 @@ public final class EditorManager {
     // Collect the files that need to be saved.
     for (FileEditor dirtyEditor : dirtyFileEditors) {
       if (dirtyEditor instanceof YaCodePageEditor) {
+        Helper.println("saveDirtyEditorsToCache()");
         YACachedBlocksNode node = YACachedBlocksNode.getCachedNode(
                 dirtyEditor.getProjectId(), dirtyEditor.getFileId());
+        Helper.println("\tsaveDirtyEditorsToCache() complete");
         if (node != null) node.saveToCache(dirtyEditor.getRawFileContent());
       } else {
         Helper.println("editor " + dirtyEditor.getFileId() + " is not CodePageEditor");
@@ -381,7 +385,7 @@ public final class EditorManager {
         final long projectId = fileDescriptor.getProjectId();
         final String fileId = fileDescriptor.getFileId();
         final String content = fileDescriptor.getContent();
-        final OdeAsyncCallback<Long> saveCallback = new OdeAsyncCallback<Long>(MESSAGES.saveErrorMultipleFiles()) {
+        final OdeAsyncCallback<Long> saveCallback = new OdeAsyncCallback<Long>(MESSAGES.saveErrorMultipleFiles() + " " + fileId) {
                   @Override
                   public void onSuccess(Long date) {
                     if (dateHolder.date != 0) {
@@ -401,6 +405,7 @@ public final class EditorManager {
 
                   @Override
                   public void onFailure(Throwable caught) {
+                    Helper.println("saveMultipleFilesAtOnce error");
                     // Here is where we handle BlocksTruncatedException
                     if (caught instanceof BlocksTruncatedException) {
                       Ode.getInstance().blocksTruncatedDialog(projectId, fileId, content, this);
@@ -409,10 +414,13 @@ public final class EditorManager {
                     }
                   }
                 };
-
+         Helper.println("saveMultipleFilesAtOnce()");
         if (YACachedBlocksNode.getCachedNode(projectId, fileId) != null) {
+          Helper.println("saveMultipleFilesAtOnce() complete");
           YACachedBlocksNode.getCachedNode(projectId, fileId).save(content, false, saveCallback);
         } else {
+          Helper.println("saveMultipleFilesAtOnce() complete");
+          Helper.println("saveMultipleFilesAtOnce() saving a non-cached node " + fileId);
           //The caching layer doesn't know about YAFormNodes and YAAssetNodes, we have to save them directly using projectservice
           Ode.getInstance().getProjectService().save2(Ode.getInstance().getSessionId(),
                   projectId, fileId, false, content, saveCallback);

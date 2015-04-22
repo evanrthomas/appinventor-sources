@@ -56,7 +56,7 @@ public class YACachedBlocksNode {
   }
 
   public void save(String s, boolean force, OdeAsyncCallback<Long> callback) {
-    content = s;
+    saveToCache(s);
     Ode.getInstance().getProjectService().save2(Ode.getInstance().getSessionId(),
             realNode.getProjectId(), realNode.getFileId(), force, content, callback);
   }

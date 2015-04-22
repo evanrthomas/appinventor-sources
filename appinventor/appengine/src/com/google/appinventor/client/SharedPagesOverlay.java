@@ -3,6 +3,7 @@ package com.google.appinventor.client;
 
 import com.google.appinventor.client.explorer.commands.AddSharedPageCommand;
 import com.google.appinventor.client.explorer.commands.ChainableCommand;
+import com.google.appinventor.client.explorer.commands.DeleteFileCommand;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.explorer.project.ProjectChangeAdapter;
 import com.google.appinventor.client.explorer.project.ProjectManager;
@@ -12,6 +13,7 @@ import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.helper.Utils;
 import com.google.appinventor.client.linker.Linker;
 import com.google.appinventor.client.tracking.Tracking;
+import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YAFormPageBlocksNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YASharedPageBlocksNode;
@@ -85,6 +87,31 @@ public class SharedPagesOverlay {
 
   }
 
+  public static void removeNode(JavaScriptObject descriptor, final JavaScriptObject onSuccess) {
+    JSONObject jsonDescriptor = new JSONObject(descriptor);
+    Helper.println("removeNode() " + jsonDescriptor.get("fileId"));
+    final Callback<Void> onSuccessCallback = new Callback<Void>() {
+      @Override
+      public void call(Void aVoid) {
+        Utils.callJSFunc(onSuccess, null);
+      }
+    };
+
+    descriptorsToNodesAsync(new Callback<YoungAndroidBlocksNode[]>() {
+      @Override
+      public void call(YoungAndroidBlocksNode[] nodes) {
+        YoungAndroidBlocksNode node  = nodes[0];
+        ChainableCommand cmd = new DeleteFileCommand() {
+          @Override
+          public void execute(final ProjectNode node) {
+            execute(node, onSuccessCallback, null);
+          }
+        };
+        cmd.startExecuteChain(Tracking.PROJECT_ACTION_REMOVEFORM_YA, node);
+      }
+    }, new JSONObject[] {jsonDescriptor});
+  }
+
   private static void descriptorsToNodesAsync(final Callback<YoungAndroidBlocksNode[]> onceAllLoaded,
                                              final JSONObject ... nodeDescriptors) {
     final YoungAndroidBlocksNode nodes[] = new YoungAndroidBlocksNode[nodeDescriptors.length];
@@ -107,6 +134,7 @@ public class SharedPagesOverlay {
   }
 
   private static YoungAndroidBlocksNode descriptorToNode(JSONObject descriptor) {
+    //This function assumes project.loadNodes has already been called
     long projectId = decodeLong(descriptor.get("projectId"));
     String fileId = descriptor.get("fileId").isString().stringValue();
 
@@ -252,6 +280,10 @@ public class SharedPagesOverlay {
 
       $wnd.exported.removeLink = $entry(function(parent, child, onSuccess) {
         return @com.google.appinventor.client.SharedPagesOverlay::removeLink(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(parent, child, onSuccess);
+      });
+
+      $wnd.exported.removeNode = $entry(function(descriptor, onSuccess) {
+        return @com.google.appinventor.client.SharedPagesOverlay::removeNode(Lcom/google/gwt/core/client/JavaScriptObject;Lcom/google/gwt/core/client/JavaScriptObject;)(descriptor, onSuccess);
       });
 
       $wnd.exported.getCurrentProjectId = $entry(@com.google.appinventor.client.SharedPagesOverlay::getCurrentProjectId());

@@ -9,6 +9,7 @@ package com.google.appinventor.client.explorer.commands;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.explorer.project.Project;
+import com.google.appinventor.client.helper.Callback;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.*;
 import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
@@ -35,6 +36,11 @@ public class DeleteFileCommand extends ChainableCommand {
 
   @Override
   public void execute(final ProjectNode node) {
+    execute(node, null, null);
+  }
+
+
+  protected void execute(final ProjectNode node, final Callback<Void> onSuccess, final Callback<Void> onFail) {
     if (deleteConfirmation()) {
       final Ode ode = Ode.getInstance();
 
@@ -67,15 +73,17 @@ public class DeleteFileCommand extends ChainableCommand {
                 project.deleteNode(sourceNode);
               }
             }
-            ode.getDesignToolbar().removeScreen(project.getProjectId(), 
+            ode.getDesignToolbar().removeScreen(project.getProjectId(),
                 ((YoungAndroidSourceNode) node).getFormName());
             ode.updateModificationDate(projectId, date);
+            if (onSuccess != null) onSuccess.call(null);
             executeNextCommand(node);
           }
 
           @Override
           public void onFailure(Throwable caught) {
             super.onFailure(caught);
+            if (onFail != null) onFail.call(null);
             executionFailedOrCanceled();
           }
         });
@@ -102,6 +110,8 @@ public class DeleteFileCommand extends ChainableCommand {
     } else {
       executionFailedOrCanceled();
     }
+
+
   }
 
   /**

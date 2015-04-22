@@ -5,6 +5,7 @@ import com.google.appinventor.client.YACachedBlocksNode;
 import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
 import com.google.appinventor.client.helper.Callback;
 import com.google.appinventor.client.helper.CountDownCallback;
+import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.helper.Utils;
 import com.google.appinventor.shared.rpc.project.youngandroid.YASharedPageBlocksNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
@@ -149,7 +150,9 @@ public class Linker {
           long projectId = Long.parseLong(projectIdString);
           String fileId = childXml.getAttribute("fileId");
           if (fileId.length() == 0) fileId = childXml.getAttribute("fileid"); //TODO (evan): fix this. Silly hack because gwt for some reason makes the I in projectId lowercase
+          Helper.println("loadChildren()");
           YACachedBlocksNode child = YACachedBlocksNode.getCachedNode(projectId, fileId);
+          Helper.println("loadChildren() complete");
           linkSet.get(node).add(child); //linkSet.get(node) is a Set, if it already has this child, the new child won't be added
         }
         onload.call(linkSet.get(node));

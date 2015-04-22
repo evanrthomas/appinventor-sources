@@ -57,13 +57,13 @@ var networkOptions = {
       })(edgeid));
     });
 
-    var descriptors = data.nodes.map(function(nodeid) {
+    var nodeInfos = data.nodes.map(function(nodeid) {
       return nodes.get(nodeid).info;
-    })
-    window.exported.removeNodes(descriptors, function() {
-      data.nodes.forEach(function(nodeid) {
-        nodes.remove(nodeid);
-      });
+    });
+    nodeInfos.forEach(function(nodeinfo) {
+      window.exported.removeNode(nodeinfo, function onSuccess() {
+        nodes.remove(nodeinfo.id);
+      })
     });
   }
 }
