@@ -61,16 +61,17 @@ public class Linker {
     Ode.getInstance().getEditorManager().scheduleAutoSave(YaCodePageEditor.getOrCreateEditor(parentNode));
   }
 
-  public static void removeAllLinksForParent(final YoungAndroidBlocksNode parentNode) {
-    loadChildren(parentNode, new Callback<Collection<YoungAndroidBlocksNode>>() {
-      @Override
-      public void call(Collection<YoungAndroidBlocksNode> youngAndroidBlocksNodes) {
-        for (YoungAndroidBlocksNode childNode: youngAndroidBlocksNodes) {
-          removeLink(parentNode, childNode);
-        }
-      }
-    });
-    Ode.getInstance().getEditorManager().scheduleAutoSave(YaCodePageEditor.getOrCreateEditor(parentNode));
+  public static void removeAllLinksForNode(final YoungAndroidBlocksNode node) {
+    //TODO (evan): should remove links form the linkSet of the form (parent -> node)
+    //loadChildren(parentNode, new Callback<Collection<YoungAndroidBlocksNode>>() {
+    //  @Override
+    //  public void call(Collection<YoungAndroidBlocksNode> youngAndroidBlocksNodes) {
+    //    for (YoungAndroidBlocksNode childNode: youngAndroidBlocksNodes) {
+    //      removeLink(parentNode, childNode);
+    //    }
+    //  }
+    //});
+//    Ode.getInstance().getEditorManager().scheduleAutoSave(YaCodePageEditor.getOrCreateEditor(parentNode));
   }
 
   public String unlinkContent(YoungAndroidBlocksNode realNode, String content) {

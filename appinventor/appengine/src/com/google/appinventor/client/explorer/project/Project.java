@@ -228,7 +228,7 @@ public final class Project {
     if (parent != null) {
       parent.removeChild(node);
     }
-    if (node instanceof YoungAndroidBlocksNode) Linker.getInstance().removeAllLinksForParent((YoungAndroidBlocksNode)node);
+    if (node instanceof YoungAndroidBlocksNode) Linker.getInstance().removeAllLinksForNode((YoungAndroidBlocksNode) node);
     fireProjectNodeRemoved(node);
   }
 
