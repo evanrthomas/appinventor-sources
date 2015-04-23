@@ -9,6 +9,7 @@ package com.google.appinventor.client.editor.youngandroid;
 import com.google.appinventor.client.*;
 import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
+import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.common.collect.Maps;
@@ -475,7 +476,7 @@ public class BlocklyPanel extends HTMLPanel {
   }
 
   public void setBlocksContent(String formJson, String blocksContent) {
-    doClearWorkspace(formName);
+    //doClearWorkspace(formName);
     loadBlocksContent(formJson, blocksContent);
   }
 
@@ -899,7 +900,7 @@ public class BlocklyPanel extends HTMLPanel {
   }-*/;
 
   private static native void doClearWorkspace(String formName) /*-{
-    if ($wnd.Blocklies && $wnd.Blocklies[formName]) { //check that the workspace exists
+    if ($wnd.Blocklies && $wnd.Blocklies[formName]) {
       $wnd.Blocklies[formName].mainWorkspace.clear();
     }
   }-*/;

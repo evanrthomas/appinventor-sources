@@ -405,7 +405,6 @@ public final class EditorManager {
 
                   @Override
                   public void onFailure(Throwable caught) {
-                    Helper.println("saveMultipleFilesAtOnce error");
                     // Here is where we handle BlocksTruncatedException
                     if (caught instanceof BlocksTruncatedException) {
                       Ode.getInstance().blocksTruncatedDialog(projectId, fileId, content, this);
@@ -414,13 +413,9 @@ public final class EditorManager {
                     }
                   }
                 };
-         Helper.println("saveMultipleFilesAtOnce()");
         if (YACachedBlocksNode.getCachedNode(projectId, fileId) != null) {
-          Helper.println("saveMultipleFilesAtOnce() complete");
           YACachedBlocksNode.getCachedNode(projectId, fileId).save(content, false, saveCallback);
         } else {
-          Helper.println("saveMultipleFilesAtOnce() complete");
-          Helper.println("saveMultipleFilesAtOnce() saving a non-cached node " + fileId);
           //The caching layer doesn't know about YAFormNodes and YAAssetNodes, we have to save them directly using projectservice
           Ode.getInstance().getProjectService().save2(Ode.getInstance().getSessionId(),
                   projectId, fileId, false, content, saveCallback);
