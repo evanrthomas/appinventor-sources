@@ -12,7 +12,6 @@ import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.helper.Callback;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.*;
-import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
 import com.google.gwt.user.client.Window;
 
 import static com.google.appinventor.client.Ode.MESSAGES;
@@ -68,7 +67,8 @@ public class DeleteFileCommand extends ChainableCommand {
             Project project = getProject(node);
             for (ProjectNode sourceNode : node.getProjectRoot().getAllSourceNodes()) {
               if (sourceNode.getFileId().equals(formFileId) ||
-                  YoungAndroidSourceAnalyzer.isBlocksNodeSourceFileId(sourceNode.getFileId()) ||
+                  sourceNode.getFileId().equals(formPageFileId) ||
+                  sourceNode.getFileId().equals(sharedPageFileId) ||
                   sourceNode.getFileId().equals(yailFileId)) {
                 project.deleteNode(sourceNode);
               }

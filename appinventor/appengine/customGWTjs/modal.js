@@ -77,7 +77,7 @@ function openModal() {
   firstTimeOpened = false;
 
   currentProjectId = window.exported.getCurrentProjectId();
-  clearNetwork();
+  clearNetwork(); //renderProjectPage and renderLibraryPage will be called by java
   document.getElementById('fade').style.display = 'block';
   document.getElementById('overlay').style.display = 'block';
 
