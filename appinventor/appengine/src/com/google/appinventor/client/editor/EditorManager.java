@@ -104,7 +104,6 @@ public final class EditorManager {
       ProjectEditorFactory factory = Ode.getProjectEditorRegistry().get(projectRootNode);
       if (factory != null) {
         projectEditor = factory.getOrCreateProjectEditor(projectRootNode);
-        Helper.println((projectEditor == null) + "");
 
         // Add the editor to the openProjectEditors map.
         openProjectEditors.put(projectId, projectEditor);
@@ -233,7 +232,6 @@ public final class EditorManager {
    *                     settings and file editors are saved successfully
    */
   public void saveDirtyEditors(final Command afterSaving) {
-    Helper.println("saveDirtyEditors()");
     // Collect the files that need to be saved.
     List<FileDescriptorWithContent> filesToSave = new ArrayList<FileDescriptorWithContent>();
     for (FileEditor fileEditor : dirtyFileEditors) {
@@ -288,10 +286,8 @@ public final class EditorManager {
     // Collect the files that need to be saved.
     for (FileEditor dirtyEditor : dirtyFileEditors) {
       if (dirtyEditor instanceof YaCodePageEditor) {
-        Helper.println("saveDirtyEditorsToCache()");
         YACachedBlocksNode node = YACachedBlocksNode.getCachedNode(
                 dirtyEditor.getProjectId(), dirtyEditor.getFileId());
-        Helper.println("\tsaveDirtyEditorsToCache() complete");
         if (node != null) node.saveToCache(dirtyEditor.getRawFileContent());
       } else {
         Helper.println("editor " + dirtyEditor.getFileId() + " is not CodePageEditor");

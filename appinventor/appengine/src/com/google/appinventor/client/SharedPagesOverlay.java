@@ -89,7 +89,6 @@ public class SharedPagesOverlay {
 
   public static void removeNode(JavaScriptObject descriptor, final JavaScriptObject onSuccess) {
     JSONObject jsonDescriptor = new JSONObject(descriptor);
-    Helper.println("removeNode() " + jsonDescriptor.get("fileId"));
     final Callback<Void> onSuccessCallback = new Callback<Void>() {
       @Override
       public void call(Void aVoid) {
