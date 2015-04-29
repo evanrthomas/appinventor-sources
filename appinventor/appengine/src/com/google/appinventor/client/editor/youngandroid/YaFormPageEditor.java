@@ -1,9 +1,11 @@
 
 package com.google.appinventor.client.editor.youngandroid;
 
+import com.google.appinventor.client.boxes.BlockSelectorBox;
 import com.google.appinventor.client.editor.simple.components.FormChangeListener;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.editor.simple.components.MockForm;
+import com.google.appinventor.client.explorer.SourceStructureExplorerItem;
 import com.google.appinventor.shared.rpc.project.FileDescriptorWithContent;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
 import com.google.appinventor.shared.youngandroid.YoungAndroidSourceAnalyzer;
@@ -36,10 +38,7 @@ public final class YaFormPageEditor extends YaCodePageEditor implements FormChan
     return myFormEditor.isScreen1();
   }
 
-  @Override
-  protected TreeItem getComponentsTree() {
-     return getForm().buildComponentsTree();
-  }
+
 
 
   @Override
@@ -139,6 +138,16 @@ public final class YaFormPageEditor extends YaCodePageEditor implements FormChan
       //TODO (evan) : might be able to remove this ternary statement, I think selectedComp will always be non-null
       updateBlocksTree(selectedComp == null ? null : selectedComp.getSourceStructureExplorerItem());
     }
+  }
+
+  @Override
+  protected void updateBlocksTree(SourceStructureExplorerItem itemToSelect) {
+    TreeItem items[] = new TreeItem[3];
+    items[0] = BlockSelectorBox.getBlockSelectorBox().getBuiltInBlocksTree();
+    items[1] = getForm().buildComponentsTree();
+    items[2] = getAnyComponentsTree();
+    sourceStructureExplorer.updateTree(items, itemToSelect);
+    BlockSelectorBox.getBlockSelectorBox().setContent(sourceStructureExplorer);
   }
 
 

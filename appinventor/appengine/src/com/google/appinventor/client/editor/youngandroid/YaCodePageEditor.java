@@ -66,7 +66,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   protected final YoungAndroidBlocksNode blocksNode;
 
   // References to other panels that we need to control.
-  private final SourceStructureExplorer sourceStructureExplorer;
+  protected final SourceStructureExplorer sourceStructureExplorer;
 
   protected final ComponentList components;
 
@@ -306,18 +306,9 @@ public abstract class YaCodePageEditor extends SimpleEditor
     }
   }
 
-  protected void updateBlocksTree(SourceStructureExplorerItem itemToSelect) {
-    TreeItem items[] = new TreeItem[3];
-    items[0] = BlockSelectorBox.getBlockSelectorBox().getBuiltInBlocksTree();
-    items[1] = getComponentsTree();
-    items[2] = getAnyComponentsTree();
-    sourceStructureExplorer.updateTree(items, itemToSelect);
-    BlockSelectorBox.getBlockSelectorBox().setContent(sourceStructureExplorer);
-  }
+  protected abstract void updateBlocksTree(SourceStructureExplorerItem itemToSelect);
 
-  protected abstract TreeItem getComponentsTree();
-
-  private TreeItem getAnyComponentsTree() {
+  protected TreeItem getAnyComponentsTree() {
     return BlockSelectorBox.getBlockSelectorBox().
             getGenericComponentsTree(new ComponentList(ComponentList.flatten(components.getComponents())));
   }

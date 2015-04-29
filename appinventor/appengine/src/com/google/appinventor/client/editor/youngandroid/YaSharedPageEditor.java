@@ -1,10 +1,11 @@
 package com.google.appinventor.client.editor.youngandroid;
 
-import com.google.appinventor.client.ComponentList;
+import com.google.appinventor.client.boxes.BlockSelectorBox;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.editor.simple.components.MockForm;
 import com.google.appinventor.client.editor.simple.palette.SimpleComponentDescriptor;
 import com.google.appinventor.client.editor.youngandroid.palette.YoungAndroidPalettePanel;
+import com.google.appinventor.client.explorer.SourceStructureExplorerItem;
 import com.google.appinventor.client.helper.Callback;
 import com.google.appinventor.client.helper.Utils;
 import com.google.appinventor.client.linker.Linker;
@@ -93,9 +94,14 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
     updateBlocksTree(null);
   }
 
-  protected TreeItem getComponentsTree() {
-    TreeItem tree = ComponentList.buildTree(components);
+  @Override
+  protected void updateBlocksTree(SourceStructureExplorerItem itemToSelect) {
+    TreeItem items[] = new TreeItem[2];
+    items[0] = BlockSelectorBox.getBlockSelectorBox().getBuiltInBlocksTree();
+    items[1] = getAnyComponentsTree();
+
     TextButton button = new TextButton("Add Component");
+    //tree.setState(false);
     YoungAndroidPalettePanel palettePanel =  new YoungAndroidPalettePanel(YaSharedPageEditor.this);
     final PopupPanel panel = new PopupPanel(true, true);
     panel.setWidget(palettePanel);
@@ -115,10 +121,10 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
         panel.show();
       }
     });
+    items[1].addItem(button);
 
-    tree.addItem(button);
-
-    return tree;
+    sourceStructureExplorer.updateTree(items, itemToSelect);
+    BlockSelectorBox.getBlockSelectorBox().setContent(sourceStructureExplorer);
   }
 
   private native Element setDemandedComponentsHeader(
