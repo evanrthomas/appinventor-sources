@@ -7,6 +7,7 @@ import com.google.appinventor.client.editor.simple.palette.SimpleComponentDescri
 import com.google.appinventor.client.editor.youngandroid.palette.YoungAndroidPalettePanel;
 import com.google.appinventor.client.explorer.SourceStructureExplorerItem;
 import com.google.appinventor.client.helper.Callback;
+import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.helper.Utils;
 import com.google.appinventor.client.linker.Linker;
 import com.google.appinventor.client.properties.json.ClientJsonParser;
@@ -57,7 +58,8 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
     return names;
   }
 
-  private void addComponentsFromHeader(JavaScriptObject blocklyXml) {
+  private void addComponentsFromHeader(Element blocklyXml) {
+    Helper.println("addComponentsFromHeader() " + Utils.domToText(blocklyXml));
     JsArray<Element> comps = getComponentsFromHeader(blocklyXml);
     for (int i =0; i<comps.length(); i++) {
       MockComponent comp  = SimpleComponentDescriptor.createMockComponent(
@@ -84,8 +86,7 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
     }
     Element newcontents = setDemandedComponentsHeader(Utils.textToDom(super.getRawFileContent()),
             componentsXmlArr);
-    String s = Utils.domToText(newcontents);
-    return s;
+    return Utils.domToText(newcontents);
   }
 
   @Override

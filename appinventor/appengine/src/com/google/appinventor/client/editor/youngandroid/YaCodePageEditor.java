@@ -323,9 +323,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   @Override
   public String getRawFileContent() {
     String content = blocksArea.getBlocksContent();
-    if (content.equals("")) {
-      return Utils.domToText(Utils.blocklyXmlContainer());
-    }
+    if (content.equals("")) return Utils.domToText(Utils.blocklyXmlContainer());
     return Linker.getInstance().unlinkContent(blocksNode, content);
   }
 
