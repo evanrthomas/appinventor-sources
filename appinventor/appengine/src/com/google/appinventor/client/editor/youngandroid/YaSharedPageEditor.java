@@ -34,17 +34,23 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
 
   public YaSharedPageEditor(YaProjectEditor projectEditor, YoungAndroidBlocksNode blocksNode) {
     super(projectEditor, blocksNode);
-    Linker.getInstance().loadLinkedContent(blocksNode, new Callback<String>() {
+    Linker.getInstance().getHeader(blocksNode, new Callback<Element>() {
       @Override
-      public void call(String content) {
-        if (!content.equals("")) addComponentsFromHeader(Utils.textToDom(content));
+      public void call(Element xml) {
+        Helper.indent("YASharedPageEditor() constructor " + getName());
+        Helper.println("xml from backend");
+        Helper.consolePrint(xml);
+        addComponentsFromHeader(xml);
+        Helper.unindent();
       }
     });
   }
 
   @Override
   public Map<String, MockComponent> getComponents() {
-    //TODO (evan): I don't like the idea of returning this map. Instead there should be a getComponentByName method. Doing this because it's required by grandfather class SimpleEditor
+    //TODO (evan): I don't like the idea of returning this map.
+    // Instead there should be a getComponentByName method.
+    // Doing this because it's required by grandfather class SimpleEditor
     Map<String, MockComponent> map = new HashMap<String, MockComponent>();
     for (MockComponent comp: components.getComponents()) {
       map.put(comp.getName(), comp);
@@ -59,7 +65,9 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
   }
 
   private void addComponentsFromHeader(Element blocklyXml) {
-    Helper.println("addComponentsFromHeader() " + Utils.domToText(blocklyXml));
+    Helper.groupCollapsed("addComponentsFromHeader()" );
+    Helper.println("blocklyXml from backend");
+    Helper.consolePrint(Utils.domToText(blocklyXml));
     JsArray<Element> comps = getComponentsFromHeader(blocklyXml);
     for (int i =0; i<comps.length(); i++) {
       MockComponent comp  = SimpleComponentDescriptor.createMockComponent(
@@ -68,10 +76,13 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
       comp.changeProperty("name", comps.get(i).getAttribute("name"));
       addComponent(comp);
     }
+    Helper.println("components " + components.getComponents().size());
+    Helper.println(components.getComponents());
+    Helper.unindent();
   }
 
   private native JsArray<Element> getComponentsFromHeader(JavaScriptObject blocklyXml) /*-{
-    return blocklyXml.querySelectorAll('header > demanded_components > *');
+    return blocklyXml.querySelectorAll('header > demanded_components > *') || blocklyXml.querySelectorAll('demanded_components > *');
   }-*/;
 
   public boolean isScreen1() {

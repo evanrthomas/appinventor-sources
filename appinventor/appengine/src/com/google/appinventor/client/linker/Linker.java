@@ -82,6 +82,17 @@ public class Linker {
     return Utils.domToText(xml);
   }
 
+  public static void getHeader(YoungAndroidBlocksNode node, final Callback<Element> onload) {
+    YACachedBlocksNode.getCachedNode(node).load(new Callback<String>() {
+      @Override
+      public void call(String s) {
+        Element header =  getHeaderBlock(Utils.textToDom(s));
+        if (header != null) onload.call(header);
+      }
+    });
+
+  }
+
   public static void loadChildren(final YoungAndroidBlocksNode node,
                                   final Callback<Collection<YoungAndroidBlocksNode>> onload) {
     loadChildren(YACachedBlocksNode.getCachedNode(node), new Callback<Collection<YACachedBlocksNode>>() {
@@ -187,6 +198,11 @@ public class Linker {
   private static native JsArray<Element> getChildrenFromHeader(JavaScriptObject xml) /*-{
     return xml.querySelectorAll('header > children > child');
   }-*/;
+
+  private static native Element getHeaderBlock(Element xml)  /*-{
+    return xml.querySelector('header');
+  }-*/;
+
 
   private static native Element createElement(String name) /*-{
     return document.createElement(name);
