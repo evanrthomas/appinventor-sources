@@ -37,11 +37,7 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
     Linker.getInstance().getHeader(blocksNode, new Callback<Element>() {
       @Override
       public void call(Element xml) {
-        Helper.indent("YASharedPageEditor() constructor " + getName());
-        Helper.println("xml from backend");
-        Helper.consolePrint(xml);
         addComponentsFromHeader(xml);
-        Helper.unindent();
       }
     });
   }
@@ -65,9 +61,6 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
   }
 
   private void addComponentsFromHeader(Element blocklyXml) {
-    Helper.groupCollapsed("addComponentsFromHeader()" );
-    Helper.println("blocklyXml from backend");
-    Helper.consolePrint(Utils.domToText(blocklyXml));
     JsArray<Element> comps = getComponentsFromHeader(blocklyXml);
     for (int i =0; i<comps.length(); i++) {
       MockComponent comp  = SimpleComponentDescriptor.createMockComponent(
@@ -76,9 +69,6 @@ public final class YaSharedPageEditor extends YaCodePageEditor {
       comp.changeProperty("name", comps.get(i).getAttribute("name"));
       addComponent(comp);
     }
-    Helper.println("components " + components.getComponents().size());
-    Helper.println(components.getComponents());
-    Helper.unindent();
   }
 
   private native JsArray<Element> getComponentsFromHeader(JavaScriptObject blocklyXml) /*-{
