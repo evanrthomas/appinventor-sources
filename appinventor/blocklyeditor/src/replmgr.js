@@ -190,9 +190,13 @@ Blockly.ReplMgr.pollYail = function() {
 };
 
 Blockly.ReplMgr.resetYail = function(code) {
+    console.log("ReplMgr.resetYail()");
     window.parent.ReplState.phoneState.initialized = false; // so running io stops
+    console.log("\tinitialized");
     this.putYail.reset();
+    console.log("\treset");
     window.parent.ReplState.phoneState = { "phoneQueue" : []};
+    console.log("\tphoneState set");
 };
 
 // Theory of Operation
