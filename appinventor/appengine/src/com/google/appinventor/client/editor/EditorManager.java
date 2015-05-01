@@ -76,7 +76,6 @@ public final class EditorManager {
       public void run() {
         // When the timer goes off, save all dirtyProjectSettings and
         // dirtyFileEditors.
-        Helper.println("EditorManager() saveDirtyEditors auto timer");
         Ode.getInstance().lockScreens(true); // Lock out changes
         saveDirtyEditors(new Command() {
             @Override
@@ -139,24 +138,16 @@ public final class EditorManager {
   public void closeProjectEditor(long projectId) {
     // TODO(lizlooney) - investigate whether the ProjectEditor and all its FileEditors stay in
     // memory even after we've removed them.
-    Helper.println("EditorManager.closeProjectEditor()");
     Project project = Ode.getInstance().getProjectManager().getProject(projectId);
-    if (project == null) Helper.println("EditorManager.closeProjectEditor project == null");
     ProjectSettings projectSettings = project.getSettings();
     dirtyProjectSettings.remove(projectSettings);
 
-
     ProjectEditor peditor = openProjectEditors.get(projectId);
-    if (peditor == null) Helper.println("EditorManager.closeProjectEditor() peditor is null");
     ArrayList<String> fileIdsAsList = new ArrayList<String>();
     for (FileEditor editor: peditor.getOpenFileEditors()) {
-      if (editor == null) Helper.println("EditorManager.closeProjectEditor() IMPOSSIBRU iterated editor");
       fileIdsAsList.add(editor.getFileId());
     }
     String[] fileids = fileIdsAsList.toArray(new String[fileIdsAsList.size()]);
-    Helper.indent("EditorManager.closeProjectEditor() fileids being passed");
-    Helper.println(Arrays.asList(fileids));
-    Helper.unindent();
     closeFileEditors(projectId, fileids);
     openProjectEditors.remove(projectId);
   }
@@ -169,10 +160,7 @@ public final class EditorManager {
    * @param fileIds  file IDs of the file editors to be closed
    */
   public void closeFileEditors(long projectId, String[] fileIds) {
-    Helper.indent("EditorManager.closeFileEditors()");
-    Helper.println(Arrays.asList(fileIds));
     ProjectEditor projectEditor = openProjectEditors.get(projectId);
-    Helper.println("Editormanager.closeFileEditors() projectEditor == null " + (projectEditor == null)); //gets to here ???
     if (projectEditor != null) {
       for (String fileId : fileIds) {
         FileEditor fileEditor = projectEditor.getFileEditor(fileId);
@@ -182,7 +170,6 @@ public final class EditorManager {
       }
       projectEditor.closeFileEditors(fileIds);
     }
-    Helper.unindent();
   }
 
   /**
@@ -389,8 +376,6 @@ public final class EditorManager {
    */
   private void saveMultipleFilesAtOnce(
       final List<FileDescriptorWithContent> filesWithContent, final Command afterSavingFiles, final DateHolder dateHolder) {
-    Helper.println("saveMultipleFilesAtOnce() ");
-
     if (filesWithContent.isEmpty()) {
       // No files needed saving.
       // Execute the afterSavingFiles command if one was given.
@@ -402,11 +387,9 @@ public final class EditorManager {
         final long projectId = fileDescriptor.getProjectId();
         final String fileId = fileDescriptor.getFileId();
         final String content = fileDescriptor.getContent();
-        Helper.println("\tsaveMultipleFilesAtOnce() saving fileId " + fileId);
         final OdeAsyncCallback<Long> saveCallback = new OdeAsyncCallback<Long>(MESSAGES.saveErrorMultipleFiles() + " " + fileId) {
                   @Override
                   public void onSuccess(Long date) {
-                    Helper.println("\tsaveMultipleFilesAtOnce() success " + fileId);
                     if (dateHolder.date != 0) {
                       // This sets the project modification time to that of one of
                       // the successful file saves. It doesn't really matter which
@@ -424,7 +407,6 @@ public final class EditorManager {
 
                   @Override
                   public void onFailure(Throwable caught) {
-                    Helper.println("\tsaveMultipleFilesAtOnce() FAILURE -- on node " + fileId);
                     // Here is where we handle BlocksTruncatedException
                     if (caught instanceof BlocksTruncatedException) {
                       Ode.getInstance().blocksTruncatedDialog(projectId, fileId, content, this);

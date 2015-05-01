@@ -9,7 +9,6 @@ package com.google.appinventor.client.editor.youngandroid;
 import com.google.appinventor.client.*;
 import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
-import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.common.collect.Maps;
@@ -434,9 +433,7 @@ public class BlocklyPanel extends HTMLPanel {
     // Call doResetYail which will stop the timer that is polling the phone. It is important
     // that it be stopped to avoid a race condition where the last timer on this form fires
     // while the new form is loading.
-    Helper.println("BlocklyPanel.saveComponentsAndBlocks() doResetYail(" + formName + ")");
     doResetYail(formName);
-    Helper.println("BlocklyPanel.saveComponentsAndBlocks() doResetYail(" + formName + ") complete");
     // Get blocks content before putting anything in the componentOps map since an entry in
     // the componentOps map is taken as an indication that the blocks area has not initialized yet.
     pendingBlocksContentMap.put(formName, getBlocksContent());

@@ -10,7 +10,6 @@ import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
 import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.helper.Callback;
-import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.*;
 import com.google.gwt.user.client.Window;
@@ -41,7 +40,6 @@ public class DeleteFileCommand extends ChainableCommand {
 
 
   protected void execute(final ProjectNode node, final Callback<Void> onSuccess, final Callback<Void> onFail) {
-    Helper.println("DeleteFile.execute()");
     if (deleteConfirmation()) {
       final Ode ode = Ode.getInstance();
 
@@ -55,10 +53,6 @@ public class DeleteFileCommand extends ChainableCommand {
         final String sharedPageFileId = YASharedPageBlocksNode.getBlocklyFileId(qualifiedFormName);
         final String yailFileId = YoungAndroidYailNode.getYailFileId(qualifiedFormName);
         final long projectId = node.getProjectId();
-        Helper.println("\tDeleteFile.execute() closing fileEditors ");
-        Helper.println("\t\t" + formFileId);
-        Helper.println("\t\t" + formPageFileId);
-        Helper.println("\t\t" + sharedPageFileId);
         ode.getEditorManager().closeFileEditors(projectId, new String[]{formFileId, formPageFileId, sharedPageFileId});
 
         // When we tell the project service to delete either the form (.scm) file or the blocks

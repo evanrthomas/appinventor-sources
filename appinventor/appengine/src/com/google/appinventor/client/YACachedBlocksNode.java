@@ -48,7 +48,7 @@ public class YACachedBlocksNode {
     if (blocksNodeToCachedNode.get(sourceNode) != null) {
       return blocksNodeToCachedNode.get(sourceNode);
     }
-    return  new YACachedBlocksNode(sourceNode);
+    return new YACachedBlocksNode(sourceNode);
   }
 
   public YoungAndroidBlocksNode getRealNode() {
