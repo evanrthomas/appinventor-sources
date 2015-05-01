@@ -27,4 +27,9 @@ public class Utils {
   public static native String domToText(Element xml) /*-{
     return $wnd.exported.domToText(xml);
   }-*/;
+
+
+  public static native JavaScriptObject eval(String s) /*-{
+     return $wnd.eval(s);
+    }-*/;
 }

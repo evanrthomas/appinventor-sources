@@ -9,7 +9,6 @@ package com.google.appinventor.client.editor.youngandroid;
 import com.google.appinventor.client.*;
 import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
-import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.common.collect.Maps;
@@ -460,7 +459,7 @@ public class BlocklyPanel extends HTMLPanel {
    * @param blocksContent XML description of a blocks workspace in format expected by Blockly
    */
   // [lyn, 2014/10/27] added formJson for upgrading
-  public void loadBlocksContent(String formJson, String blocksContent) {
+  public void setBlocksContent(String formJson, String blocksContent) {
     LoadStatus loadStat = new LoadStatus();
     loadStatusMap.put(formName, loadStat);
     if (blocksInited(formName)) {
@@ -473,11 +472,6 @@ public class BlocklyPanel extends HTMLPanel {
       // [lyn, 2014/10/27] added formJson for upgrading
       pendingFormJsonMap.put(formName, formJson);
     }
-  }
-
-  public void setBlocksContent(String formJson, String blocksContent) {
-    //doClearWorkspace(formName);
-    loadBlocksContent(formJson, blocksContent);
   }
 
   // [lyn, 2014/10/27] added formJson for upgrading

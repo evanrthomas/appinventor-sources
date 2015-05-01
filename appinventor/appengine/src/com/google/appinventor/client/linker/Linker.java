@@ -5,6 +5,7 @@ import com.google.appinventor.client.YACachedBlocksNode;
 import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
 import com.google.appinventor.client.helper.Callback;
 import com.google.appinventor.client.helper.CountDownCallback;
+import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.helper.Utils;
 import com.google.appinventor.shared.rpc.project.youngandroid.YASharedPageBlocksNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
@@ -86,7 +87,8 @@ public class Linker {
     YACachedBlocksNode.getCachedNode(node).load(new Callback<String>() {
       @Override
       public void call(String s) {
-        Element header =  getHeaderBlock(Utils.textToDom(s));
+        Element header =  querySelector(Utils.textToDom(s),
+                Utils.eval("\"header\"")); //TODO (evan): figure out how to make a javascript string
         if (header != null) onload.call(header);
       }
     });
@@ -125,6 +127,7 @@ public class Linker {
             JsArray<Element> blocks = content.equals("") ? (JsArray<Element>) JavaScriptObject.createArray().cast() :
                     getTopLevelBlocks(thisUnlinkedDom);
             labelBlocks(blocks, depth);
+            if (depth > 0) qualifyFunctions(blocks, node.getFormName());
             addAllBlocks(finalDom, blocks);
             thisLinked.call(finalDom);
           }
@@ -176,6 +179,20 @@ public class Linker {
     }
   }
 
+  private static void qualifyFunctions(JsArray<Element> blocks, String name) {
+    for (int i = 0; i<blocks.length(); i++) {
+      Element elm = blocks.get(i);
+      if (!(elm.getAttribute("type").equals("procedures_defnoreturn") ||
+              elm.getAttribute("type").equals("procedures_defreturn"))) continue;
+      Element nameField = querySelector(elm, Utils.eval("\"field[name=NAME]\""));
+      if (nameField == null) {
+        Helper.consolePrint(elm);
+        Helper.debugger();
+        throw new RuntimeException("procedure has no name field!!!");
+      }
+      nameField.setInnerHTML(name + "_" + nameField.getInnerHTML());
+    }
+  }
   private static void addAllBlocks(Element dom, JsArray<Element> blocks) {
     //traverse in reverse order because the size of the array elements delete themselves as you add them to dom
     for (int i = blocks.length() - 1; i>=0; i--) {
@@ -199,8 +216,8 @@ public class Linker {
     return xml.querySelectorAll('header > children > child');
   }-*/;
 
-  private static native Element getHeaderBlock(Element xml)  /*-{
-    return xml.querySelector('header');
+  private static native Element querySelector(Element xml, JavaScriptObject s) /*-{
+    return xml.querySelector(s);
   }-*/;
 
 
