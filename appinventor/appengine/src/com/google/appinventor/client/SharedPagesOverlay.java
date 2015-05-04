@@ -5,7 +5,6 @@ import com.google.appinventor.client.explorer.commands.AddSharedPageCommand;
 import com.google.appinventor.client.explorer.commands.ChainableCommand;
 import com.google.appinventor.client.explorer.commands.DeleteFileCommand;
 import com.google.appinventor.client.explorer.project.Project;
-import com.google.appinventor.client.explorer.project.ProjectChangeAdapter;
 import com.google.appinventor.client.explorer.project.ProjectManager;
 import com.google.appinventor.client.helper.Callback;
 import com.google.appinventor.client.helper.Closure;
@@ -121,7 +120,7 @@ public class SharedPagesOverlay {
       Project project = projectManager.getProject(projectId);
       if (project == null) throw new RuntimeException("invalid projectId " + projectId);
 
-      onLoadProjectNodes(project, new Closure<Integer, Project>(i) {
+      Project.onLoadProjectNodes(project, new Closure<Integer, Project>(i) {
         @Override
         public void call(Project project) {
           timesCalled.value += 1;
@@ -176,7 +175,7 @@ public class SharedPagesOverlay {
     final JavaScriptObject renderLibaryPageFunction = getRenderLibraryPageFunction();
     Collection<Project> books = Ode.getInstance().getProjectManager().getLibrary();
     for (final Project book : books) {
-      onLoadProjectNodes(book, new Callback<Project>() {
+      Project.onLoadProjectNodes(book, new Callback<Project>() {
         @Override
         public void call(Project book) {
           for (YoungAndroidBlocksNode page : book.getRootNode().getAllBlocksNodes()) {
@@ -205,23 +204,6 @@ public class SharedPagesOverlay {
     }
   }
 
-  private static void onLoadProjectNodes(final Project project, final Callback<Project> callback) {
-    ProjectRootNode root = project.getRootNode();
-    if (root == null) {
-
-      project.addProjectChangeListener(new ProjectChangeAdapter() {
-        @Override
-        public void onProjectLoaded(Project projectLoaded) {
-          project.removeProjectChangeListener(this);
-          onLoadProjectNodes(project, callback);
-        }
-      });
-      project.loadProjectNodes();
-
-    } else {
-      callback.call(project);
-    }
-  }
 
   public static JSONObject pageDescriptor(YoungAndroidBlocksNode node) {
     JSONObject jsonBlob = new JSONObject();

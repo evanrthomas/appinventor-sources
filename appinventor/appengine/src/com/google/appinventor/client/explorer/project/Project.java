@@ -8,6 +8,7 @@ package com.google.appinventor.client.explorer.project;
 
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.OdeAsyncCallback;
+import com.google.appinventor.client.helper.Callback;
 import com.google.appinventor.client.linker.Linker;
 import com.google.appinventor.client.settings.project.ProjectSettings;
 import com.google.appinventor.shared.rpc.project.ProjectNode;
@@ -280,4 +281,25 @@ public final class Project {
       listener.onProjectNodeRemoved(this, node);
     }
   }
+
+
+  public static void onLoadProjectNodes(final Project project, final Callback<Project> callback) {
+    ProjectRootNode root = project.getRootNode();
+    if (root == null) {
+
+      project.addProjectChangeListener(new ProjectChangeAdapter() {
+        @Override
+        public void onProjectLoaded(Project projectLoaded) {
+          project.removeProjectChangeListener(this);
+          onLoadProjectNodes(project, callback);
+        }
+      });
+      project.loadProjectNodes();
+
+    } else {
+      callback.call(project);
+    }
+  }
 }
+
+

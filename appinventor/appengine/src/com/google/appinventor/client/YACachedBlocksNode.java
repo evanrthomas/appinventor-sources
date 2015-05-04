@@ -32,7 +32,14 @@ public class YACachedBlocksNode {
       Helper.println("Error :: project is null!!!");
       return null;
     }
+    Helper.println("getCachedNode() getting source node");
+    if (project.getRootNode() == null) Helper.debugger();
+    //Helper.println("fileId " + fileId);
+    //Helper.println("project.getRootNode() == null " + (project.getRootNode() == null));
+    //Helper.println("project.getRootNode().findNode() == null "
+    //    + (project.getRootNode().findNode(fileId) == null));
     ProjectNode sourceNode = project.getRootNode().findNode(fileId);
+    Helper.println("getCachedNode() got source node");
     if (sourceNode == null) {
       Helper.println("Error :: sourceNode does not exist");
       return null;
