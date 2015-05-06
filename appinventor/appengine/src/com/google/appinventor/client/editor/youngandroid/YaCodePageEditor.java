@@ -16,6 +16,7 @@ import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.explorer.SourceStructureExplorer;
 import com.google.appinventor.client.explorer.SourceStructureExplorerItem;
 import com.google.appinventor.client.helper.Callback;
+import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.helper.Utils;
 import com.google.appinventor.client.linker.Linker;
 import com.google.appinventor.client.output.OdeLog;
@@ -177,6 +178,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
   }
 
   public void relinkBlocksArea(final Command afterFileLoaded) {
+    Helper.println("YaCodePageEditor.relinkBlocksArea() " + getName());
     loadComplete = false;
     Linker.getInstance().loadLinkedContent(blocksNode, new Callback<String>() {
       @Override
@@ -184,6 +186,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
         blocksArea.setBlocksContent(getUpgraderJson(), currentLinkedWorkspace = content);
         loadComplete = true;
         selectedDrawer = null;
+        Helper.println("\tYaCodePageEditor.relinkBlocksArea() afterFileLoaded.execute() NEVER GET'S CALLED " + getName());
         if (afterFileLoaded != null) afterFileLoaded.execute();
       }
     });

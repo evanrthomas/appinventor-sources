@@ -3,6 +3,7 @@ package com.google.appinventor.client.linker;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.YACachedBlocksNode;
 import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
+import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.helper.Callback;
 import com.google.appinventor.client.helper.CountDownCallback;
 import com.google.appinventor.client.helper.Helper;
@@ -28,13 +29,15 @@ public class Linker {
     return INSTANCE;
   }
 
-  public static void loadLinkedContent(YoungAndroidBlocksNode realNode, final Callback<String> onload) {
+  public static void loadLinkedContent(final YoungAndroidBlocksNode realNode, final Callback<String> onload) {
+    Helper.println("Linker.loadLinkedContent() (public) " + realNode.getName());
     YACachedBlocksNode node = YACachedBlocksNode.getCachedNode(realNode);
     Element dom = Utils.blocklyXmlContainer();
     Set<YACachedBlocksNode> visited = new HashSet<YACachedBlocksNode>();
     loadLinkedContent(node, dom, visited, 0, new Callback<Element>() {
       @Override
       public void call(Element element) {
+        Helper.println("Linker.loadLinkedContent() (public) calling callback " + realNode.getName());
         onload.call(Utils.domToText(element));
       }
     });
@@ -156,21 +159,52 @@ public class Linker {
 
         Element header = Utils.textToDom(s);
         JsArray<Element> childrenXml = getChildrenFromHeader(header);
-        Element childXml;
-        for (int i = 0; i < childrenXml.length(); i++) {
-          childXml = childrenXml.get(i);
-          String projectIdString = childXml.getAttribute("projectId");
-          if (projectIdString.length() == 0) projectIdString = childXml.getAttribute("projectid");  //TODO (evan): fix this. Silly hack because gwt for some reason makes the I in projectId lowercase
-          long projectId = Long.parseLong(projectIdString);
-          String fileId = childXml.getAttribute("fileId");
-          if (fileId.length() == 0) fileId = childXml.getAttribute("fileid"); //TODO (evan): fix this. Silly hack because gwt for some reason makes the I in projectId lowercase
-          YACachedBlocksNode child = YACachedBlocksNode.getCachedNode(projectId, fileId);
-          linkSet.get(node).add(child); //linkSet.get(node) is a Set, if it already has this child, the new child won't be added
+        final Collection<Tuple<Long, String>> ids = getFileIds(childrenXml);
+        Helper.println("loadChildren() ids");
+        Helper.println(ids);
+
+        Set<Project> uniqueProjects = new HashSet<Project>();
+        for (Tuple<Long, String> tup : ids) {
+          Project p = Ode.getInstance().getProjectManager().getProject(tup.fst);
+          if (p == null) Helper.println("loadChildren project is null for " + tup.fst + " " + tup.snd);
+          if (p != null) uniqueProjects.add(p);
         }
-        onload.call(linkSet.get(node));
+
+        CountDownCallback<Project> onProjectsLoaded = new CountDownCallback<Project>(uniqueProjects.size(),
+                new Callback<Project>() {
+                  @Override
+                  public void call(Project avoid) {
+                    for (Tuple<Long, String> id : ids) {
+                      YACachedBlocksNode child = YACachedBlocksNode.getCachedNode(id.fst, id.snd);
+                      linkSet.get(node).add(child); //linkSet.get(node) is a Set, if it already has this child, the new child won't be added
+                    }
+                    onload.call(linkSet.get(node));
+                  }
+                });
+
+        for (Project p : uniqueProjects) {
+          Project.onLoadProjectNodes(p, onProjectsLoaded);
+        }
       }
     });
   }
+
+  private static Collection<Tuple<Long, String>> getFileIds(JsArray<Element> children) {
+    Helper.println("getFileIds()");
+    Helper.consolePrint(children);
+    ArrayList<Tuple<Long, String>> ids = new ArrayList<Tuple<Long, String>>();
+    for (int i = 0; i < children.length(); i++) {
+      Element childXml = children.get(i);
+      String projectIdString = childXml.getAttribute("projectId");
+      if (projectIdString.length() == 0) projectIdString = childXml.getAttribute("projectid");  //TODO (evan): fix this. Silly hack because gwt for some reason makes the I in projectId lowercase
+      long projectId = Long.parseLong(projectIdString);
+      String fileId = childXml.getAttribute("fileId");
+      if (fileId.length() == 0) fileId = childXml.getAttribute("fileid"); //TODO (evan): fix this. Silly hack because gwt for some reason makes the I in projectId lowercase
+      ids.add(new Tuple<Long, String>(projectId, fileId));
+    }
+    return ids;
+  }
+
 
   private static void labelBlocks(JsArray<Element> blocks, int depth) {
     //TODO (evan): when you add components, label each function with the version of it (ie what components it's using)
@@ -237,4 +271,17 @@ public class Linker {
   private static native JsArray<Element> getTopLevelBlocks(JavaScriptObject root) /*-{
     return $wnd.exported.getTopLevelBlocks(root);
   }-*/;
+
+  private static class Tuple<S, T> {
+    final S fst;
+    final T snd;
+    public Tuple(S s, T t) {
+      fst = s;
+      snd = t;
+    }
+
+    public String toString() {
+      return fst.toString() + "_" + snd.toString();
+    }
+  }
 }

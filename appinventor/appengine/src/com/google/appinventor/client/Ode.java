@@ -6,13 +6,7 @@
 
 package com.google.appinventor.client;
 
-import java.util.Random;
-import static com.google.appinventor.client.Ode.MESSAGES;
-
-import java.util.List;
-import java.util.logging.Logger;
 import com.google.appinventor.client.boxes.*;
-
 import com.google.appinventor.client.editor.EditorManager;
 import com.google.appinventor.client.editor.FileEditor;
 import com.google.appinventor.client.editor.youngandroid.BlocklyPanel;
@@ -23,9 +17,9 @@ import com.google.appinventor.client.explorer.project.Project;
 import com.google.appinventor.client.explorer.project.ProjectChangeAdapter;
 import com.google.appinventor.client.explorer.project.ProjectManager;
 import com.google.appinventor.client.explorer.project.ProjectManagerEventAdapter;
-import com.google.appinventor.client.explorer.youngandroid.LibraryToolbar;
 import com.google.appinventor.client.explorer.youngandroid.GalleryPage;
 import com.google.appinventor.client.explorer.youngandroid.GalleryToolbar;
+import com.google.appinventor.client.explorer.youngandroid.LibraryToolbar;
 import com.google.appinventor.client.explorer.youngandroid.ProjectToolbar;
 import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.jsonp.JsonpConnection;
@@ -48,14 +42,7 @@ import com.google.appinventor.shared.rpc.help.HelpService;
 import com.google.appinventor.shared.rpc.help.HelpServiceAsync;
 import com.google.appinventor.shared.rpc.launch.LaunchService;
 import com.google.appinventor.shared.rpc.launch.LaunchServiceAsync;
-import com.google.appinventor.shared.rpc.project.FileNode;
-import com.google.appinventor.shared.rpc.project.GalleryAppListResult;
-import com.google.appinventor.shared.rpc.project.GallerySettings;
-import com.google.appinventor.shared.rpc.project.ProjectRootNode;
-import com.google.appinventor.shared.rpc.project.ProjectService;
-import com.google.appinventor.shared.rpc.project.ProjectServiceAsync;
-import com.google.appinventor.shared.rpc.project.GalleryService;
-import com.google.appinventor.shared.rpc.project.GalleryServiceAsync;
+import com.google.appinventor.shared.rpc.project.*;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidSourceNode;
 import com.google.appinventor.shared.rpc.user.Config;
 import com.google.appinventor.shared.rpc.user.User;
@@ -78,7 +65,7 @@ import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.google.gwt.user.client.ui.*;
 
 import java.util.Random;
-import com.google.appinventor.shared.rpc.project.GalleryApp;
+import java.util.logging.Logger;
 
 /**
  * Main entry point for Ode. Defines the startup UI elements in
@@ -484,9 +471,12 @@ public class Ode implements EntryPoint {
   }
 
   public void openYoungAndroidProjectInDesigner(final Project project) {
+    Helper.println("openYoungAndroidProjectInDesigner() " + project.getProjectName());
     //TODO (evan): rename this to openYoungAndroidProject (not necessesarily in designer)
     ProjectRootNode projectRootNode = project.getRootNode();
+    //TODO (evan): wrap this in Project.onLoadProjectNodes
     if (projectRootNode == null) {
+      Helper.println("\topenYoungAndroidProjectInDsigner() projectRootNode == null");
       // The project nodes haven't been loaded yet.
       // Add a ProjectChangeListener so we'll be notified when they have been loaded.
       project.addProjectChangeListener(new ProjectChangeAdapter() {
@@ -497,8 +487,9 @@ public class Ode implements EntryPoint {
         }
       });
       project.loadProjectNodes();
-
     } else {
+
+      Helper.println("\topenYoungAndroidProjectInDsigner() projectRootNode != null");
       // The project nodes have been loaded. Tell the viewer to open
       // the project. This will cause the projects source files to be fetched
       // asynchronously, and loaded into file editors.

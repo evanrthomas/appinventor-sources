@@ -96,8 +96,10 @@ public final class EditorManager {
    * @return  project editor for the given project
    */
   public ProjectEditor openProject(ProjectRootNode projectRootNode) {
+    Helper.println("EditorManager.openProject()");
     long projectId = projectRootNode.getProjectId();
     ProjectEditor projectEditor = openProjectEditors.get(projectId);
+    Helper.println("\tEditorManager.openProject() projectEditor == null " + (projectEditor == null));
     if (projectEditor == null) {
       // No open editor for this project yet.
       // Use the ProjectEditorRegistry to get the factory and create the project editor.

@@ -286,7 +286,6 @@ public final class Project {
   public static void onLoadProjectNodes(final Project project, final Callback<Project> callback) {
     ProjectRootNode root = project.getRootNode();
     if (root == null) {
-
       project.addProjectChangeListener(new ProjectChangeAdapter() {
         @Override
         public void onProjectLoaded(Project projectLoaded) {
@@ -295,7 +294,6 @@ public final class Project {
         }
       });
       project.loadProjectNodes();
-
     } else {
       callback.call(project);
     }
