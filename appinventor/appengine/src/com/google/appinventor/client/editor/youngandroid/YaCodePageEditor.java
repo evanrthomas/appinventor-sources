@@ -178,7 +178,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
   }
 
   public void relinkBlocksArea(final Command afterFileLoaded) {
-    Helper.println("YaCodePageEditor.relinkBlocksArea() " + getName());
     loadComplete = false;
     Linker.getInstance().loadLinkedContent(blocksNode, new Callback<String>() {
       @Override
@@ -186,7 +185,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
         blocksArea.setBlocksContent(getUpgraderJson(), currentLinkedWorkspace = content);
         loadComplete = true;
         selectedDrawer = null;
-        Helper.println("\tYaCodePageEditor.relinkBlocksArea() afterFileLoaded.execute() NEVER GET'S CALLED " + getName());
         if (afterFileLoaded != null) afterFileLoaded.execute();
       }
     });
