@@ -471,12 +471,10 @@ public class Ode implements EntryPoint {
   }
 
   public void openYoungAndroidProjectInDesigner(final Project project) {
-    Helper.println("openYoungAndroidProjectInDesigner() " + project.getProjectName());
     //TODO (evan): rename this to openYoungAndroidProject (not necessesarily in designer)
     ProjectRootNode projectRootNode = project.getRootNode();
     //TODO (evan): wrap this in Project.onLoadProjectNodes
     if (projectRootNode == null) {
-      Helper.println("\topenYoungAndroidProjectInDsigner() projectRootNode == null");
       // The project nodes haven't been loaded yet.
       // Add a ProjectChangeListener so we'll be notified when they have been loaded.
       project.addProjectChangeListener(new ProjectChangeAdapter() {
@@ -489,7 +487,6 @@ public class Ode implements EntryPoint {
       project.loadProjectNodes();
     } else {
 
-      Helper.println("\topenYoungAndroidProjectInDsigner() projectRootNode != null");
       // The project nodes have been loaded. Tell the viewer to open
       // the project. This will cause the projects source files to be fetched
       // asynchronously, and loaded into file editors.
