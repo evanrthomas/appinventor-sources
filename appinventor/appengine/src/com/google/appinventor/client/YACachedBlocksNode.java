@@ -32,7 +32,6 @@ public class YACachedBlocksNode {
       Helper.println("Error :: project is null!!!");
       return null;
     }
-    if (project.getRootNode() == null) Helper.debugger();
     ProjectNode sourceNode = project.getRootNode().findNode(fileId);
     if (sourceNode == null) {
       Helper.println("Error :: sourceNode does not exist");

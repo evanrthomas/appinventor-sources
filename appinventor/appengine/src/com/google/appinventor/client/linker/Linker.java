@@ -30,14 +30,12 @@ public class Linker {
   }
 
   public static void loadLinkedContent(final YoungAndroidBlocksNode realNode, final Callback<String> onload) {
-    Helper.println("Linker.loadLinkedContent() (public)");
     YACachedBlocksNode node = YACachedBlocksNode.getCachedNode(realNode);
     Element dom = Utils.blocklyXmlContainer();
     Set<YACachedBlocksNode> visited = new HashSet<YACachedBlocksNode>();
     loadLinkedContent(node, dom, visited, 0, new Callback<Element>() {
       @Override
       public void call(Element element) {
-        Helper.println("LOOKING FOR HERE!!!! UP LEVEL loadLinkedContent called from loadLinkedContent private");
         onload.call(Utils.domToText(element));
       }
     });
@@ -103,7 +101,6 @@ public class Linker {
     loadChildren(YACachedBlocksNode.getCachedNode(node), new Callback<Collection<YACachedBlocksNode>>() {
       @Override
       public void call(Collection<YACachedBlocksNode> childrenAsCachedNodes) {
-        Helper.println("loadChildren() (public) in callback");
         Collection<YoungAndroidBlocksNode> childrenAsBlocksNode = new ArrayList<YoungAndroidBlocksNode>();
         for (YACachedBlocksNode child: childrenAsCachedNodes) {
           childrenAsBlocksNode.add(child.getRealNode());
@@ -122,29 +119,19 @@ public class Linker {
     loadChildren(node, new Callback<Collection<YACachedBlocksNode>>() {
       @Override
       public void call(Collection<YACachedBlocksNode> children) {
-        Helper.println("loadLinkedContent() in callback 1");
         final CountDownCallback thisLinked = new CountDownCallback(children.size() + 1, onLinked); //TODO (evan): this callback  spaghetti is messy. Re design
-
-        Helper.println("loadLinkedContent() in callback 2");
 
         node.load(new Callback<String>() {
           @Override
           public void call(String content) {
             Element thisUnlinkedDom = Utils.textToDom(content);
-            Helper.println("loadLinkedContent() in callback 3");
             JsArray<Element> blocks = content.equals("") ? (JsArray<Element>) JavaScriptObject.createArray().cast() :
                     getTopLevelBlocks(thisUnlinkedDom);
-
-            Helper.println("loadLinkedContent() in callback 4");
             labelBlocks(blocks, depth);
             if (depth > 0) qualifyFunctions(blocks, node.getFormName());
             addAllBlocks(finalDom, blocks);
 
-            Helper.println("loadLinkedContent() in callback 5");
-            Helper.consolePrint(finalDom);
-            Helper.debugger();
             thisLinked.call(finalDom); //!!! links up to here up level 2
-            Helper.println("loadLinkedContent() in callback 6");
           }
         });
 
@@ -171,10 +158,7 @@ public class Linker {
 
         Element header = Utils.textToDom(s);
         JsArray<Element> childrenXml = getChildrenFromHeader(header);
-        //Helper.println("Linker.loadChildren() childrenXml");
-        //Helper.consolePrint(childrenXml);
         final Collection<Tuple<Long, String>> ids = getFileIds(childrenXml);
-        //Helper.println("Linker.loadChildren() ids.size() " + ids.size());
 
         Set<Project> childProjects = new HashSet<Project>();
         for (Tuple<Long, String> tup : ids) {
@@ -182,20 +166,14 @@ public class Linker {
           if (p != null) childProjects.add(p);
         }
 
-        Helper.println("Linker.loadChildren() childProjects.size() " + childProjects.size());
         Callback onProjectsLoaded = new Callback<Collection<Project>>() {
                   @Override
                   public void call(Collection<Project> avoid) {
-                    Helper.println("Linker.loadChildren() 1");
                     for (Tuple<Long, String> id : ids) {
-                      Helper.println(ids);
                       YACachedBlocksNode child = YACachedBlocksNode.getCachedNode(id.fst, id.snd);
                       linkSet.get(node).add(child); //linkSet.get(node) is a Set, if it already has this child, the new child won't be added
                     }
-                    Helper.println("Linker.loadChildren() 2 " + (node == null));
-                    Helper.println("Linker.loadChildren() 3 " + (linkSet.get(node)));
                     onload.call(linkSet.get(node)); //error is here!!! goes up to llc (private)
-                    Helper.println("Linker.loadChildren() 4");
                   }
                 };
 
@@ -204,7 +182,6 @@ public class Linker {
         } else {
           CountDownCallback<Project> countdown = new CountDownCallback<Project>(childProjects.size(), onProjectsLoaded);
           for (Project p : childProjects) {
-            Helper.println("Linker.loadChildren() calling onLoadProjectNodes " + p.getProjectName());
             Project.onLoadProjectNodes(p, countdown);
           }
         }

@@ -299,5 +299,3 @@ public final class Project {
     }
   }
 }
-
-

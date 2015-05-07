@@ -16,7 +16,6 @@ import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.explorer.SourceStructureExplorer;
 import com.google.appinventor.client.explorer.SourceStructureExplorerItem;
 import com.google.appinventor.client.helper.Callback;
-import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.helper.Utils;
 import com.google.appinventor.client.linker.Linker;
 import com.google.appinventor.client.output.OdeLog;
