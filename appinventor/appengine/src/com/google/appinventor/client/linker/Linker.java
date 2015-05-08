@@ -166,7 +166,7 @@ public class Linker {
           if (p != null) childProjects.add(p);
         }
 
-        Callback onProjectsLoaded = new Callback<Collection<Project>>() {
+        Callback onChildrenProjectsLoaded = new Callback<Collection<Project>>() {
                   @Override
                   public void call(Collection<Project> avoid) {
                     for (Tuple<Long, String> id : ids) {
@@ -178,9 +178,9 @@ public class Linker {
                 };
 
         if (childProjects.size() == 0) {
-          onProjectsLoaded.call(new ArrayList<Project>());
+          onChildrenProjectsLoaded.call(new ArrayList<Project>());
         } else {
-          CountDownCallback<Project> countdown = new CountDownCallback<Project>(childProjects.size(), onProjectsLoaded);
+          CountDownCallback<Project> countdown = new CountDownCallback<Project>(childProjects.size(), onChildrenProjectsLoaded);
           for (Project p : childProjects) {
             Project.onLoadProjectNodes(p, countdown);
           }
