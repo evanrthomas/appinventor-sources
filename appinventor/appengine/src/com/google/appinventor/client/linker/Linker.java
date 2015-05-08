@@ -4,10 +4,6 @@ import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.YACachedBlocksNode;
 import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
 import com.google.appinventor.client.explorer.project.Project;
-import com.google.appinventor.client.helper.Callback;
-import com.google.appinventor.client.helper.CountDownCallback;
-import com.google.appinventor.client.helper.Helper;
-import com.google.appinventor.client.helper.Utils;
 import com.google.appinventor.shared.rpc.project.youngandroid.YASharedPageBlocksNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -180,7 +176,7 @@ public class Linker {
         if (childProjects.size() == 0) {
           onChildrenProjectsLoaded.call(new ArrayList<Project>());
         } else {
-          CountDownCallback<Project> countdown = new CountDownCallback<Project>(childProjects.size(), onChildrenProjectsLoaded);
+          CollectorCallback<Project> countdown = new CollectorCallback<Project>(childProjects.size(), onChildrenProjectsLoaded);
           for (Project p : childProjects) {
             Project.onLoadProjectNodes(p, countdown);
           }
