@@ -4,6 +4,10 @@ import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.YACachedBlocksNode;
 import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
 import com.google.appinventor.client.explorer.project.Project;
+import com.google.appinventor.client.helper.Callback;
+import com.google.appinventor.client.helper.CollectorCallback;
+import com.google.appinventor.client.helper.CountDownCallback;
+import com.google.appinventor.client.helper.Utils;
 import com.google.appinventor.shared.rpc.project.youngandroid.YASharedPageBlocksNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidBlocksNode;
 import com.google.gwt.core.client.JavaScriptObject;
@@ -163,15 +167,15 @@ public class Linker {
         }
 
         Callback onChildrenProjectsLoaded = new Callback<Collection<Project>>() {
-                  @Override
-                  public void call(Collection<Project> avoid) {
-                    for (Tuple<Long, String> id : ids) {
-                      YACachedBlocksNode child = YACachedBlocksNode.getCachedNode(id.fst, id.snd);
-                      linkSet.get(node).add(child); //linkSet.get(node) is a Set, if it already has this child, the new child won't be added
-                    }
-                    onload.call(linkSet.get(node)); //error is here!!! goes up to llc (private)
-                  }
-                };
+          @Override
+          public void call(Collection<Project> avoid) {
+            for (Tuple<Long, String> id : ids) {
+              YACachedBlocksNode child = YACachedBlocksNode.getCachedNode(id.fst, id.snd);
+              linkSet.get(node).add(child); //linkSet.get(node) is a Set, if it already has this child, the new child won't be added
+            }
+            onload.call(linkSet.get(node)); //error is here!!! goes up to llc (private)
+          }
+        };
 
         if (childProjects.size() == 0) {
           onChildrenProjectsLoaded.call(new ArrayList<Project>());
@@ -183,7 +187,6 @@ public class Linker {
         }
       }
     });
-    Helper.unindent();
   }
 
   private static Collection<Tuple<Long, String>> getFileIds(JsArray<Element> children) {
@@ -214,11 +217,7 @@ public class Linker {
       if (!(elm.getAttribute("type").equals("procedures_defnoreturn") ||
               elm.getAttribute("type").equals("procedures_defreturn"))) continue;
       Element nameField = querySelector(elm, Utils.eval("\"field[name=NAME]\""));
-      if (nameField == null) {
-        Helper.consolePrint(elm);
-        Helper.debugger();
-        throw new RuntimeException("procedure has no name field!!!");
-      }
+      if (nameField == null)  throw new RuntimeException("procedure has no name field!!!");
       nameField.setInnerHTML(name + "_" + nameField.getInnerHTML());
     }
   }
