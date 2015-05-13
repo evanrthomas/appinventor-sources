@@ -199,15 +199,15 @@ public abstract class YaCodePageEditor extends SimpleEditor
     //saved and loaded into this editor
     Ode.getInstance().getEditorManager().saveDirtyEditorsToCache();
     super.onShow();
+    showWhenInitialized();
     relinkBlocksArea(null);
-    showWhenInitialized("onShow()", fullName, Math.random());
   }
 
-  public void showWhenInitialized(final String callerMethod, final String callerForm, final double id) {
+  public void showWhenInitialized() {
     //check if blocks are initialized
-    if (BlocklyPanel.blocksInited(callerForm) && loadComplete) {
+    if (BlocklyPanel.blocksInited(fullName) && loadComplete) {
       updateBlocksTree(null);
-      blocksArea.showDifferentForm(callerForm);
+      blocksArea.showDifferentForm(fullName);
       loadBlocksEditor();
       if (this instanceof YaFormPageEditor) {
         ((YaFormPageEditor) this).sendComponentData();  // Send Blockly the component information for generating Yail
@@ -217,7 +217,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
       //timer calls this function again if the blocks are not initialized
       Timer timer = new Timer() {
         public void run() {
-          showWhenInitialized("showWhenInitialized", callerForm, id);
+          showWhenInitialized();
         }
       };
       timer.schedule(200); // Run every 200 milliseconds
