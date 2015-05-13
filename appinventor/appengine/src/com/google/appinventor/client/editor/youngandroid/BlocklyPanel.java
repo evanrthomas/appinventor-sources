@@ -9,6 +9,7 @@ package com.google.appinventor.client.editor.youngandroid;
 import com.google.appinventor.client.*;
 import com.google.appinventor.client.editor.simple.SimpleComponentDatabase;
 import com.google.appinventor.client.editor.simple.components.MockComponent;
+import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.output.OdeLog;
 import com.google.appinventor.components.common.YaVersion;
 import com.google.common.collect.Maps;
@@ -16,10 +17,7 @@ import com.google.gwt.core.client.JavaScriptException;
 import com.google.gwt.core.client.JavaScriptObject;
 import com.google.gwt.user.client.ui.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.google.appinventor.client.Ode.MESSAGES;
 
@@ -39,7 +37,7 @@ public class BlocklyPanel extends HTMLPanel {
   private static String currentForm;
   private static String languageSetting;
 
-  private static class ComponentOp {
+  public static class ComponentOp {
     public OpType op;
     public MockComponent component;
     public String oldName;          // for RENAME
@@ -113,6 +111,7 @@ public class BlocklyPanel extends HTMLPanel {
     super(EDITOR_HTML.replace("FORM_NAME", formName));
     this.formName = formName;
     this.myBlocksEditor = blocksEditor;
+    Helper.println("BlocklyPanel(" + formName +") putting formName in componentOps");
     componentOps.put(formName, new ArrayList<ComponentOp>());
     // note: using Maps.newHashMap() gives a type error in Eclipse in the following line
     currentComponents.put(formName, new HashMap<String, ComponentOp>());
@@ -143,7 +142,7 @@ public class BlocklyPanel extends HTMLPanel {
    * exportInitComponentsMethod().
    */
   private static void initBlocksArea(String formName) {
-
+    Helper.println("BlocklyPanel.initBlocksArea() " + formName);
     OdeLog.log("BlocklyPanel: Got initBlocksArea call for " + formName);
 
     // if there are any components added, add them first before we load
@@ -181,6 +180,7 @@ public class BlocklyPanel extends HTMLPanel {
             break;
         }
       }
+      Helper.println("BP.initBlocksArea() removing " + formName + " from componentOps");
       componentOps.remove(formName);
     }
 
@@ -221,6 +221,9 @@ public class BlocklyPanel extends HTMLPanel {
    * @param component the component to be added
    */
   public void addComponent(MockComponent component) {
+    Helper.println("BP.addComponent(" + component.getName() + ") "  +
+            "\n\t" + formName +
+            "\n\t" + blocksInited(formName));
     if (!blocksInited(formName)) {
       ComponentOp cop = new ComponentOp();
       cop.op = OpType.ADD;
@@ -257,6 +260,9 @@ public class BlocklyPanel extends HTMLPanel {
    * @param comp the component to be removed
    */
   public void removeComponent(MockComponent comp) {
+    Helper.println("BP.removeComponent(" + comp.getName() + ") "  +
+            "\n\t" + formName +
+            "\n\t" + blocksInited(formName));
     if (!blocksInited(formName)) {
       ComponentOp cop = new ComponentOp();
       cop.op = OpType.REMOVE;
@@ -291,6 +297,9 @@ public class BlocklyPanel extends HTMLPanel {
    * @param comp     the component to be removed
    */
   public void renameComponent(String oldName, MockComponent comp) {
+    Helper.println("BP.renameComponent(" + comp.getName() + ") "  +
+            "\n\t" + formName +
+            "\n\t" + blocksInited(formName));
     if (!blocksInited(formName)) {
       ComponentOp cop = new ComponentOp();
       cop.op = OpType.RENAME;
@@ -439,8 +448,14 @@ public class BlocklyPanel extends HTMLPanel {
     pendingBlocksContentMap.put(formName, getBlocksContent());
     // [lyn, 2014/10/28] added formJson for upgrading
     pendingFormJsonMap.put(formName, getFormJson());
+    Helper.println("BP.saveComponentsAndBlocks() "  +
+            "\n\t" + formName +
+            "\n\t" + blocksInited(formName));
     componentOps.put(formName, new ArrayList<ComponentOp>());
   }
+  //public static void markAsUninitialized(String formName) {
+  //  componentOps.put(formName, new ArrayList<ComponentOp>());
+  //}
 
   /**
    * @returns true if the blocks drawer is showing, false otherwise.
@@ -951,4 +966,9 @@ public class BlocklyPanel extends HTMLPanel {
   public static native String getURL() /*-{
     return $wnd.location.href;
   }-*/;
+
+  //for debugging only
+  public static  Map<String, List<ComponentOp>> getComponentOps() {
+    return componentOps;
+  }
 }
