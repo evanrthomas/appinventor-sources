@@ -3,7 +3,6 @@ package com.google.appinventor.client.helper;
 import com.google.appinventor.client.Ode;
 import com.google.appinventor.client.YACachedBlocksNode;
 import com.google.appinventor.client.editor.FileEditor;
-import com.google.appinventor.client.editor.youngandroid.BlocklyPanel;
 import com.google.appinventor.client.editor.youngandroid.YaCodePageEditor;
 import com.google.appinventor.client.editor.youngandroid.YaSharedPageEditor;
 import com.google.appinventor.client.explorer.project.Project;
@@ -321,19 +320,6 @@ public class Helper {
     return scheduedBlob.getJavaScriptObject();
   }
 
-  public static void printComponentOps() {
-    for (String formName : BlocklyPanel.getComponentOps().keySet()) {
-      println(formName);
-      for (BlocklyPanel.ComponentOp op : BlocklyPanel.getComponentOps().get(formName)) {
-        Helper.println("\t" + op);
-      }
-    }
-  }
-
-  private static boolean blocksInited(String formName) {
-    return BlocklyPanel.blocksInited(formName);
-  }
-
   public static native void exportHelperMethods() /*-{
       console.log("HELPER METHODS ARE BEING EXPORTED!!!");
       $wnd.exported = $wnd.exported || {};
@@ -391,7 +377,5 @@ public class Helper {
       $wnd.pdes = $wnd.printDirtyEditors;
       $wnd.pst = $wnd.getScheduledTasks;
       $wnd.prc = $wnd.printRawContent;
-      $wnd.pco = $entry(@com.google.appinventor.client.helper.Helper::printComponentOps());
-      $wnd.bi = $entry(@com.google.appinventor.client.helper.Helper::blocksInited(Ljava/lang/String;));
   }-*/;
 }

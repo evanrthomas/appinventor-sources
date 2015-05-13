@@ -16,7 +16,6 @@ import com.google.appinventor.client.editor.simple.components.MockComponent;
 import com.google.appinventor.client.explorer.SourceStructureExplorer;
 import com.google.appinventor.client.explorer.SourceStructureExplorerItem;
 import com.google.appinventor.client.helper.Callback;
-import com.google.appinventor.client.helper.Helper;
 import com.google.appinventor.client.helper.Utils;
 import com.google.appinventor.client.linker.Linker;
 import com.google.appinventor.client.output.OdeLog;
@@ -197,7 +196,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   @Override
   public void onShow() {
-    Helper.println("YACPE.onShow() " + getFileId());
     OdeLog.log("YaBlocksEditor: got onShow() for " + getFileId());
 
     //before you switch to a new blocks editor,
@@ -211,14 +209,7 @@ public abstract class YaCodePageEditor extends SimpleEditor
 
   public void showWhenInitialized(final String callerMethod, final String callerForm, final double id) {
     //check if blocks are initialized
-    Helper.println("YACPE.showWhenInitialized(" + callerForm + ") " +
-            "\n\tcaller " + callerMethod + "_" + callerForm +
-            "\n\tblocksInited(" + callerForm + ")::" + BlocklyPanel.blocksInited(callerForm) +
-            "\n\tloadComplete::" + loadComplete +
-            "\n\tid::" + id);
-    Helper.debugger();
     if (BlocklyPanel.blocksInited(callerForm) && loadComplete) {
-      Helper.println("\tdoing actual update");
       updateBlocksTree(null);
       blocksArea.showDifferentForm(callerForm);
       loadBlocksEditor();
@@ -235,13 +226,10 @@ public abstract class YaCodePageEditor extends SimpleEditor
       if(timer == null) {
         timer = new Timer() {
           public void run() {
-            Helper.debugger();
-            Helper.println("id " + id);
             showWhenInitialized("showWhenInitialized", callerForm, id);
           }
         };
       }
-      Helper.println("\tnot inited yet ... scheduleing the next show");
       timer.schedule(200); // Run every 200 milliseconds
     }
   }
@@ -251,7 +239,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
    * properties panel.
    */
   private void loadBlocksEditor() {
-    Helper.println("loadBlocksEditor() " + fullName);
     PaletteBox.getPaletteBox().setVisible(false);
 
       // Update the source structure explorer with the tree of this form's components.

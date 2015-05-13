@@ -50,13 +50,10 @@
                 .exec(window.parent.location.search)||[,""])[1].replace(/\+/g, '%20'))||null;
       }
       function init() {
-        console.log("blocklyframe.init()");
-        console.group();
         // We expect window.location.hash to have the form:
         // projectId_formName, and to be unique among
         // all the Blockly instances created in this App Inventor session.
         var formName = window.location.hash.substr(1);
-        console.log("formName:: " + formName);
         if (!window.parent.Blocklies) {
           // We keep a set of Blockly objects indexed by name
           // of the form for which they are the blocks editor
@@ -70,10 +67,8 @@
         window.parent.ReplState.phoneState = {}; <!-- Reset the phone state when we are reloaded -->
         Blockly.BlocklyEditor.startup(document.body, formName);
         Blockly.ComponentTypes.populateTypes();
-        console.log("calling initBlocksArea for formName:: " + formName);
         window.parent.BlocklyPanel_initBlocksArea(formName);
         window.parent.BlocklyPanel_checkWarningState(formName);
-        console.groupEnd();
       }
     </script>
   </head>
