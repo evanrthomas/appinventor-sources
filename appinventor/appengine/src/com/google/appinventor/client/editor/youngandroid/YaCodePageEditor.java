@@ -92,10 +92,6 @@ public abstract class YaCodePageEditor extends SimpleEditor
   // blocks area again.
   private Set<String> componentUuids = new HashSet<String>();
 
-  //Timer used to poll blocks editor to check if it is initialized
-  private static Timer timer;
-
-
   //FOR DEBUGGING ONLY!!!
   private String currentLinkedWorkspace;
   private String projectName;
@@ -217,19 +213,13 @@ public abstract class YaCodePageEditor extends SimpleEditor
         ((YaFormPageEditor) this).sendComponentData();  // Send Blockly the component information for generating Yail
       }
       blocksArea.renderBlockly(); //Re-render Blockly due to firefox bug
-      if (timer != null) {
-        timer.cancel();
-        timer = null;
-      }
     } else {
       //timer calls this function again if the blocks are not initialized
-      if(timer == null) {
-        timer = new Timer() {
-          public void run() {
-            showWhenInitialized("showWhenInitialized", callerForm, id);
-          }
-        };
-      }
+      Timer timer = new Timer() {
+        public void run() {
+          showWhenInitialized("showWhenInitialized", callerForm, id);
+        }
+      };
       timer.schedule(200); // Run every 200 milliseconds
     }
   }
